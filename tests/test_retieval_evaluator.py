@@ -32,7 +32,3 @@ def test_retieval_evaluator():
     )
     results = evaluator.run(data, aggregate=True)
     assert all_close(results, expected_results)
-
-
-if __name__ == "__main__":
-    test_retieval_evaluator()
