@@ -3,7 +3,6 @@ from continuous_eval.metrics import (
     MatchingStrategy,
     PrecisionRecallF1,
     RankedRetrievalMetrics,
-    LLMBasedContextPrecision,
 )
 from continuous_eval.evaluators import RetrievalEvaluator
 from tests.utils import all_close

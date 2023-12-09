@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "continuous-eval"
-version = "0.1.0"
-description = ""
+version = "0.1.2"
+description = "Continuous evaluation for retrieval-based LLMs pipelines."
 authors = ["Yi Zhang <yi@relari.ai>", "Pasquale Antonante <pasquale@relari.ai>"]
 readme = "README.md"
 packages = [{include = "continuous_eval"}]
