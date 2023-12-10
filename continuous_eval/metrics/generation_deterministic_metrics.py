@@ -120,7 +120,6 @@ class BertAnswerSimilarity(Metric):
 
 class DeterministicAnswerRelevance(Metric):
     def calculate(self, answer, ground_truths, **kwargs):
-        results = {}
         # calculate the max score across all ground truth answers
         token_scores = [
             TokenOverlap().calculate(answer, gt_answer) for gt_answer in ground_truths

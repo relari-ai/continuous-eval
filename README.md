@@ -79,27 +79,27 @@ For generation you can instead use the `GenerationEvaluator`.
 
 #### Deterministic
 
-- `PrecisionRecallF1`
-- `RankedRetrievalMetrics`
+- `PrecisionRecallF1`: Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
+- `RankedRetrievalMetrics`: Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
 
 #### LLM-based
 
-- `LLMBasedContextPrecision`
-- `LLMBasedContextCoverage`
+- `LLMBasedContextPrecision`: Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
+- `LLMBasedContextCoverage`: Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calcualted by LLM
 
 ### Generation-based metrics
 
 #### Deterministic
 
-- `DeterministicAnswerRelevance`
-- `RougeSentenceFaithfulness`
-- `BertAnswerRelevance`
-- `BertAnswerSimilarity`
+- `DeterministicAnswerRelevance`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
+- `RougeSentenceFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L recall
+- `BertAnswerRelevance`: Similarity score based on the BERT model between the Generated Answer and Question
+- `BertAnswerSimilarity`: Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
 
 #### LLM-based
 
-- `LLMBasedFaithfulness`
-- `LLMBasedAnswerCorrectness`
+- `LLMBasedFaithfulness`: Classification of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
+- `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
 
 ## License
 
