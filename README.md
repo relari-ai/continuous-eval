@@ -98,7 +98,7 @@ For generation you can instead use the `GenerationEvaluator`.
 
 #### LLM-based
 
-- `LLMBasedFaithfulness`: Classification of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
+- `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
 - `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
 
 ## License

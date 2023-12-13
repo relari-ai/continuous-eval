@@ -21,26 +21,32 @@ class LLMBasedFaithfulness(LLMBasedMetric):
 Example 1:
 Context: The Eiffel Tower, a wrought-iron lattice tower on the Champ de Mars in Paris, France, is one of the most famous landmarks in the world. It was designed by Gustave Eiffel and completed in 1889.
 Statement: The Eiffel Tower can be found in the center of London, near the Thames River.
-Response: No
+Response: 
+No
+The statement contradicts with the context, which states that Eiffel Tower is in Paris, as opposed to the center of London.
+
 Example 2:
 Context: Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that can later be released to fuel the organisms' activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water.
-Statement: Photosynthesis in plants primarily involves the conversion of light energy into glucose, a simple sugar.
-Response: Yes
+Statement: Photosynthesis in plants primarily involves the conversion of light energy into chemical energy stored in forms such as sugar.
+Response: 
+Yes
+The statement is supported by the context, which states that photosynthesis converts light energy into chemical energy and that the chemical energy is stored in carbohydrate molecules, such as sugars.
 """
         else:
             few_shot_prompt = ""
         prompt = {
             "system_prompt": (
-                "You are tasked to evaluate whether the statement is fully supported by the context. Respond with either Yes or No.\n"
+                "You are tasked to evaluate whether the statement is fully supported by the context. Respond with either Yes or No, followed by your reasoning in a new line.\n"
                 + few_shot_prompt
             ),
             "user_prompt": ("Context: " + context + "\Statement: " + answer),
         }
 
         response = self._llm_response(prompt)
-        score = "yes" in response.lower()
+        score_txt, reasoning = response.split("\n", 1)
+        score = "yes" in score_txt.lower()
 
-        return {"LLM_based_faithfulness_score": score}
+        return {"LLM_based_faithfulness_score": score, "LLM_based_faithfulness_reasoning": reasoning}
 
 
 class LLMBasedAnswerCorrectness(LLMBasedMetric):
@@ -95,4 +101,4 @@ Use the following guidelines for evaluation:
         score_txt, reasoning = response.split("\n", 1)
         score = float(score_txt)
 
-        return {"LLM_based_answer_correctness": score}
+        return {"LLM_based_answer_correctness": score, "LLM_based_answer_correctness_reasoning": reasoning}
