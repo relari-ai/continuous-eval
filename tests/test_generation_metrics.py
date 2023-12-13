@@ -4,7 +4,7 @@ from tests.utils import all_close
 from tests import example_datum
 from continuous_eval.metrics import (
     DeterministicAnswerRelevance,
-    RougeSentenceFaithfulness,
+    DeterministicFaithfulness,
     BertAnswerRelevance,
     BertAnswerSimilarity,
     LLMBasedFaithfulness,
@@ -49,7 +49,7 @@ def test_rouge_sentence_faithfulness():
         {"rouge_sentence_faithfulness": 0.0},
     ]
 
-    metric = RougeSentenceFaithfulness()
+    metric = DeterministicFaithfulness()
     assert all(
         all_close(metric.calculate(**datum), expected)
         for datum, expected in zip(data, expected_results)

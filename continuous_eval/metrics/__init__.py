@@ -3,7 +3,7 @@ from continuous_eval.metrics.generation_deterministic_metrics import (
     BertAnswerRelevance,
     BertAnswerSimilarity,
     DeterministicAnswerRelevance,
-    RougeSentenceFaithfulness,
+    DeterministicFaithfulness,
 )
 from continuous_eval.metrics.generation_LLM_based_metrics import (
     LLMBasedAnswerCorrectness,

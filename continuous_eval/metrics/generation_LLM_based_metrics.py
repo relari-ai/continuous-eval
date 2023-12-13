@@ -46,7 +46,10 @@ The statement is supported by the context, which states that photosynthesis conv
         score_txt, reasoning = response.split("\n", 1)
         score = "yes" in score_txt.lower()
 
-        return {"LLM_based_faithfulness_score": score, "LLM_based_faithfulness_reasoning": reasoning}
+        return {
+            "LLM_based_faithfulness_score": score,
+            "LLM_based_faithfulness_reasoning": reasoning,
+        }
 
 
 class LLMBasedAnswerCorrectness(LLMBasedMetric):
@@ -101,4 +104,7 @@ Use the following guidelines for evaluation:
         score_txt, reasoning = response.split("\n", 1)
         score = float(score_txt)
 
-        return {"LLM_based_answer_correctness": score, "LLM_based_answer_correctness_reasoning": reasoning}
+        return {
+            "LLM_based_answer_correctness": score,
+            "LLM_based_answer_correctness_reasoning": reasoning,
+        }

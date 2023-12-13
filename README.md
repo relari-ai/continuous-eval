@@ -92,7 +92,7 @@ For generation you can instead use the `GenerationEvaluator`.
 #### Deterministic
 
 - `DeterministicAnswerRelevance`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
-- `RougeSentenceFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L recall
+- `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
 - `BertAnswerRelevance`: Similarity score based on the BERT model between the Generated Answer and Question
 - `BertAnswerSimilarity`: Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
 

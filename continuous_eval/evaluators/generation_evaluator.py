@@ -7,19 +7,20 @@ from continuous_eval.evaluators.base_evaluator import BaseEvaluator
 from continuous_eval.evaluators.utils import validate_dataset
 from continuous_eval.metrics import (
     Metric,
-    RougeSentenceFaithfulness,
+    DeterministicFaithfulness,
 )
 import logging as logger
+
 
 class GenerationEvaluator(BaseEvaluator):
     def __init__(
         self,
-        metrics: List[Metric] = [RougeSentenceFaithfulness()],
+        metrics: List[Metric] = [DeterministicFaithfulness()],
     ):
         super().__init__(metrics)
         self.metrics = metrics
 
-    def run(self, dataset, aggregate:bool=True):
+    def run(self, dataset, aggregate: bool = True):
         validate_dataset(dataset)
         results = self._calculate_metrics(dataset)
 

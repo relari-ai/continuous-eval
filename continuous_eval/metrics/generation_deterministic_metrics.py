@@ -2,6 +2,7 @@ import nltk
 import torch
 from rouge import Rouge
 from transformers import BertModel, BertTokenizer
+import warnings
 
 from continuous_eval.metrics.base import Metric
 
@@ -42,7 +43,9 @@ class RougeScore(Metric):
 
 class BleuScore(Metric):
     def calculate(self, prediction, reference):
+        warnings.filterwarnings("ignore")
         bleu = nltk.translate.bleu_score.sentence_bleu([reference], prediction)
+        warnings.filterwarnings("default")
         return {"bleu_score": bleu}
 
 
@@ -80,21 +83,45 @@ class BertSimilarity:
 # Compound Metrics
 
 
-class RougeSentenceFaithfulness(Metric):
-    ROUGE_RECALL_THRESHOLD = 0.8
+class DeterministicFaithfulness(Metric):
+    ROUGE_PRECISION_THRESHOLD = 0.5
+    TOKEN_OVERLAP_PRECISION_THRESHOLD = 0.5
 
     def calculate(self, answer, retrieved_contexts, **kwargs):
         context = "\n".join(retrieved_contexts)
-        sentences = nltk.sent_tokenize(context)
-        attributed_sentences = 0
-        for sentence in sentences:
-            if (
-                RougeScore().calculate(sentence, answer)["rouge_l_recall"]
-                > self.ROUGE_RECALL_THRESHOLD
-            ):
-                attributed_sentences += 1
-        faithfulness = attributed_sentences / len(sentences)
-        return {"rouge_sentence_faithfulness": faithfulness}
+        sentences = nltk.sent_tokenize(answer)
+
+        rouge_scores = [
+            RougeScore().calculate(sentence, context)["rouge_l_precision"]
+            for sentence in sentences
+        ]
+        token_overlap_scores = [
+            TokenOverlap().calculate(sentence, context)["token_precision"]
+            for sentence in sentences
+        ]
+        bleu_scores = [
+            BleuScore().calculate(sentence, context)["bleu_score"]
+            for sentence in sentences
+        ]
+
+        rouge_faithfulness = sum(
+            score > self.ROUGE_PRECISION_THRESHOLD for score in rouge_scores
+        ) / len(sentences)
+        token_overlap_faithfulness = sum(
+            score > self.TOKEN_OVERLAP_PRECISION_THRESHOLD
+            for score in token_overlap_scores
+        ) / len(sentences)
+        avg_sentence_bleu = sum(score for score in bleu_scores) / len(sentences)
+        min_sentence_bleu = min(bleu_scores)
+
+        return {
+            "rouge_faithfulness": rouge_faithfulness,
+            "token_overlap_faithfulness": token_overlap_faithfulness,
+            "avg_sentence_bleu": avg_sentence_bleu,
+            "min_sentence_bleu": min_sentence_bleu,
+            "rouge_scores_p_by_sentence": rouge_scores,
+            "token_overlap_p_by_sentence": token_overlap_scores,
+        }
 
 
 class BertAnswerRelevance(Metric):

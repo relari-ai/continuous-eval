@@ -1,7 +1,7 @@
 import pytest
 from continuous_eval.metrics import (
     DeterministicAnswerRelevance,
-    RougeSentenceFaithfulness,
+    DeterministicFaithfulness,
 )
 from continuous_eval.evaluators import GenerationEvaluator
 from tests.utils import all_close
@@ -27,7 +27,7 @@ def test_generation_evaluator():
     evaluator = GenerationEvaluator(
         [
             DeterministicAnswerRelevance(),
-            RougeSentenceFaithfulness(),
+            DeterministicFaithfulness(),
         ]
     )
     results = evaluator.run(data, aggregate=True)
