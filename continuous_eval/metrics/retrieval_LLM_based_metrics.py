@@ -39,7 +39,9 @@ Given the following question and context, verify if the information in the given
 """
                     + few_shot_prompt
                 ),
-                "user_prompt": ("Question: " + question + "\nContext: " + context),
+                "user_prompt": (
+                    "Question: " + question + "\nContext: " + context + "\nResponse:"
+                ),
             }
 
             content = self._llm_response(prompt)
@@ -143,12 +145,12 @@ Given a question, context, and answer, analyze each statement in the answer and 
             print(f"{type(e).__name__} Error: {content}, skipping")
             return {
                 "LLM_based_context_coverage": None,
-                # "LLM_based_context_statements": content,
+                "LLM_based_context_statements": content,
             }
 
         return {
             "LLM_based_context_coverage": coverage,
-            # "LLM_based_context_statements": content,
+            "LLM_based_context_statements": content,
         }
 
     @staticmethod

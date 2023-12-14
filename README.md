@@ -21,7 +21,7 @@ poetry install
 
 ### Prerequisites
 
-The code requires the `OPENAI_API_KEY` (and optionally an `ANTHROPIC_API_KEY`) to run the LLM-based metrics.
+The code requires the `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GOOGLE_API_KEY` in .env to run the LLM-based metrics.
 
 ### Usage
 

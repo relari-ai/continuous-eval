@@ -3,13 +3,16 @@ from abc import ABC, abstractmethod
 
 from anthropic import AI_PROMPT, HUMAN_PROMPT, Anthropic
 from openai import OpenAI
+import google.generativeai as google_genai
 
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
+
 EVAL_LLM = os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106")
+google_genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
 class Metric(ABC):
@@ -34,6 +37,39 @@ class LLMBasedMetric(Metric):
             self.client = OpenAI()
         elif model in ["claude-2.1", "claude-2.0", "claude-instant-1.2"]:
             self.client = Anthropic()
+        elif model in ["gemini-pro"]:
+            # Set up the model
+            generation_config = {
+                "temperature": 0,
+                "top_p": 1,
+                "top_k": 1,
+                "max_output_tokens": 1024,
+            }
+
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+            ]
+
+            self.client = google_genai.GenerativeModel(
+                model_name=model,
+                generation_config=generation_config,
+                safety_settings=safety_settings,
+            )
         else:
             raise ValueError(
                 f"Model {model} is not supported. Please choose one of the following models: gpt-3.5-turbo-1106, gpt-4-1106-preview, claude-2.1, claude-2.0, claude-instant-1.2."
@@ -65,6 +101,11 @@ class LLMBasedMetric(Metric):
                 prompt=f"{prompt['system_prompt']}{HUMAN_PROMPT}{prompt['user_prompt']}{AI_PROMPT}",
             )
             content = response.completion
+        elif isinstance(self.client, google_genai.GenerativeModel):
+            response = self.client.generate_content(
+                f"{prompt['system_prompt']}\n{prompt['user_prompt']}"
+            )
+            content = response.text
         else:
             raise ValueError(f"Unknown model client")
 
