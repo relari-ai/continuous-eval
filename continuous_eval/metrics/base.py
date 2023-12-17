@@ -32,8 +32,8 @@ class LLMBasedMetric(Metric):
 
     def __init__(self, model=EVAL_LLM):
         super().__init__()
+        self.model = model
         if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"]:
-            self.model = model
             self.client = OpenAI()
         elif model in ["claude-2.1", "claude-2.0", "claude-instant-1.2"]:
             self.client = Anthropic()

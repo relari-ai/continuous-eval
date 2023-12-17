@@ -10,6 +10,9 @@ class LLMBasedContextPrecision(LLMBasedMetric):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
+    def __str__(self):
+        return f"LLMBasedContextPrecision(model={self.model}, use_few_shot={self.use_few_shot})"
+
     def calculate(self, question, retrieved_contexts, **kwargs):
         """
         Calculate the context relevance score for the given datapoint.
@@ -69,6 +72,9 @@ class LLMBasedContextCoverage(LLMBasedMetric):
     def __init__(self, model=EVAL_LLM, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
+
+    def __str__(self):
+        return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
 
     # Redefine the _llm_response method to return the json_object response format for OpenAI
     def _llm_response(self, prompt):
