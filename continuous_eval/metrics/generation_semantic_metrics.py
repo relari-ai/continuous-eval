@@ -1,5 +1,6 @@
 import torch
 from transformers import BertModel, BertTokenizer
+from sentence_transformers import CrossEncoder
 
 from continuous_eval.metrics.base import Metric
 
@@ -54,3 +55,43 @@ class BertAnswerSimilarity(Metric):
                 score["bert_similarity"] for score in bert_similarity_scores
             )
         }
+    
+class DebertaScores:
+    def __init__(self):
+        self.model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
+    
+    def calculate(self, sentence_pairs):
+        scores = self.model.predict(sentence_pairs)
+        return scores
+
+class DebertaAnswerScores(Metric):
+    
+    def __init__(self, reverse: bool = False):
+        self.reverse = reverse
+
+    def calculate(self, answer, ground_truths, **kwargs):
+        sentence_pairs = []
+
+        for gt_answer in ground_truths:
+            if self.reverse:
+                # premise=ground truth => hypothesis=answer
+                sentence_pairs.append((gt_answer, answer))
+            else:
+                # premise=answer => hypothesis=ground truth
+                sentence_pairs.append((answer, gt_answer))
+
+        scores = DebertaScores().calculate(sentence_pairs)
+
+        # Get the score for the pair with the highest entailment
+        scores_with_max_entailment = max(scores, key=lambda sublist: sublist[1])
+
+        if self.reverse:
+            return {
+                "deberta_reverse_answer_entailment": scores_with_max_entailment[1],
+                "deberta_reverse_answer_contradiction": scores_with_max_entailment[0],
+            }
+        else:
+            return {
+                "deberta_answer_entailment": scores_with_max_entailment[1],
+                "deberta_answer_contradiction": scores_with_max_entailment[0],
+            }

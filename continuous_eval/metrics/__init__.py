@@ -6,6 +6,7 @@ from continuous_eval.metrics.generation_deterministic_metrics import (
 from continuous_eval.metrics.generation_semantic_metrics import (
     BertAnswerRelevance,
     BertAnswerSimilarity,
+    DebertaAnswerScores,
 )
 from continuous_eval.metrics.generation_LLM_based_metrics import (
     LLMBasedAnswerCorrectness,
