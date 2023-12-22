@@ -19,6 +19,8 @@ tqdm = "^4.66.1"
 anthropic = "^0.7.7"
 google-generativeai = "^0.3.1"
 sentence-transformers = "^2.2.2"
+mapie = "^0.7.0"
+imbalanced-learn = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.11.0"

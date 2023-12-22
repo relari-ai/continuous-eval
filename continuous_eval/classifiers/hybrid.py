@@ -1,0 +1,64 @@
+from typing import Optional, Callable
+import numpy as np
+import pandas as pd
+from mapie.classification import MapieClassifier
+
+from continuous_eval.datatypes import XYData
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+
+
+class HybridClassifier:
+    def __init__(
+        self,
+        training: XYData,
+        calibration: XYData,
+        judicator: Optional[Callable] = None,
+        alpha: float = 0.1,
+        random_state: Optional[int] = None,
+    ) -> None:
+        # fmt: off
+        assert alpha > 0.0 and alpha < 1.0, "Alpha must be between 0 and 1"
+        assert isinstance(training, XYData), "Training data must be an XYData object"
+        assert isinstance(calibration, XYData), "Calibration data must be an XYData object"
+        assert (len(training.X.columns) > 0) and (len(training) > 0), "Training data must not be empty"
+        assert (len(calibration.X.columns) > 0) and (len(calibration) > 0), "Calibration data must not be empty"
+        assert (set(training.X.columns) == set(calibration.X.columns)), "Training and calibration data must have the same features"
+        # fmt: on
+        self.features = set(training.X.columns)
+        self._regressor = self._make_regressor(training.X, training.y)
+        self._judicator = judicator
+        self._alpha = alpha
+        self._classifier = MapieClassifier(
+            estimator=self._regressor,
+            cv="prefit",
+            method="lac",
+            random_state=random_state,
+        )
+        self._classifier.fit(calibration.X, calibration.y)
+
+    def _make_regressor(self, X: pd.DataFrame, y: pd.Series) -> None:
+        classifier = LogisticRegression()
+        parameters = {
+            "penalty": ["l1", "l2"],
+            "C": [0.1, 1, 10],
+            "solver": ["liblinear"],
+        }
+        clf = GridSearchCV(classifier, parameters)
+        clf.fit(X, y)
+        return clf
+
+    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
+        assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
+        assert (set(X.columns) == self.features), "X must have the same features as the training data"
+        y_pred, y_set = self._classifier.predict(X, alpha=self._alpha)
+        if self._judicator is None:
+            return y_pred, y_set
+        y_set = y_set.squeeze()
+        y_hat = np.empty(len(y_set), dtype=int)
+        for i in range(len(y_set)):
+            if np.sum(y_set[i]) == 1:
+                y_hat[i] = np.argmax(y_set[i])
+            else:
+                y_hat[i] = self._judicator(i)
+        return y_hat, y_set
