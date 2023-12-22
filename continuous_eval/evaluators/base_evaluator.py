@@ -14,3 +14,10 @@ class BaseEvaluator(ABC):
     @abstractmethod
     def _calculate_metrics(self, dataset):
         pass
+
+    @staticmethod
+    def _sanitize_pre_aggregate(results):
+        return [
+            {k: v for k, v in r.items() if not isinstance(v, (list, str))}
+            for r in results
+        ]

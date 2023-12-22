@@ -1,12 +1,13 @@
 import pytest
+
+from continuous_eval.evaluators import RetrievalEvaluator
 from continuous_eval.metrics import (
     MatchingStrategy,
     PrecisionRecallF1,
     RankedRetrievalMetrics,
 )
-from continuous_eval.evaluators import RetrievalEvaluator
-from tests.utils import all_close
 from tests import example_datum
+from tests.utils import all_close
 
 
 def test_retieval_evaluator():

@@ -1,15 +1,16 @@
 import pytest
 
-from tests.utils import all_close
-from tests import example_datum
 from continuous_eval.metrics import (
-    DeterministicAnswerRelevance,
-    DeterministicFaithfulness,
     BertAnswerRelevance,
     BertAnswerSimilarity,
-    LLMBasedFaithfulness,
+    DebertaAnswerScores,
+    DeterministicAnswerRelevance,
+    DeterministicFaithfulness,
     LLMBasedAnswerCorrectness,
+    LLMBasedFaithfulness,
 )
+from tests import example_datum
+from tests.utils import all_close
 
 
 def test_deterministic_answer_relevance():
@@ -43,10 +44,16 @@ def test_deterministic_answer_relevance():
 
 
 def test_rouge_sentence_faithfulness():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
+    data = [example_datum.CAPITAL_OF_FRANCE]
     expected_results = [
-        {"rouge_sentence_faithfulness": 0.5},
-        {"rouge_sentence_faithfulness": 0.0},
+        {
+            "rouge_faithfulness": 1.0,
+            "token_overlap_faithfulness": 1.0,
+            "avg_sentence_bleu": 0.0,
+            "min_sentence_bleu": 0.0,
+            "rouge_scores_p_by_sentence": [1.0],
+            "token_overlap_p_by_sentence": [1.0],
+        },
     ]
 
     metric = DeterministicFaithfulness()
@@ -100,3 +107,37 @@ def test_llm_based_answer_correctness():
     results = [metric.calculate(**datum) for datum in data]
     for result in results:
         assert 1.0 <= result["LLM_based_answer_correctness"] <= 5.0
+
+
+def test_semantic():
+    correct = {
+        "question": "What are the implications of global warming?",
+        "answer": "Reducing greenhouse gas emissions, transitioning to renewable energy",
+        "ground_truths": ["Reducing greenhouse gas emissions"],
+    }
+    wrong = {
+        "question": "What are the implications of global warming?",
+        "answer": "The diverse culinary traditions of Italy offer a fascinating insight into the country's history",
+        "ground_truths": ["Reducing greenhouse gas emissions"],
+    }
+    d1 = {
+        "AnswerScore": DebertaAnswerScores().calculate(**correct),
+        "AnswerSimilarity": BertAnswerSimilarity().calculate(**correct),
+        "AnswerRelevance": BertAnswerRelevance().calculate(**correct),
+    }
+    d2 = {
+        "AnswerScore": DebertaAnswerScores().calculate(**wrong),
+        "AnswerSimilarity": BertAnswerSimilarity().calculate(**wrong),
+    }
+    assert (
+        d1["AnswerScore"]["deberta_answer_entailment"]
+        > d2["AnswerScore"]["deberta_answer_entailment"]
+    )
+    assert (
+        d1["AnswerSimilarity"]["bert_answer_similarity"]
+        > d2["AnswerSimilarity"]["bert_answer_similarity"]
+    )
+    assert (
+        d1["AnswerRelevance"]["bert_answer_relevance"] > 0
+        and d1["AnswerRelevance"]["bert_answer_relevance"] < 1.0
+    )

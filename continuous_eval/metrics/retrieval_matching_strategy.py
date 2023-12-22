@@ -2,6 +2,9 @@ from enum import Enum, auto
 
 from rouge import Rouge
 
+ROUGE_CHUNK_MATCH_THRESHOLD = 0.7
+ROUGE_SENTENCE_MATCH_THRESHOLD = 0.8
+
 
 class MatchingStrategy(Enum):
     EXACT_CHUNK_MATCH = auto()
@@ -11,22 +14,24 @@ class MatchingStrategy(Enum):
 
 
 def is_relevant(retrieved_component, ground_truth_component, matching_strategy):
-    match matching_strategy:
-        case MatchingStrategy.EXACT_CHUNK_MATCH:
-            return retrieved_component == ground_truth_component
-        case MatchingStrategy.EXACT_SENTENCE_MATCH:
-            return retrieved_component == ground_truth_component
-        case MatchingStrategy.ROUGE_CHUNK_MATCH:
-            rouge = Rouge()
-            score = rouge.get_scores(retrieved_component, ground_truth_component)[0][
+    if (
+        matching_strategy == MatchingStrategy.EXACT_CHUNK_MATCH
+        or matching_strategy == MatchingStrategy.EXACT_SENTENCE_MATCH
+    ):
+        return retrieved_component == ground_truth_component
+    elif matching_strategy == MatchingStrategy.ROUGE_CHUNK_MATCH:
+        return (
+            Rouge().get_scores(retrieved_component, ground_truth_component)[0][
                 "rouge-l"
             ]["r"]
-            return score > 0.7
-        case MatchingStrategy.ROUGE_SENTENCE_MATCH:
-            rouge = Rouge()
-            score = rouge.get_scores(retrieved_component, ground_truth_component)[0][
+            > ROUGE_CHUNK_MATCH_THRESHOLD
+        )
+    elif matching_strategy == MatchingStrategy.ROUGE_SENTENCE_MATCH:
+        return (
+            Rouge().get_scores(retrieved_component, ground_truth_component)[0][
                 "rouge-l"
             ]["r"]
-            return score > 0.8
-        case _:
-            raise ValueError(f"Matching strategy {matching_strategy} not found.")
+            > ROUGE_SENTENCE_MATCH_THRESHOLD
+        )
+    else:
+        raise ValueError(f"Unknown matching strategy {matching_strategy} .")

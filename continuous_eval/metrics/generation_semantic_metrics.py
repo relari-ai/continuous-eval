@@ -1,10 +1,11 @@
 import torch
-from transformers import BertModel, BertTokenizer
 from sentence_transformers import CrossEncoder
+from transformers import BertModel, BertTokenizer
 
 from continuous_eval.metrics.base import Metric
 
 # Single Metrics
+
 
 class BertSimilarity:
     def __init__(self):
@@ -36,6 +37,7 @@ class BertSimilarity:
         semantic_similarity = max(0.0, min(semantic_similarity, 1.0))  # clip in [0, 1]
         return {"bert_similarity": semantic_similarity}
 
+
 class BertAnswerRelevance(Metric):
     def calculate(self, answer, question, **kwargs):
         return {
@@ -55,17 +57,18 @@ class BertAnswerSimilarity(Metric):
                 score["bert_similarity"] for score in bert_similarity_scores
             )
         }
-    
+
+
 class DebertaScores:
     def __init__(self):
         self.model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
-    
+
     def calculate(self, sentence_pairs):
         scores = self.model.predict(sentence_pairs)
         return scores
 
+
 class DebertaAnswerScores(Metric):
-    
     def __init__(self, reverse: bool = False):
         self.reverse = reverse
 

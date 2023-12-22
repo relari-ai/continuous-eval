@@ -1,13 +1,19 @@
 from continuous_eval.metrics.base import EVAL_LLM, LLMBasedMetric
 from continuous_eval.metrics.retrieval_LLM_based_metrics import LLMBasedContextCoverage
 
+
 class LLMBasedFaithfulness(LLMBasedMetric):
     """
     The LLM based faithfulness metric.
     Measures whether the generated answer is faithful to the retrieved context.
     """
 
-    def __init__(self, model: str = EVAL_LLM, use_few_shot: bool = True, classify_by_statement: bool = False):
+    def __init__(
+        self,
+        model: str = EVAL_LLM,
+        use_few_shot: bool = True,
+        classify_by_statement: bool = False,
+    ):
         super().__init__(model)
         self.use_few_shot = use_few_shot
         self.classify_by_statement = classify_by_statement
@@ -20,7 +26,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
         Calculate the faithfulness score for the given datapoint.
         """
         if self.classify_by_statement:
-            # Context coverage uses the same prompt as faithfulness because it calculates how what proportion statements in the answer can be attributed to the context. 
+            # Context coverage uses the same prompt as faithfulness because it calculates how what proportion statements in the answer can be attributed to the context.
             # The difference is that faithfulness uses the generated answer, while context coverage uses ground truth answer (to evaluate context).
             context_coverage = LLMBasedContextCoverage(use_few_shot=self.use_few_shot)
             results = context_coverage.calculate(question, retrieved_contexts, answer)
@@ -56,7 +62,7 @@ The statement is supported by the context, which states that photosynthesis conv
 
             response = self._llm_response(prompt)
             score_txt, reasoning = response.split("\n", 1)
-            score = int("yes" in score_txt.lower())
+            score = bool("yes" in score_txt.lower())
 
         return {
             "LLM_based_faithfulness_score": score,
@@ -73,7 +79,7 @@ class LLMBasedAnswerCorrectness(LLMBasedMetric):
     def __init__(self, model: str = EVAL_LLM, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
-    
+
     def __str__(self):
         return f"LLMBasedAnswerCorrectness(model={self.model}, use_few_shot={self.use_few_shot})"
 

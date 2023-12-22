@@ -1,3 +1,4 @@
+import logging as logger
 from math import log
 
 from continuous_eval.metrics.base import Metric
@@ -5,7 +6,6 @@ from continuous_eval.metrics.retrieval_matching_strategy import (
     MatchingStrategy,
     is_relevant,
 )
-import logging as logger
 
 
 class RankedRetrievalMetrics(Metric):

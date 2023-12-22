@@ -5,11 +5,7 @@ from tqdm import tqdm
 
 from continuous_eval.evaluators.base_evaluator import BaseEvaluator
 from continuous_eval.evaluators.utils import validate_dataset
-from continuous_eval.metrics import (
-    MatchingStrategy,
-    Metric,
-    PrecisionRecallF1,
-)
+from continuous_eval.metrics import MatchingStrategy, Metric, PrecisionRecallF1
 
 
 class RetrievalEvaluator(BaseEvaluator):
@@ -34,7 +30,7 @@ class RetrievalEvaluator(BaseEvaluator):
         results = self._calculate_metrics(dataset, k)
 
         if aggregate:
-            results_df = pd.DataFrame(results)
+            results_df = pd.DataFrame(BaseEvaluator._sanitize_pre_aggregate(results))
             return results_df.mean().to_dict()
         else:
             return results

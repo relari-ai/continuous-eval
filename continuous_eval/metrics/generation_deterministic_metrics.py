@@ -1,6 +1,7 @@
+import warnings
+
 import nltk
 from rouge import Rouge
-import warnings
 
 from continuous_eval.metrics.base import Metric
 
@@ -89,7 +90,7 @@ class DeterministicFaithfulness(Metric):
             "rouge_scores_p_by_sentence": rouge_scores,
             "token_overlap_p_by_sentence": token_overlap_scores,
         }
-    
+
 
 class DeterministicAnswerRelevance(Metric):
     def calculate(self, answer, ground_truths, **kwargs):

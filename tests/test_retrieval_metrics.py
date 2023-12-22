@@ -1,14 +1,14 @@
 import pytest
 
-from tests.utils import all_close, in_zero_one
-from tests import example_datum
 from continuous_eval.metrics import (
-    PrecisionRecallF1,
-    MatchingStrategy,
-    RankedRetrievalMetrics,
-    LLMBasedContextPrecision,
     LLMBasedContextCoverage,
+    LLMBasedContextPrecision,
+    MatchingStrategy,
+    PrecisionRecallF1,
+    RankedRetrievalMetrics,
 )
+from tests import example_datum
+from tests.utils import all_close, in_zero_one, is_close
 
 
 def test_precision_recall_exact_chunk_match():
@@ -94,27 +94,16 @@ def test_ranked_retrieval_exact_sentence_match():
 
 def test_llm_based_context_precision():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-    expected_results = [
-        {"LLM_based_context_precision": 0.0, "LLM_based_context_average_precision": 0},
-        {
-            "LLM_based_context_precision": 0.5,
-            "LLM_based_context_average_precision": 0.5,
-        },
-    ]
-
     metric = LLMBasedContextPrecision()
     assert all(in_zero_one(metric.calculate(**datum)) for datum in data)
 
 
 def test_llm_based_context_coverage():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-    expected_results = [
-        {"LLM_based_context_coverage": 0.0},
-        {"LLM_based_context_coverage": 1.0},
-    ]
+    expected_results = [0.0, 1.0]
 
     metric = LLMBasedContextCoverage()
     assert all(
-        all_close(metric.calculate(**datum), expected)
+        is_close(metric.calculate(**datum)["LLM_based_context_coverage"], expected)
         for datum, expected in zip(data, expected_results)
     )
