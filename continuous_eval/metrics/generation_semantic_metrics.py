@@ -130,10 +130,13 @@ class DebertaAnswerScores(Metric):
         # Group by 'ids' and get the score for the pair with the highest entailment
         df = pd.DataFrame({entailment_key: scores[:, 1], contradiction_key: scores[:, 0], "ids": ids})
         idx = df.groupby("ids")[entailment_key].idxmax()
-        return {
-            entailment_key: df.loc[idx, entailment_key].tolist(),
-            contradiction_key: df.loc[idx, contradiction_key].tolist(),
-        }
+        return [
+            {entailment_key: entailment_value, contradiction_key: contradiction_value}
+            for (entailment_value, contradiction_value) in zip(
+                df.loc[idx, entailment_key],
+                df.loc[idx, contradiction_key],
+            )
+        ]
 
     def calculate(self, answer, ground_truths, **kwargs):
         sentence_pairs = list()

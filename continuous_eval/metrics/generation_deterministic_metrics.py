@@ -5,10 +5,17 @@ from rouge import Rouge
 
 from continuous_eval.metrics.base import Metric
 
+
 # Single Metrics
-nltk.download('punkt')
+def _download_punkt():
+    nltk.download('punkt', quiet=True)
+
 
 class TokenOverlap(Metric):
+    def __init__(self):
+        _download_punkt()
+        super().__init__()
+
     def calculate(self, prediction, reference):
         tokenizer = nltk.tokenize.word_tokenize
 
@@ -63,6 +70,10 @@ class BleuScore(Metric):
 class DeterministicFaithfulness(Metric):
     ROUGE_PRECISION_THRESHOLD = 0.5
     TOKEN_OVERLAP_PRECISION_THRESHOLD = 0.5
+
+    def __init__(self):
+        _download_punkt()
+        super().__init__()
 
     def calculate(self, answer, retrieved_contexts, **kwargs):
         context = "\n".join(retrieved_contexts)
