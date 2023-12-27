@@ -27,7 +27,7 @@ assert os.getenv("OPENAI_API_KEY") is not None, (
 )
 if GOOGLE_GENAI_AVAILABLE:
     assert os.getenv("GEMINI_API_KEY") is not None, (
-        "Please set the environment variable GOOGLE_API_KEY. "
+        "Please set the environment variable GEMINI_API_KEY. "
         "You can get one at https://ai.google.dev/tutorials/setup."
     )
     google_genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -67,35 +67,8 @@ class LLMBasedMetric(Metric):
         elif model in ["gemini-pro"]:
             if not GOOGLE_GENAI_AVAILABLE:
                 raise ImportError("Google GenAI is not available. Please install the optional dependency `gemini`.")
-            # Set up the model
-            generation_config = {
-                "temperature": 0,
-                "top_p": 1,
-                "top_k": 1,
-                "max_output_tokens": 1024,
-            }
-            safety_settings = [
-                {
-                    "category": "HARM_CATEGORY_HARASSMENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-                },
-                {
-                    "category": "HARM_CATEGORY_HATE_SPEECH",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-                },
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
-                },
-            ]
             self.client = google_genai.GenerativeModel(
                 model_name=model,
-                generation_config=generation_config,
-                safety_settings=safety_settings,
             )
         else:
             raise ValueError(
@@ -133,7 +106,35 @@ class LLMBasedMetric(Metric):
             )
             content = response.completion
         elif isinstance(self.client, google_genai.GenerativeModel):
-            response = self.client.generate_content(f"{prompt['system_prompt']}\n{prompt['user_prompt']}")
+            generation_config = {
+                "temperature": 0,
+                "top_p": 1,
+                "top_k": 1,
+                "max_output_tokens": 1024,
+            }
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+            ]
+            response = self.client.generate_content(
+                f"{prompt['system_prompt']}\n{prompt['user_prompt']}",
+                generation_config=generation_config,
+                safety_settings=safety_settings,
+            )
             content = response.text
         else:
             raise ValueError(f"Unknown model client")

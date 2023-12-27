@@ -32,30 +32,3 @@ class RetrievalEvaluator(BaseEvaluator):
                 if len(datum["retrieved_contexts"]) >= k:
                     datum["retrieved_contexts"] = datum["retrieved_contexts"][:k]
         return dataset_
-
-    # def run(
-    #     self,
-    #     k: int = None,
-    # ):
-    #     if k is not None and k < 0:
-    #         print("K must be a positive integer. " "Leave it as None to consider all retrieved chunks.")
-
-    #     self._results = self._calculate_metrics(k)
-
-    # def _calculate_metrics(self, k):
-    #     results = []
-    #     for _, row in tqdm(
-    #         self.dataset.iterrows(),
-    #         total=len(self.dataset),
-    #         desc="Examples evaluated",
-    #     ):
-    #         datum = row.to_dict()
-    #         if k is not None:
-    #             datum = datum.copy()
-    #             datum["retrieved_contexts"] = datum["retrieved_contexts"][:k]
-
-    #         result = {}
-    #         for metric in self.metrics:
-    #             result.update(metric.calculate(**datum))
-    #         results.append(result)
-    #     return results

@@ -36,7 +36,7 @@ class TokenOverlap(Metric):
         try:
             f1 = 2 * ((precision * recall) / (precision + recall))
         except ZeroDivisionError:
-            f1 = 0
+            f1 = 0.0
 
         return {"token_precision": precision, "token_recall": recall, "token_f1": f1}
 
