@@ -16,7 +16,7 @@ class DebertaScores:
 
     @property
     def device(self):
-        return self._model.device
+        return self._model._target_device
 
     def calculate(self, sentence_pairs):
         return self._model.predict(sentence_pairs)
