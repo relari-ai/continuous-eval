@@ -39,14 +39,14 @@ class LLMBasedFaithfulness(LLMBasedMetric):
 Example 1:
 Context: The Eiffel Tower, a wrought-iron lattice tower on the Champ de Mars in Paris, France, is one of the most famous landmarks in the world. It was designed by Gustave Eiffel and completed in 1889.
 Statement: The Eiffel Tower can be found in the center of London, near the Thames River.
-Response: 
+Response:
 No
 The statement contradicts with the context, which states that Eiffel Tower is in Paris, as opposed to the center of London.
 
 Example 2:
 Context: Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that can later be released to fuel the organisms' activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water.
 Statement: Photosynthesis in plants primarily involves the conversion of light energy into chemical energy stored in forms such as sugar.
-Response: 
+Response:
 Yes
 The statement is supported by the context, which states that photosynthesis converts light energy into chemical energy and that the chemical energy is stored in carbohydrate molecules, such as sugars.
 """
@@ -57,7 +57,7 @@ The statement is supported by the context, which states that photosynthesis conv
                     "You are tasked to evaluate whether the statement is fully supported by the context. Respond with either Yes or No, followed by your reasoning in a new line.\n"
                     + few_shot_prompt
                 ),
-                "user_prompt": ("Context: " + context + "\Statement: " + answer),
+                "user_prompt": ("Context: " + context + r"\Statement: " + answer),
             }
 
             response = self._llm_response(prompt)
@@ -89,8 +89,8 @@ class LLMBasedAnswerCorrectness(LLMBasedMetric):
         """
         gt_answers = "\n".join(ground_truths)
         if self.use_few_shot:
-            few_shot_prompt = """Example Response: 
-3.5 
+            few_shot_prompt = """Example Response:
+3.5
 The answer is relevant to the question and similar to the ground truth answer but misses some information.
 """
         else:
@@ -98,7 +98,7 @@ The answer is relevant to the question and similar to the ground truth answer bu
         prompt = {
             "system_prompt": (
                 """
-You are an expert evaluator system for a question answering system. 
+You are an expert evaluator system for a question answering system.
 You need to evaluate the quality of the generated answer based on the question and reference ground truth answer.
 Output a score and the reasoning for your score in a new line.
 Use the following guidelines for evaluation:
@@ -112,12 +112,7 @@ Use the following guidelines for evaluation:
                 + few_shot_prompt
             ),
             "user_prompt": (
-                "Question: "
-                + question
-                + "\nAnswer: "
-                + answer
-                + "\Ground truth reference answer(s): "
-                + gt_answers
+                "Question: " + question + "\nAnswer: " + answer + r"\Ground truth reference answer(s): " + gt_answers
             ),
         }
 

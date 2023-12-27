@@ -1,45 +1,23 @@
-import logging as logger
-from typing import List
+from collections import ChainMap
+from typing import List, Union
 
 import pandas as pd
-from tqdm import tqdm
 
+from continuous_eval.dataset import Dataset
 from continuous_eval.evaluators.base_evaluator import BaseEvaluator
-from continuous_eval.evaluators.utils import validate_dataset
 from continuous_eval.metrics import DeterministicFaithfulness, Metric
 
 
 class GenerationEvaluator(BaseEvaluator):
     def __init__(
         self,
+        dataset: Union[Dataset, pd.DataFrame],
         metrics: List[Metric] = [DeterministicFaithfulness()],
     ):
-        super().__init__(metrics)
-        self.metrics = metrics
+        super().__init__(dataset=dataset, metrics=metrics)
 
-    def run(self, dataset, aggregate: bool = True):
-        validate_dataset(dataset)
-        results = self._calculate_metrics(dataset)
-
-        if aggregate:
-            results_df = pd.DataFrame(BaseEvaluator._sanitize_pre_aggregate(results))
-            return results_df.mean().to_dict()
-        else:
-            return results
-
-    def _calculate_metrics(self, dataset):
-        results = []
-        for item in tqdm(
-            dataset, total=len(dataset), desc="Calculating generation metrics"
-        ):
-            result = {}
-            for metric in self.metrics:
-                try:
-                    result.update(metric.calculate(**item))
-                except Exception as e:
-                    logger.warning(f"Error calculating {metric}. Skipping...")
-                    print(e)
-                    continue
-            results.append(result)
-
-        return results
+    def run(self):
+        data = self.dataset.to_dict(orient="records")
+        metrics = {id(metric): metric.batch_calculate(data) for metric in self.metrics}
+        self._results = [dict(ChainMap(*x)) for x in zip(*metrics.values())]
+        return self._results

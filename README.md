@@ -14,14 +14,14 @@ if you want to install from source
 
 ```bash
 git clone https://github.com/relari-ai/continuous-eval.git && cd continuous-eval
-poetry install
+poetry install --all-extras
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-The code requires the `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GOOGLE_API_KEY` in .env to run the LLM-based metrics.
+The code requires the `OPENAI_API_KEY` (optionally `ANTHROPIC_API_KEY` and/or `GOOGLE_API_KEY`) in .env to run the LLM-based metrics.
 
 ### Usage
 

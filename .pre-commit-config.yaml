@@ -1,0 +1,51 @@
+# Exclude hidden files, init, tensorrt folders, protobuf generated files, markdown files, and DB model.py files
+exclude: ^(.*/\..*|.*__init__.py|.*_pb2.py|.*_pb2_grpc.py|.*.md|.*.database.*.models.py)$
+default_language_version:
+  python: python3.9
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-ast  # check if valid python file
+    stages: [commit]
+  - id: debug-statements  # check if left in debug statements
+    stages: [commit]
+  - id: trailing-whitespace  # remove trailing whitespace
+    stages: [commit]
+  - id: end-of-file-fixer  # have one line at end of file
+    stages: [commit]
+  - id: check-docstring-first  # File comments should come before imports
+    stages: [commit]
+  - id: check-yaml  # make sure valid yaml
+    stages: [commit]
+  - id: name-tests-test  # check that tests start with test_*
+    args: ['--pytest']
+    stages: [commit]
+    exclude: ^tests/helpers/
+  - id: check-added-large-files  # check that we're not committing big files to git, excluding lfs files.
+    args: ['--maxkb=2000']  # set max file size to 2MB
+    stages: [commit]
+- repo: https://github.com/asottile/pyupgrade  # use Python3 tricks
+  rev: v2.32.0
+  hooks:
+  - id: pyupgrade
+    args: ['--keep-percent-format', '--keep-runtime-typing']
+    stages: [commit]
+- repo: https://github.com/pre-commit/mirrors-isort  # Sort imports, similar to PyCharm organize imports
+  rev: v5.10.1
+  hooks:
+  - id: isort
+    args: ['--line-length=120', '--profile=black']
+    stages: [commit]
+  - id: isort
+    args: ['--line-length=120', '--profile=black', '--check']
+    stages: [manual]
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+    args: ['--line-length=120', '--skip-string-normalization']
+    stages: [commit]
+  - id: black
+    args: ['--line-length=120', '--skip-string-normalization', '--check']
+    stages: [manual]
