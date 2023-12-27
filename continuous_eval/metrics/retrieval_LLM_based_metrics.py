@@ -6,9 +6,10 @@ from continuous_eval.metrics.base import EVAL_LLM, LLMBasedMetric
 
 
 class LLMBasedContextPrecision(LLMBasedMetric):
-    def __init__(self, model=EVAL_LLM, use_few_shot: bool = True):
+    def __init__(self, model=EVAL_LLM, use_few_shot: bool = True, log_relevance_by_context: bool = False):
         super().__init__(model)
         self.use_few_shot = use_few_shot
+        self.log_relevance_by_context = log_relevance_by_context
 
     def __str__(self):
         return f"LLMBasedContextPrecision(model={self.model}, use_few_shot={self.use_few_shot})"
@@ -58,10 +59,17 @@ Given the following question and context, verify if the information in the given
         average_precision = average_precision / relevant_chunks if relevant_chunks else 0
         precision = relevant_chunks / len(scores)
 
-        return {
-            "LLM_based_context_precision": precision,
-            "LLM_based_context_average_precision": average_precision,
-        }
+        if self.log_relevance_by_context:
+            return {
+                "LLM_based_context_precision": precision,
+                "LLM_based_context_average_precision": average_precision,
+                "LLM_based_context_relevance_by_context": scores,
+            }
+        else:
+            return {
+                "LLM_based_context_precision": precision,
+                "LLM_based_context_average_precision": average_precision,
+            }
 
 
 class LLMBasedContextCoverage(LLMBasedMetric):
