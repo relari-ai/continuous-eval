@@ -6,7 +6,7 @@ from rouge import Rouge
 from continuous_eval.metrics.base import Metric
 
 # Single Metrics
-
+nltk.download('punkt')
 
 class TokenOverlap(Metric):
     def calculate(self, prediction, reference):
