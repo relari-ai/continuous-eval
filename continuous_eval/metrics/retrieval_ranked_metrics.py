@@ -2,10 +2,7 @@ import logging as logger
 from math import log
 
 from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.retrieval_matching_strategy import (
-    MatchingStrategy,
-    is_relevant,
-)
+from continuous_eval.metrics.retrieval_matching_strategy import MatchingStrategy, is_relevant
 
 
 class RankedRetrievalMetrics(Metric):
@@ -32,19 +29,13 @@ class RankedRetrievalMetrics(Metric):
                 f"using {self.matching_strategy} strategy for Ranked Metrics."
             )
 
-        map = self.calculate_average_precision(
-            retrieved_contexts, ground_truth_contexts
-        )
+        map = self.calculate_average_precision(retrieved_contexts, ground_truth_contexts)
         mrr = self.calculate_reciprocal_rank(retrieved_contexts, ground_truth_contexts)
-        ndcg = self.calculate_normalized_discounted_cumulative_gain(
-            retrieved_contexts, ground_truth_contexts
-        )
+        ndcg = self.calculate_normalized_discounted_cumulative_gain(retrieved_contexts, ground_truth_contexts)
 
         return {"Average Precision": map, "Mean Reciprocal Rank": mrr, "NDCG": ndcg}
 
-    def calculate_average_precision(
-        self, retrieved_contexts, ground_truth_contexts, **kwargs
-    ):
+    def calculate_average_precision(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate average precision for a single query retrieval
 
         # Calculate average precision for each relevant chunk
@@ -60,9 +51,7 @@ class RankedRetrievalMetrics(Metric):
 
         return average_precision / relevant_chunks if relevant_chunks else 0
 
-    def calculate_reciprocal_rank(
-        self, retrieved_contexts, ground_truth_contexts, **kwargs
-    ):
+    def calculate_reciprocal_rank(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate reciprocal rank for a single query retrieval
 
         # Calculate reciprocal rank for each relevant chunk
@@ -74,9 +63,7 @@ class RankedRetrievalMetrics(Metric):
         # If no relevant chunk is found, return 0
         return 0
 
-    def calculate_normalized_discounted_cumulative_gain(
-        self, retrieved_contexts, ground_truth_contexts, **kwargs
-    ):
+    def calculate_normalized_discounted_cumulative_gain(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate normalized discounted cumulative gain for a single query retrieval
 
         # Calculate discounted cumulative gain

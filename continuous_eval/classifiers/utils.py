@@ -1,10 +1,7 @@
 from typing import Dict
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    precision_score,
-    recall_score,
-)
+
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score
+
 
 def eval_prediction(y, y_hat) -> Dict:
     accuracy = accuracy_score(y, y_hat)

@@ -1,12 +1,11 @@
-from enum import Enum
-
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
 
 
 class XYData(tuple):
@@ -42,27 +41,33 @@ class SplitRatios:
     calibration: float = 0.2
 
     def __post_init__(self):
-        assert (
-            np.abs(self.train + self.test + self.calibration - 1) < 1e-6
-        ), "Data split must sum to 1"
+        assert np.abs(self.train + self.test + self.calibration - 1) < 1e-6, "Data split must sum to 1"
 
 
 class DataSplit:
     def __init__(
         self,
-        X:pd.DataFrame,
-        y:np.ndarray,
+        X: pd.DataFrame,
+        y: np.ndarray,
         features: List[str],
         split_ratios: SplitRatios,
         oversample: bool = False,
         random_state: Optional[int] = None,
     ):
+
+        if isinstance(y, pd.Series):
+            y = y.to_numpy()
+
+        assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
+        assert isinstance(y, np.ndarray), "y must be a numpy ndarray"
+        assert len(X) == len(y), "X and y must have the same number of rows"
+        assert len(X.columns) > 0, "X must not be empty"
+        assert len(y.shape) == 1, "y must be a 1-dimensional array"
+
         self.features = features
 
         # Split the data into training, testing and calibration sets
-        X_temp, X_test, y_temp, y_test = train_test_split(
-            X, y, test_size=split_ratios.test, random_state=random_state
-        )
+        X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=split_ratios.test, random_state=random_state)
         X_train, X_cal, y_train, y_cal = train_test_split(
             X_temp,
             y_temp,
@@ -76,9 +81,7 @@ class DataSplit:
         if oversample:
             self.X_train_unbalanced = self.X_train.copy()
             self.y_train_unbalanced = self.y_train.copy()
-            self.X_train, self.y_train = SMOTE().fit_resample(
-                self.X_train, self.y_train
-            )
+            self.X_train, self.y_train = SMOTE().fit_resample(self.X_train, self.y_train)
 
         self.X_cal = X_cal[self.features]
         self.y_cal = y_cal.astype(int)

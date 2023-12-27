@@ -7,8 +7,8 @@ from continuous_eval.metrics import (
     PrecisionRecallF1,
     RankedRetrievalMetrics,
 )
-from tests import example_datum
-from tests.utils import all_close, in_zero_one, is_close
+from tests.helpers import example_datum
+from tests.helpers.utils import all_close, in_zero_one, is_close
 
 
 def test_precision_recall_exact_chunk_match():
@@ -19,10 +19,7 @@ def test_precision_recall_exact_chunk_match():
     ]
 
     metric = PrecisionRecallF1(MatchingStrategy.EXACT_CHUNK_MATCH)
-    assert all(
-        all_close(metric.calculate(**datum), expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_precision_recall_exact_sentence_match():
@@ -36,10 +33,7 @@ def test_precision_recall_exact_sentence_match():
     ]
 
     metric = PrecisionRecallF1(MatchingStrategy.EXACT_SENTENCE_MATCH)
-    assert all(
-        all_close(metric.calculate(**datum), expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_precision_recall_rouge_sentence_match():
@@ -50,10 +44,7 @@ def test_precision_recall_rouge_sentence_match():
     ]
 
     metric = PrecisionRecallF1(MatchingStrategy.ROUGE_SENTENCE_MATCH)
-    assert all(
-        all_close(metric.calculate(**datum), expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_ranked_retrieval_exact_chunk_match():
@@ -68,10 +59,7 @@ def test_ranked_retrieval_exact_chunk_match():
     ]
 
     metric = RankedRetrievalMetrics(MatchingStrategy.EXACT_CHUNK_MATCH)
-    assert all(
-        all_close(metric.calculate(**datum), expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_ranked_retrieval_exact_sentence_match():
@@ -86,10 +74,7 @@ def test_ranked_retrieval_exact_sentence_match():
     ]
 
     metric = RankedRetrievalMetrics(MatchingStrategy.EXACT_CHUNK_MATCH)
-    assert all(
-        all_close(metric.calculate(**datum), expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_llm_based_context_precision():
@@ -98,12 +83,21 @@ def test_llm_based_context_precision():
     assert all(in_zero_one(metric.calculate(**datum)) for datum in data)
 
 
-def test_llm_based_context_coverage():
+def test_llm_based_context_coverage_openai():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-    expected_results = [0.0, 1.0]
 
-    metric = LLMBasedContextCoverage()
-    assert all(
-        is_close(metric.calculate(**datum)["LLM_based_context_coverage"], expected)
-        for datum, expected in zip(data, expected_results)
-    )
+    metric = LLMBasedContextCoverage(model="gpt-3.5-turbo-1106")
+    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
+
+
+def test_llm_based_context_coverage_claude():
+    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
+    metric = LLMBasedContextCoverage(model="claude-2.1")
+    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
+
+
+def test_llm_based_context_coverage_gemini():
+    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
+
+    metric = LLMBasedContextCoverage(model="gemini-pro")
+    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)

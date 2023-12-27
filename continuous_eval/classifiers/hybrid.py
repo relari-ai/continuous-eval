@@ -1,14 +1,16 @@
-from typing import Optional, Callable
+import pickle
+from typing import Callable, Optional
+
 import numpy as np
 import pandas as pd
 from mapie.classification import MapieClassifier
-
-from continuous_eval.datatypes import XYData
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 
+from continuous_eval.datatypes import XYData
 
-class HybridClassifier:
+
+class ConformalClassifier:
     def __init__(
         self,
         training: XYData,
@@ -50,7 +52,7 @@ class HybridClassifier:
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
-        assert (set(X.columns) == self.features), "X must have the same features as the training data"
+        assert set(X.columns) == self.features, "X must have the same features as the training data"
         y_pred, y_set = self._classifier.predict(X, alpha=self._alpha)
         if self._judicator is None:
             return y_pred, y_set
@@ -62,3 +64,10 @@ class HybridClassifier:
             else:
                 y_hat[i] = self._judicator(i)
         return y_hat, y_set
+
+    def save(self, savepath: str) -> None:
+        pickle.dump(self, open(savepath, "wb"))
+
+    @staticmethod
+    def load(loadpath: str) -> "ConformalClassifier":
+        return pickle.load(open(loadpath, "rb"))

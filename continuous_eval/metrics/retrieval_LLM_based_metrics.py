@@ -20,7 +20,7 @@ class LLMBasedContextPrecision(LLMBasedMetric):
         scores = []
         for context in retrieved_contexts:
             few_shot_prompt = (
-                """Example 1: 
+                """Example 1:
 Question: What is the capital of France?
 Context: Paris is the largest city and the capital of France. It has many historical monuments.
 Response: Yes
@@ -42,9 +42,7 @@ Given the following question and context, verify if the information in the given
 """
                     + few_shot_prompt
                 ),
-                "user_prompt": (
-                    "Question: " + question + "\nContext: " + context + "\nResponse:"
-                ),
+                "user_prompt": ("Question: " + question + "\nContext: " + context + "\nResponse:"),
             }
 
             content = self._llm_response(prompt)
@@ -57,9 +55,7 @@ Given the following question and context, verify if the information in the given
             if score:
                 relevant_chunks += 1
                 average_precision += relevant_chunks / (i + 1)
-        average_precision = (
-            average_precision / relevant_chunks if relevant_chunks else 0
-        )
+        average_precision = average_precision / relevant_chunks if relevant_chunks else 0
         precision = relevant_chunks / len(scores)
 
         return {
@@ -133,14 +129,7 @@ Given a question, context, and answer, analyze each statement in the answer and 
 """
                 + few_shot_prompt
             ),
-            "user_prompt": (
-                "question: "
-                + question
-                + "\ncontext: "
-                + context
-                + "\nanswer: "
-                + answer
-            ),
+            "user_prompt": ("question: " + question + "\ncontext: " + context + "\nanswer: " + answer),
         }
 
         content = self._llm_response(prompt)
@@ -164,15 +153,9 @@ Given a question, context, and answer, analyze each statement in the answer and 
         pattern = r'"Attributed":\s*(\d+)'
         attributed_numbers = re.findall(pattern, statements, re.IGNORECASE)
         try:
-            attributed_numbers = [
-                int(num) for group in attributed_numbers for num in group if num
-            ]
+            attributed_numbers = [int(num) for group in attributed_numbers for num in group if num]
         except Exception as e:
             print(f"{type(e).__name__} Error: {attributed_numbers}, skipping")
             return None
-        coverage = (
-            sum(attributed_numbers) / len(attributed_numbers)
-            if attributed_numbers
-            else None
-        )
+        coverage = sum(attributed_numbers) / len(attributed_numbers) if attributed_numbers else None
         return coverage

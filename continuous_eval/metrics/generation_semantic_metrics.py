@@ -1,3 +1,6 @@
+from typing import Any, Dict, List
+
+import pandas as pd
 import torch
 from sentence_transformers import CrossEncoder
 from transformers import BertModel, BertTokenizer
@@ -7,73 +10,134 @@ from continuous_eval.metrics.base import Metric
 # Single Metrics
 
 
+class DebertaScores:
+    def __init__(self):
+        self._model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
+
+    @property
+    def device(self):
+        return self._model.device
+
+    def calculate(self, sentence_pairs):
+        return self._model.predict(sentence_pairs)
+
+
 class BertSimilarity:
     def __init__(self):
         # Load pre-trained BERT model and tokenizer
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        self.model = BertModel.from_pretrained("bert-base-uncased")
+        self._tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        self._model = BertModel.from_pretrained("bert-base-uncased")
 
-    def calculate(self, prediction, reference):
-        # Tokenize the prediction and reference texts
-        pred_tokens = self.tokenizer.tokenize(prediction)
-        ref_tokens = self.tokenizer.tokenize(reference)
+    def _tokenize(self, data: List[Dict[str, str]]):
+        predictions = self._tokenizer([datum["prediction"] for datum in data], padding=True)
+        references = self._tokenizer([datum["reference"] for datum in data], padding=True)
+        return predictions, references
 
-        # Convert tokens to token IDs
-        pred_ids = self.tokenizer.convert_tokens_to_ids(pred_tokens)
-        ref_ids = self.tokenizer.convert_tokens_to_ids(ref_tokens)
-
-        # Convert token IDs to tensors
-        pred_tensor = torch.tensor([pred_ids])
-        ref_tensor = torch.tensor([ref_ids])
+    def batch_calculate(self, data: List[Dict[str, str]], pooler_output: bool = False):
+        predictions, references = self._tokenize(data)
 
         # Get BERT embeddings for the tokens
         with torch.no_grad():
-            pred_embedding = self.model(pred_tensor)[0].squeeze(0).mean(dim=0)
-            ref_embedding = self.model(ref_tensor)[0].squeeze(0).mean(dim=0)
+            pred_embedding = self._model(
+                torch.tensor(predictions["input_ids"]),
+                attention_mask=torch.tensor(predictions["attention_mask"]),
+            )
+            ref_embedding = self._model(
+                torch.tensor(references["input_ids"]),
+                attention_mask=torch.tensor(references["attention_mask"]),
+            )
+            if pooler_output:
+                pred_embedding = pred_embedding.pooler_output
+                ref_embedding = ref_embedding.pooler_output
+            else:
+                pred_embedding = pred_embedding[0].mean(dim=1)
+                ref_embedding = ref_embedding[0].mean(dim=1)
 
-        # Calculate cosine similarity between the embeddings
         cosine_similarity = torch.nn.CosineSimilarity(dim=0)
-        semantic_similarity = cosine_similarity(pred_embedding, ref_embedding).item()
-        semantic_similarity = max(0.0, min(semantic_similarity, 1.0))  # clip in [0, 1]
-        return {"bert_similarity": semantic_similarity}
+        semantic_similarity = cosine_similarity(pred_embedding.T, ref_embedding.T)
+        semantic_similarity = torch.clip(semantic_similarity, min=0.0, max=1.0)
+        return {"bert_similarity": semantic_similarity.tolist()}
+
+    def calculate(self, prediction: str, reference: str, pooler_output: bool = False):
+        res = self.batch_calculate(
+            [{"prediction": prediction, "reference": reference}],
+            pooler_output=pooler_output,
+        )
+        return {"bert_similarity": res["bert_similarity"][0]}
 
 
 class BertAnswerRelevance(Metric):
+    def _preprocess_dataset(self, dataset: List[Dict[str, Any]]):
+        return [{"prediction": datum["answer"], "reference": datum["question"]} for datum in dataset]
+
+    def batch_calculate(self, dataset: List[Dict[str, Any]]):
+        data = self._preprocess_dataset(dataset)
+        score = BertSimilarity().batch_calculate(data)
+        return [{"bert_answer_relevance": x} for x in score["bert_similarity"]]
+
     def calculate(self, answer, question, **kwargs):
-        return {
-            "bert_answer_relevance": BertSimilarity().calculate(answer, question)[
-                "bert_similarity"
-            ]
-        }
+        return {"bert_answer_relevance": BertSimilarity().calculate(answer, question)["bert_similarity"]}
 
 
 class BertAnswerSimilarity(Metric):
     def calculate(self, answer, ground_truths, **kwargs):
-        bert_similarity_scores = [
-            BertSimilarity().calculate(answer, gt_answer) for gt_answer in ground_truths
-        ]
-        return {
-            "bert_answer_similarity": max(
-                score["bert_similarity"] for score in bert_similarity_scores
-            )
-        }
+        bert_similarity_scores = [BertSimilarity().calculate(answer, gt_answer) for gt_answer in ground_truths]
+        return {"bert_answer_similarity": max(score["bert_similarity"] for score in bert_similarity_scores)}
 
+    def _preprocess_dataset(self, dataset: List[Dict[str, Any]]):
+        data = list()
+        ids = list()
+        for i, datum in enumerate(dataset):
+            for gt_answer in datum["ground_truths"]:
+                data.append({"prediction": datum["answer"], "reference": gt_answer})
+                ids.append(i)
+        return data, ids
 
-class DebertaScores:
-    def __init__(self):
-        self.model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
-
-    def calculate(self, sentence_pairs):
-        scores = self.model.predict(sentence_pairs)
-        return scores
+    def batch_calculate(self, dataset: List[Dict[str, Any]]):
+        data, ids = self._preprocess_dataset(dataset)
+        score = BertSimilarity().batch_calculate(data)
+        df = pd.DataFrame({"bert_answer_similarity": score["bert_similarity"], "ids": ids})
+        ret = df.groupby("ids").max()
+        return [{"bert_answer_similarity": x} for x in ret["bert_answer_similarity"]]
 
 
 class DebertaAnswerScores(Metric):
     def __init__(self, reverse: bool = False):
         self.reverse = reverse
 
+    def _ret_keys(self):
+        reverse = "reverse_" if self.reverse else ""
+        entailment_key = f"deberta_{reverse}answer_entailment"
+        contradiction_key = f"deberta_{reverse}answer_contradiction"
+        return entailment_key, contradiction_key
+
+    def batch_calculate(self, dataset: List[Dict[str, Any]]):
+        entailment_key, contradiction_key = self._ret_keys()
+        sentence_pairs = list()
+        ids = list()
+        for i, datum in enumerate(dataset):
+            for gt_answer in datum["ground_truths"]:
+                if self.reverse:
+                    # premise=ground truth => hypothesis=answer
+                    sentence_pairs.append((gt_answer, datum["answer"]))
+                else:
+                    # premise=answer => hypothesis=ground truth
+                    sentence_pairs.append((datum["answer"], gt_answer))
+                ids.append(i)
+
+        scores = DebertaScores().calculate(sentence_pairs)
+
+        # Group by 'ids' and get the score for the pair with the highest entailment
+        df = pd.DataFrame({entailment_key: scores[:, 1], contradiction_key: scores[:, 0], "ids": ids})
+        idx = df.groupby("ids")[entailment_key].idxmax()
+        return {
+            entailment_key: df.loc[idx, entailment_key].tolist(),
+            contradiction_key: df.loc[idx, contradiction_key].tolist(),
+        }
+
     def calculate(self, answer, ground_truths, **kwargs):
-        sentence_pairs = []
+        sentence_pairs = list()
+        entailment_key, contradiction_key = self._ret_keys()
 
         for gt_answer in ground_truths:
             if self.reverse:
@@ -84,17 +148,9 @@ class DebertaAnswerScores(Metric):
                 sentence_pairs.append((answer, gt_answer))
 
         scores = DebertaScores().calculate(sentence_pairs)
-
         # Get the score for the pair with the highest entailment
         scores_with_max_entailment = max(scores, key=lambda sublist: sublist[1])
-
-        if self.reverse:
-            return {
-                "deberta_reverse_answer_entailment": scores_with_max_entailment[1],
-                "deberta_reverse_answer_contradiction": scores_with_max_entailment[0],
-            }
-        else:
-            return {
-                "deberta_answer_entailment": scores_with_max_entailment[1],
-                "deberta_answer_contradiction": scores_with_max_entailment[0],
-            }
+        return {
+            entailment_key: scores_with_max_entailment[1],
+            contradiction_key: scores_with_max_entailment[0],
+        }

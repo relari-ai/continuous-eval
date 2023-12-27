@@ -1,1 +1,1 @@
-from continuous_eval.classifiers.hybrid import HybridClassifier
+from continuous_eval.classifiers.hybrid import ConformalClassifier

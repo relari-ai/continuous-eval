@@ -1,7 +1,9 @@
-from typing import Union
 import json
-import pandas as pd
 from pathlib import Path
+from typing import Union
+
+import pandas as pd
+
 from continuous_eval.datatypes import DatumField
 
 _MINIMAL_REQUIRED_COLUMNS = [
@@ -18,6 +20,11 @@ class Dataset(pd.DataFrame):
         super().__init__(data=data, index=index, columns=columns, copy=copy)
         self.validate()
 
+    def to_dict(self, *args, **kwargs):
+        if 'orient' not in kwargs:
+            kwargs['orient'] = "records"
+        return super().to_dict(*args, **kwargs)
+
     def validate(self):
         if len(self) == 0:
             raise ValueError("Dataset is empty")
@@ -30,9 +37,7 @@ class Dataset(pd.DataFrame):
             ]
         ):
             raise ValueError(
-                "The dataset should at least have one of the following columns: {}".format(
-                    _MINIMAL_REQUIRED_COLUMNS
-                )
+                "The dataset should at least have one of the following columns: {}".format(_MINIMAL_REQUIRED_COLUMNS)
             )
 
         for item in self.values:
@@ -50,30 +55,22 @@ class Dataset(pd.DataFrame):
                     raise ValueError("Ground truth answers must be a list of strings")
                 for answer in itm:
                     if not isinstance(answer, str):
-                        raise ValueError(
-                            "Ground truth answers must be a list of strings"
-                        )
+                        raise ValueError("Ground truth answers must be a list of strings")
             if DatumField.RETRIEVED_CONTEXTS.value in self.columns:
                 itm = item[self.columns.get_loc(DatumField.RETRIEVED_CONTEXTS.value)]
                 if isinstance(itm, list):
                     for ctx in itm:
                         if not isinstance(ctx, str):
-                            raise ValueError(
-                                "Retrieved context must be a list of strings or a string"
-                            )
+                            raise ValueError("Retrieved context must be a list of strings or a string")
                 elif not isinstance(itm, str):
-                    raise ValueError(
-                        "Retrieved context must be a list of strings or a string"
-                    )
+                    raise ValueError("Retrieved context must be a list of strings or a string")
             if DatumField.GROUND_TRUTH_CONTEXTS.value in self.columns:
                 itm = item[self.columns.get_loc(DatumField.GROUND_TRUTH_CONTEXTS.value)]
                 if not isinstance(itm, list):
                     raise ValueError("Ground truth context must be a list of strings")
                 for answer in itm:
                     if not isinstance(answer, str):
-                        raise ValueError(
-                            "Ground truth context must be a list of strings"
-                        )
+                        raise ValueError("Ground truth context must be a list of strings")
 
     @classmethod
     def from_jsonl(cls, path: Union[str, Path]):
@@ -83,5 +80,4 @@ class Dataset(pd.DataFrame):
 
     def to_jsonl(self, path: Union[str, Path]):
         with open(path, "w") as f:
-            for item in self.values:
-                f.write(json.dumps(item) + "\n")
+            f.write(self.to_json(orient='records', lines=True))
