@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 
@@ -40,6 +40,23 @@ class BaseEvaluator(ABC):
             raise ValueError("No results found. Did you run the evaluator?")
         agg = pd.DataFrame(BaseEvaluator._sanitize_pre_aggregate(self._results))
         return agg.mean().to_dict()
+
+    def _get_batches(self, batch_size: Optional[Union[int, float]] = None):
+        assert isinstance(batch_size, (int, float, type(None))), "batch_size must be an int, a float or None"
+
+        data = self.dataset.to_dict(orient="records")
+        if isinstance(batch_size, float):
+            assert batch_size > 0 and batch_size <= 1, "batch_size must be in (0, 1]"
+            batch_size = int(batch_size * len(data))
+        elif isinstance(batch_size, int):
+            assert batch_size > 0, "batch_size must be positive"
+            batch_size = min(batch_size, len(data))
+
+        if batch_size is None:
+            yield data
+        else:
+            for i in range(0, len(data), batch_size):
+                yield data[i : i + batch_size]
 
     @abstractmethod
     def run(self):

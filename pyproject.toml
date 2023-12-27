@@ -22,6 +22,7 @@ mapie = "^0.7.0"
 imbalanced-learn = "^0.11.0"
 pandas = "^2.1.4"
 protobuf = "^4.25.1"
+tqdm = "^4.66.1"
 
 [tool.poetry.extras]
 anthropic = ["anthropic"]
