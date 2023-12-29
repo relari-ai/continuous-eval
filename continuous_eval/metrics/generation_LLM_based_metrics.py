@@ -60,7 +60,7 @@ The statement is supported by the context, which states that photosynthesis conv
                 "user_prompt": ("Context: " + context + r"\Statement: " + answer),
             }
 
-            response = self._llm_response(prompt)
+            response = self.llm_factory.run(prompt)
             score_txt, reasoning = response.split("\n", 1)
             score = bool("yes" in score_txt.lower())
 
@@ -116,7 +116,7 @@ Use the following guidelines for evaluation:
             ),
         }
 
-        response = self._llm_response(prompt)
+        response = self.llm_factory.run(prompt)
         score_txt, reasoning = response.split("\n", 1)
         score = float(score_txt.split(":")[-1].strip())
 

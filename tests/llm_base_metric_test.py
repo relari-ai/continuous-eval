@@ -17,7 +17,7 @@ class DummyLLMMetric(LLMBasedMetric):
             ),
             "user_prompt": ("Please tell me `yes`."),
         }
-        return self._llm_response(prompt)
+        return self.llm_factory.run(prompt)
 
 
 def test_llm_based_metric():

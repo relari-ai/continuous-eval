@@ -46,7 +46,7 @@ Given the following question and context, verify if the information in the given
                 "user_prompt": ("Question: " + question + "\nContext: " + context + "\nResponse:"),
             }
 
-            content = self._llm_response(prompt)
+            content = self.llm_factory.run(prompt)
             score = "yes" in content.lower()
             scores.append(score)
 
@@ -79,28 +79,6 @@ class LLMBasedContextCoverage(LLMBasedMetric):
 
     def __str__(self):
         return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
-
-    # Redefine the _llm_response method to return the json_object response format for OpenAI
-    def _llm_response(self, prompt):
-        if isinstance(self.client, OpenAI):
-            response = self.client.chat.completions.create(
-                model=self.model,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": prompt["system_prompt"]},
-                    {"role": "user", "content": prompt["user_prompt"]},
-                ],
-                seed=0,
-                temperature=0,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
-            )
-            content = response.choices[0].message.content
-        else:
-            content = super()._llm_response(prompt)
-
-        return content
 
     def calculate(self, question, retrieved_contexts, answer, **kwargs):
         """
@@ -140,7 +118,7 @@ Given a question, context, and answer, analyze each statement in the answer and 
             "user_prompt": ("question: " + question + "\ncontext: " + context + "\nanswer: " + answer),
         }
 
-        content = self._llm_response(prompt)
+        content = self.llm_factory.run(prompt)
 
         try:
             coverage = self.extract_attributed_from_broken_json(content)
