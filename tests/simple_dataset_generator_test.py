@@ -35,20 +35,15 @@ def generate_data():
         index_dimension=1536, num_questions=num_questions, multi_hop_percentage=multi_hop_precentage
     )
     current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_csv = f"tests/data/simple_data_generator/G_{generator_llm}_Q_{num_questions}_MH%_{multi_hop_precentage}_{current_datetime}.csv"
+    output_directory = "tests/data/generated_dataset"
+    os.makedirs(output_directory, exist_ok=True)  # Create the directory if it doesn't exist
+    output_csv = (
+        f"{output_directory}/G_{generator_llm}_Q_{num_questions}_MH%_{multi_hop_precentage}_{current_datetime}.csv"
+    )
     df = pd.DataFrame(results)
     df.to_csv(output_csv, index=False)
     return output_csv
 
 
-# def evaluate_data(intermediate_csv):
-#     processor_llm = "gpt-3.5-turbo-1106"
-#     df = pd.read_csv(intermediate_csv)
-#     processed_results = SimpleDatasetGenerator.postprocess(df, processor_llm=processor_llm)
-#     df_processed = pd.DataFrame(processed_results)
-#     df_processed.to_csv(intermediate_csv[:-4] + "_processed.csv", index=False)
-
-
 output_csv = generate_data()
-output_csv = "tests/data/simple_data_generator/G_gpt-4-1106-preview_Q_20_MH%_0.2_20231228_122331.csv"
-# evaluate_data(output_csv)
+print(f"Generated: {output_csv}")
