@@ -130,3 +130,4 @@ cython_debug/
 
 # Others
 .DS_Store
+generated_dataset/
