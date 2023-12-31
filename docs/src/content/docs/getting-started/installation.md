@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: A guide in my new Starlight docs site.
+description: How to install continuous-eval
 ---
 
 ## Installation
@@ -20,9 +20,14 @@ poetry install --all-extras
 
 continuous-eval is tested on Python 3.9 and 3.11.
 
-continuous-eval supports OpenAI, Anthropic Claude and Google Cloud AI Platform Prediction.
-It requires the API keys:
+**Optional:**
+If you want to run LLM-based metrics, continuous-eval supports OpenAI, Anthropic and Google models, which require API keys:
 
 - `OPENAI_API_KEY` 
 - `ANTHROPIC_API_KEY` (optional)
-- `GOOGLE_API_KEY` (optional)
+- `GEMINI_API_KEY` (optional)
+
+```bash
+import os
+os.environ["OPENAI_API_KEY"] = "your-openai-key"
+```

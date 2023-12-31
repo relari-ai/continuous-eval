@@ -3,7 +3,7 @@ title: Retrieval Evaluator
 ---
 
 ```python
-from continuous_eval.evaluators import GenerationEvaluator
+from continuous_eval.evaluators import RetrievalEvaluator
 from continuous_eval.dataset import Dataset
 from continuous_eval.metrics import (
   PrecisionRecallF1,
