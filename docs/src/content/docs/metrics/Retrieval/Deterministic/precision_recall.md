@@ -2,15 +2,19 @@
 title: Precision/Recall/F1
 ---
 
-### Definition
-#### Precision
-\[ \text{Precision} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}} \]
+### Definitions
 
-#### Recall
-\[ \text{Recall} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}} \]
+$$
+\text{Precision} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}
+$$
 
-#### F1
-\[ \text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} \]
+$$
+\text{Recall} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}
+$$
+
+$$
+\text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+$$
 
 #### Matching Strategy
 Given that the ground truth contexts can be defined differently from the exact chunks retrieved. For example, a ground truth contexts can be a sentence that contains the information, while the contexts retrieved are uniform 512-token chunks. We have following matching strategies that determine relevance:

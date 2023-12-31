@@ -1,0 +1,5 @@
+.top-level>li>details>ul>li>details>ul>li>details>summary>div>span {
+  font-weight: normal;
+  font-family: var(--__sl-font);
+  font-size: var(--sl-text-sm);
+}

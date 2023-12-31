@@ -3,13 +3,22 @@ title: Context Coverage
 ---
 
 ### Definition
+
 Inputs: `question`, `retrieved_context` and `ground_truth_answers`
 
-\[ \text{LLM-Based Context Coverage} = \frac{\text{Number of Statements in Generated Answer Attributed to the Ground Truth Contexts}}{\text{Total Number of Statements in Generated Answer}} \]
+$$
+\text{LLM-Based Context Coverage} =
+\frac{
+  \text{Number of Statements in Generated Answer Attributed to the Ground Truth Contexts}
+}{
+  \text{Total Number of Statements in Generated Answer}
+}
+$$
 
 this metric is used to measure completeness of the retrieved contexts to generated a ground truth answer.
 
 ### Example Usage
+
 ```python
 from continuous_eval.metrics import LLMBasedContextCoverage
 
@@ -21,6 +30,7 @@ metric = LLMBasedContextCoverage(
 ```
 
 ### Sample Output
+
 ```JSON
 {
     "LLM_based_context_coverage": 0.5,

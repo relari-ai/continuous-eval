@@ -1,6 +1,8 @@
 ---
 title: Overview
 description: Overview of different types of metrics
+sidebar:
+  order: -1
 ---
 
 ## What are we measuring
@@ -8,19 +10,20 @@ description: Overview of different types of metrics
 Retrieval-augmented Generation
 We break down the pipeline into retrieval and generation because the two components have distinct functionality and requirements.
 In retrieval, we care how well the system can fetch the relevent documents to answer the question. Specifically, we care about:
--   Recall: how completely has the system retrieved all the necessary documents (More important metric!)
--   Precision: how much signal (vs. noise) did the system retrieve?
 
+- Recall: how completely has the system retrieved all the necessary documents (More important metric!)
+- Precision: how much signal (vs. noise) did the system retrieve?
 
-In generation, we care about how well the LLM answers the question. To break down:
--   Overall Correctness: how closely the answer match with an ideal reference answer?
--   Faithfulness: how well is the answer grounded on context retrieved?
--   Relevance: is the answer a direct response to the question?
--   Logic / Style / and many more aspects
+In generation, we care about how well the LLM answers the question.
+To break down:
+
+- Overall Correctness: how closely the answer match with an ideal reference answer?
+- Faithfulness: how well is the answer grounded on context retrieved?
+- Relevance: is the answer a direct response to the question?
+- Logic / Style / and many more aspects
 
 Check out our blog post below that dives deeper:
 **A Practical Guide to RAG Pipeline Evaluation:** [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893), [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
-
 
 ## Data Dependencies
 
