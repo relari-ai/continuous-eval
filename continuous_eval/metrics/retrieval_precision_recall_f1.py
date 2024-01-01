@@ -18,29 +18,26 @@ class PrecisionRecallF1(Metric):
             MatchingStrategy.EXACT_CHUNK_MATCH,
             MatchingStrategy.ROUGE_CHUNK_MATCH,
         ):
-            relevant_chunks = sum(
-                is_relevant(chunk, ground_truth_chunk, self.matching_strategy)
-                for ground_truth_chunk in ground_truth_contexts
-                for chunk in retrieved_contexts
-            )
-            precision = relevant_chunks / len(retrieved_contexts) if retrieved_contexts else 0
-            recall = relevant_chunks / len(ground_truth_contexts) if ground_truth_contexts else 0
+            ret_components = retrieved_contexts
+            gt_components = ground_truth_contexts
+
         elif self.matching_strategy in (
             MatchingStrategy.EXACT_SENTENCE_MATCH,
             MatchingStrategy.ROUGE_SENTENCE_MATCH,
         ):
-            retrieval_sentences = [sentence for chunk in retrieved_contexts for sentence in sent_tokenize(chunk)]
-            ground_truth_sentences = [sentence for chunk in ground_truth_contexts for sentence in sent_tokenize(chunk)]
-            relevant_retrieval_sentences = 0
-            hit_ground_truth_sentences = set()
-            for ret_sentence in retrieval_sentences:
-                for gt_sentence in ground_truth_sentences:
-                    if is_relevant(ret_sentence, gt_sentence, self.matching_strategy):
-                        relevant_retrieval_sentences += 1
-                        hit_ground_truth_sentences.add(gt_sentence)
-                        continue
-            precision = relevant_retrieval_sentences / len(retrieval_sentences) if retrieval_sentences else 0.0
-            recall = len(hit_ground_truth_sentences) / len(ground_truth_sentences) if ground_truth_sentences else 0.0
+            ret_components = [sentence for chunk in retrieved_contexts for sentence in sent_tokenize(chunk)]
+            gt_components = [sentence for chunk in ground_truth_contexts for sentence in sent_tokenize(chunk)]
+
+        relevant_ret_componnets = 0
+        hit_gt_components = set()
+        for ret_component in ret_components:
+            for gt_component in gt_components:
+                if is_relevant(ret_component, gt_component, self.matching_strategy):
+                    relevant_ret_componnets += 1
+                    hit_gt_components.add(gt_component)
+                    continue
+        precision = relevant_ret_componnets / len(ret_components) if ret_components else 0.0
+        recall = len(hit_gt_components) / len(gt_components) if gt_components else 0.0
 
         try:
             f1 = 2 * (precision * recall) / (precision + recall)
