@@ -214,28 +214,6 @@ class SimpleDatasetGenerator:
         num_single_hop_tries = 0
         num_multi_hop_tries = 0
 
-        while len(single_hop_questions) < single_hop_target:
-            if num_single_hop_tries >= single_hop_target * max_try_ratio:
-                print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
-                break
-            try:
-                chunks = self._sample_from_vectorstore(
-                    embedding_vector_size=embedding_vector_size,
-                    num_seed_vectors=num_seed_vectors,
-                    top_k=1,
-                )
-                q_a_c_list = self._generate_q_a(
-                    chunks=chunks,
-                    multi_hop=False,
-                    questions_to_generate=1,
-                )
-                single_hop_questions.extend(q_a_c_list)
-                num_single_hop_tries += 1
-            except Exception as e:
-                print(f"Error: {e}")
-                num_single_hop_tries += 1
-                continue
-
         while len(multi_hop_questions) < multi_hop_target:
             if num_multi_hop_tries >= multi_hop_target * max_try_ratio:
                 logging.info(
@@ -258,6 +236,31 @@ class SimpleDatasetGenerator:
             except Exception as e:
                 print(f"Error: {e}")
                 num_multi_hop_tries += 1
+                continue
+
+        multi_hop_gap = multi_hop_target - len(multi_hop_questions)
+        single_hop_target += multi_hop_gap
+
+        while len(single_hop_questions) < single_hop_target:
+            if num_single_hop_tries >= single_hop_target * max_try_ratio:
+                print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
+                break
+            try:
+                chunks = self._sample_from_vectorstore(
+                    embedding_vector_size=embedding_vector_size,
+                    num_seed_vectors=num_seed_vectors,
+                    top_k=1,
+                )
+                q_a_c_list = self._generate_q_a(
+                    chunks=chunks,
+                    multi_hop=False,
+                    questions_to_generate=1,
+                )
+                single_hop_questions.extend(q_a_c_list)
+                num_single_hop_tries += 1
+            except Exception as e:
+                print(f"Error: {e}")
+                num_single_hop_tries += 1
                 continue
 
         return Dataset(single_hop_questions + multi_hop_questions)
