@@ -17,7 +17,7 @@ class GenerationEvaluator(BaseEvaluator):
     ):
         super().__init__(dataset=dataset, metrics=metrics)
 
-    def run(self, batch_size: int = None, quiet: bool = False):
+    def run(self, batch_size: int = 32, quiet: bool = False):
         batches = self._get_batches(batch_size=batch_size)
         results = {id(metric): list() for metric in self.metrics}
 

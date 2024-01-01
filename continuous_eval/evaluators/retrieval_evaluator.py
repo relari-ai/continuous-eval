@@ -19,7 +19,7 @@ class RetrievalEvaluator(BaseEvaluator):
     def run(
         self,
         k: int = None,
-        batch_size: Optional[Union[int, float]] = None,
+        batch_size: Optional[Union[int, float]] = 32,
         quiet: bool = False,
     ):
         assert k is None or isinstance(k, int) and k > 0, "K must be a positive integer or None."

@@ -95,7 +95,6 @@ class LLMFactory:
             )
             content = response.completion
         elif isinstance(self.client, google_genai.GenerativeModel):
-
             generation_config = {
                 "temperature": temperature,
                 "top_p": 1,

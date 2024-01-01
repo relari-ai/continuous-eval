@@ -4,6 +4,9 @@ import random
 from langchain.vectorstores import VectorStore
 
 from continuous_eval.llm_factory import LLMFactory
+from continuous_eval import Dataset
+import logging
+import numpy as np
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -47,82 +50,79 @@ If an answer cannot be reasonably provided using the context alone, respond with
 class SimpleDatasetGenerator:
     def __init__(
         self,
-        vector_store_index,
+        vector_store_index: VectorStore,
         generator_llm="gpt-3.5-turbo-1106",
-        # processor_llm=None,
     ):
         if isinstance(vector_store_index, VectorStore):
+            if not (
+                hasattr(vector_store_index, "similarity_search_by_vector")
+                or hasattr(vector_store_index, "similarity_search_by_vector_with_score")
+            ):
+                raise ValueError(
+                    "VectorDB error:"
+                    "Could be not find similarity_search_by_vector(_with_score) for vector_store_index. "
+                    "Check: https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/vectorstores "
+                )
             self.vector_store_index = vector_store_index
         else:
             raise ValueError(
                 f"Only Langchain VectorStore is supported for Simple Dataset Generator.\
                              Check: https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/vectorstores"
             )
-        self.generator_llm = generator_llm
+        self._llm = LLMFactory(model=generator_llm)
 
-    def _sample_from_vectorstore(self, index_dimension, num_seed_vectors=1, top_k=3):
+    def _sample_from_vectorstore(
+        self, embedding_vector_size: int, num_seed_vectors: int = 1, top_k: int = 3
+    ):
         # Sample from vectorstore based on random vectors
-        random_vectors = []
-
-        for _ in range(num_seed_vectors):
-            vector = [random.random() for _ in range(index_dimension)]
-            random_vectors.append(vector)
-
+        random_vectors = np.random.rand(num_seed_vectors, embedding_vector_size)
         sampled_chunks = []
         for rv in random_vectors:
             try:
                 docs = self.vector_store_index.similarity_search_by_vector(
-                    embedding=rv,
+                    embedding=rv.tolist(),
                     k=top_k,
                 )
             except Exception:
                 try:
-                    docs_scores = self.vector_store_index.similarity_search_by_vector_with_score(
-                        embedding=rv,
-                        k=top_k,
+                    docs_scores = (
+                        self.vector_store_index.similarity_search_by_vector_with_score(
+                            embedding=rv.tolist(),
+                            k=top_k,
+                        )
                     )
                     docs = [d for d, _ in docs_scores]
                 except Exception as e:
-                    raise ValueError(
-                        f"VectorDB error: {e}.\n\
-                        Could be not finding similarity_search_by_vector(_with_score) for vectorDB.\
-                        Check: https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/vectorstores"
-                    )
+                    raise RuntimeError(f"Failed to sample from vectorstore: {e}")
+            # Do not add if sampled aleady
+            sampled_chunks.extend([doc for doc in docs if doc not in sampled_chunks])
+        return sampled_chunks
 
-            sampled_chunks.extend(docs)
-
-        # remove duplicates
-        unique_chunks = []
-        for c in sampled_chunks:
-            if c not in unique_chunks:
-                unique_chunks.append(c)
-        return unique_chunks
-
-    def _generate_q_a(self, chunks, multi_hop, questions_to_generate):
+    def _generate_q_a(self, chunks, multi_hop: bool, questions_to_generate: int):
         # Generate questions based on the sampled chunks
         prompt_list = []
         if multi_hop:
-            assert len(chunks) >= 2, "Must input more than 2 chunks for multi-hop questions."
+            assert (
+                len(chunks) >= 2
+            ), "Must input more than 2 chunks for multi-hop questions."
             # generate random unique pairs from the chunks
             chunk_pairs = list(itertools.combinations(chunks, 2))
             multi_hop_chunk_list = random.sample(chunk_pairs, questions_to_generate)
 
             for c in multi_hop_chunk_list:
-
                 context = ""
                 for i in range(len(c)):
                     context += "Context_" + str(i + 1) + ": " + c[i].page_content + "\n"
 
-                Multi_Hop_Prompt_List = [
+                multi_hop_prompt_list = [
                     ("Multi Hop Reasoning", MULTI_HOP_REASONING_PROMPT),
                     ("Multi Hop Fact Seeking", MULTI_HOP_FACT_PROMPT),
                 ]
+                multi_hop_prompt_weights = [0.5, 0.5]
 
-                Multi_Hop_Prompt_Weights = [
-                    0.5,
-                    0.5,
-                ]
-                prompt_type, system_prompt = random.choices(Multi_Hop_Prompt_List, Multi_Hop_Prompt_Weights)[0]
+                prompt_type, system_prompt = random.choices(
+                    multi_hop_prompt_list, multi_hop_prompt_weights
+                )[0]
 
                 prompt = {
                     "system_prompt": (system_prompt),
@@ -132,15 +132,14 @@ class SimpleDatasetGenerator:
         else:  # single hop
             for c in chunks:
                 context = c.page_content
-                Single_Hop_Prompt_List = [
+                single_hop_prompt_list = [
                     ("Single Hop Reasoning", SINGLE_HOP_REASONING_PROMPT),
                     ("Single Hop Fact Seeking", SINGLE_HOP_FACT_PROMPT),
                 ]
-                Single_Hop_Prompt_Weights = [
-                    0.5,
-                    0.5,
-                ]
-                prompt_type, system_prompt = random.choices(Single_Hop_Prompt_List, Single_Hop_Prompt_Weights)[0]
+                single_hop_prompt_weights = [0.5, 0.5]
+                prompt_type, system_prompt = random.choices(
+                    single_hop_prompt_list, single_hop_prompt_weights
+                )[0]
                 prompt = {
                     "system_prompt": (system_prompt),
                     "user_prompt": ("Context:\n" + context + "\nQuestion: "),
@@ -148,29 +147,32 @@ class SimpleDatasetGenerator:
                 prompt_list.append({"prompt": prompt, "question_type": prompt_type})
 
         q_a_c_list = []
-        llm_generator = LLMFactory(model=self.generator_llm)
+
         for i in range(len(prompt_list)):
             try:
-                question = llm_generator.run(
+                question = self._llm.run(
                     prompt=prompt_list[i]["prompt"],
                     temperature=0.9,
                 )
                 if "generation error" in question.lower():
-                    raise ValueError(f"Failed to generate question based on prompt {prompt_list[i]['prompt']}")
+                    raise ValueError(
+                        f"Failed to generate question based on prompt {prompt_list[i]['prompt']}"
+                    )
 
-                if multi_hop:
-                    context_list = multi_hop_chunk_list[i]
-                else:
-                    context_list = [chunks[i]]
+                context_list = multi_hop_chunk_list[i] if multi_hop else [chunks[i]]
                 context_texts = []
                 context_metadata = []
                 for c in context_list:
                     # Filter out irrelevant sentences
-                    extracted_context = llm_generator.run(
+                    extracted_context = self._llm.run(
                         prompt={
                             "system_prompt": (CONTEXT_EXTRACTION_PROMPT),
                             "user_prompt": (
-                                "Context:\n" + c.page_content + "\nQuestion:\n" + question + "\nExtracted Sentences: "
+                                "Context:\n"
+                                + c.page_content
+                                + "\nQuestion:\n"
+                                + question
+                                + "\nExtracted Sentences: "
                             ),
                         },
                         temperature=0,
@@ -182,11 +184,15 @@ class SimpleDatasetGenerator:
                     context_texts.append(extracted_context)
                     context_metadata.append(c.metadata)
 
-                answer = llm_generator.run(
+                answer = self._llm.run(
                     prompt={
                         "system_prompt": (ANSWER_PROMPT),
                         "user_prompt": (
-                            "Context:\n" + "\n".join(context_texts) + "\nQuestion:\n" + question + "\nAnswer: "
+                            "Context:\n"
+                            + "\n".join(context_texts)
+                            + "\nQuestion:\n"
+                            + question
+                            + "\nAnswer: "
                         ),
                     },
                     temperature=0,
@@ -205,17 +211,24 @@ class SimpleDatasetGenerator:
                     }
                 )
             except Exception as e:
-                # print(f"Error: {e}")
                 continue
         return q_a_c_list
 
     def generate(
         self,
-        index_dimension,
+        embedding_vector_size: int,
         num_questions: int = 10,
         multi_hop_percentage: float = 0.2,
         max_try_ratio: int = 3,
-    ):
+        num_seed_vectors: int = 1,
+    ) -> Dataset:
+        assert embedding_vector_size > 0, "embedding_vector_size must be positive"
+        assert num_questions > 0, "num_questions must be positive"
+        assert (
+            multi_hop_percentage >= 0 and multi_hop_percentage <= 1
+        ), "multi_hop_percentage must be in [0, 1]"
+        assert max_try_ratio > 0, "max_try_ratio must be positive"
+        assert num_seed_vectors > 0, "num_seed_vectors must be positive"
         multi_hop_target = int(num_questions * multi_hop_percentage)
         single_hop_target = num_questions - multi_hop_target
         multi_hop_questions = []
@@ -225,10 +238,16 @@ class SimpleDatasetGenerator:
 
         while len(single_hop_questions) < single_hop_target:
             if num_single_hop_tries >= single_hop_target * max_try_ratio:
-                print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
+                print(
+                    f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries."
+                )
                 break
             try:
-                chunks = self._sample_from_vectorstore(index_dimension=index_dimension, num_seed_vectors=1, top_k=1)
+                chunks = self._sample_from_vectorstore(
+                    embedding_vector_size=embedding_vector_size,
+                    num_seed_vectors=num_seed_vectors,
+                    top_k=1,
+                )
                 q_a_c_list = self._generate_q_a(
                     chunks=chunks,
                     multi_hop=False,
@@ -243,10 +262,16 @@ class SimpleDatasetGenerator:
 
         while len(multi_hop_questions) < multi_hop_target:
             if num_multi_hop_tries >= multi_hop_target * max_try_ratio:
-                print(f"Generated {len(multi_hop_questions)} multi hop questions after {num_multi_hop_tries} tries.")
+                logging.info(
+                    f"Generated {len(multi_hop_questions)} multi hop questions after {num_multi_hop_tries} tries."
+                )
                 break
             try:
-                chunks = self._sample_from_vectorstore(index_dimension=index_dimension, num_seed_vectors=1, top_k=3)
+                chunks = self._sample_from_vectorstore(
+                    embedding_vector_size=embedding_vector_size,
+                    num_seed_vectors=num_seed_vectors,
+                    top_k=3,
+                )
                 q_a_c_list = self._generate_q_a(
                     chunks=chunks,
                     multi_hop=True,
@@ -259,16 +284,4 @@ class SimpleDatasetGenerator:
                 num_multi_hop_tries += 1
                 continue
 
-        print(f"{'Results':<10} | {'Target':<10} | {'Generated':<10} | {'Tries':<10}")
-        print(f"{'-'*50}")
-        print(
-            f"{'Single Hop':<10} | {single_hop_target:<10} | {len(single_hop_questions):<10} | {num_single_hop_tries:<10}"
-        )
-        print(
-            f"{'Multi Hop':<10} | {multi_hop_target:<10} | {len(multi_hop_questions):<10} | {num_multi_hop_tries:<10}"
-        )
-        print(
-            f"{'Total':<10} | {num_questions:<10} | {len(single_hop_questions) + len(multi_hop_questions):<10} | {num_single_hop_tries + num_multi_hop_tries:<10}"
-        )
-
-        return single_hop_questions + multi_hop_questions
+        return Dataset(single_hop_questions + multi_hop_questions)
