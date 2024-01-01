@@ -1,10 +1,6 @@
 from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.metrics import (
-    MatchingStrategy,
-    PrecisionRecallF1,
-    RankedRetrievalMetrics,
-)
 from continuous_eval.evaluators import RetrievalEvaluator
+from continuous_eval.metrics import MatchingStrategy, PrecisionRecallF1, RankedRetrievalMetrics
 
 retrieval = example_data_downloader("retrieval")
 

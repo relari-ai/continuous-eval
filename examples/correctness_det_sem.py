@@ -1,24 +1,15 @@
 from time import perf_counter
-from continuous_eval import Dataset
-from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.evaluators import GenerationEvaluator
-from continuous_eval.metrics import (
-    DeterministicAnswerRelevance,
-    DebertaAnswerScores,
-)
 
 import numpy as np
 import pandas as pd
 
+from continuous_eval import Dataset
 from continuous_eval.classifiers import ConformalClassifier
 from continuous_eval.classifiers.utils import eval_prediction
+from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.datatypes import DataSplit, SplitRatios
-from continuous_eval import Dataset
 from continuous_eval.evaluators import GenerationEvaluator
-from continuous_eval.metrics import (
-    DeterministicAnswerRelevance,
-)
-
+from continuous_eval.metrics import DebertaAnswerScores, DeterministicAnswerRelevance
 
 dataset = example_data_downloader("correctness")
 dataset = dataset[dataset["annotation"] != "refuse-to-answer"]

@@ -6,7 +6,12 @@ from continuous_eval.metrics.base import EVAL_LLM, LLMBasedMetric
 
 
 class LLMBasedContextPrecision(LLMBasedMetric):
-    def __init__(self, model=EVAL_LLM, use_few_shot: bool = True, log_relevance_by_context: bool = False):
+    def __init__(
+        self,
+        model=EVAL_LLM,
+        use_few_shot: bool = True,
+        log_relevance_by_context: bool = False,
+    ):
         super().__init__(model)
         self.use_few_shot = use_few_shot
         self.log_relevance_by_context = log_relevance_by_context

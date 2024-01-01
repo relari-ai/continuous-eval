@@ -8,7 +8,7 @@ from continuous_eval.metrics.base import Metric
 
 # Single Metrics
 def _download_punkt():
-    nltk.download('punkt', quiet=True)
+    nltk.download("punkt", quiet=True)
 
 
 class TokenOverlap(Metric):

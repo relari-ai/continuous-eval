@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -6,6 +7,8 @@ from sentence_transformers import CrossEncoder
 from transformers import BertModel, BertTokenizer
 
 from continuous_eval.metrics.base import Metric
+
+warnings.filterwarnings("ignore")
 
 # Single Metrics
 

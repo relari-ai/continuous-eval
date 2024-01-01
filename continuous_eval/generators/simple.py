@@ -1,12 +1,12 @@
 import itertools
+import logging
 import random
 
+import numpy as np
 from langchain.vectorstores import VectorStore
 
-from continuous_eval.llm_factory import LLMFactory
 from continuous_eval import Dataset
-import logging
-import numpy as np
+from continuous_eval.llm_factory import LLMFactory
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -71,9 +71,7 @@ class SimpleDatasetGenerator:
             )
         self._llm = LLMFactory(model=generator_llm)
 
-    def _sample_from_vectorstore(
-        self, embedding_vector_size: int, num_seed_vectors: int = 1, top_k: int = 3
-    ):
+    def _sample_from_vectorstore(self, embedding_vector_size: int, num_seed_vectors: int = 1, top_k: int = 3):
         # Sample from vectorstore based on random vectors
         random_vectors = np.random.rand(num_seed_vectors, embedding_vector_size)
         sampled_chunks = []
@@ -85,11 +83,9 @@ class SimpleDatasetGenerator:
                 )
             except Exception:
                 try:
-                    docs_scores = (
-                        self.vector_store_index.similarity_search_by_vector_with_score(
-                            embedding=rv.tolist(),
-                            k=top_k,
-                        )
+                    docs_scores = self.vector_store_index.similarity_search_by_vector_with_score(
+                        embedding=rv.tolist(),
+                        k=top_k,
                     )
                     docs = [d for d, _ in docs_scores]
                 except Exception as e:
@@ -102,9 +98,7 @@ class SimpleDatasetGenerator:
         # Generate questions based on the sampled chunks
         prompt_list = []
         if multi_hop:
-            assert (
-                len(chunks) >= 2
-            ), "Must input more than 2 chunks for multi-hop questions."
+            assert len(chunks) >= 2, "Must input more than 2 chunks for multi-hop questions."
             # generate random unique pairs from the chunks
             chunk_pairs = list(itertools.combinations(chunks, 2))
             multi_hop_chunk_list = random.sample(chunk_pairs, questions_to_generate)
@@ -120,9 +114,7 @@ class SimpleDatasetGenerator:
                 ]
                 multi_hop_prompt_weights = [0.5, 0.5]
 
-                prompt_type, system_prompt = random.choices(
-                    multi_hop_prompt_list, multi_hop_prompt_weights
-                )[0]
+                prompt_type, system_prompt = random.choices(multi_hop_prompt_list, multi_hop_prompt_weights)[0]
 
                 prompt = {
                     "system_prompt": (system_prompt),
@@ -137,9 +129,7 @@ class SimpleDatasetGenerator:
                     ("Single Hop Fact Seeking", SINGLE_HOP_FACT_PROMPT),
                 ]
                 single_hop_prompt_weights = [0.5, 0.5]
-                prompt_type, system_prompt = random.choices(
-                    single_hop_prompt_list, single_hop_prompt_weights
-                )[0]
+                prompt_type, system_prompt = random.choices(single_hop_prompt_list, single_hop_prompt_weights)[0]
                 prompt = {
                     "system_prompt": (system_prompt),
                     "user_prompt": ("Context:\n" + context + "\nQuestion: "),
@@ -155,9 +145,7 @@ class SimpleDatasetGenerator:
                     temperature=0.9,
                 )
                 if "generation error" in question.lower():
-                    raise ValueError(
-                        f"Failed to generate question based on prompt {prompt_list[i]['prompt']}"
-                    )
+                    raise ValueError(f"Failed to generate question based on prompt {prompt_list[i]['prompt']}")
 
                 context_list = multi_hop_chunk_list[i] if multi_hop else [chunks[i]]
                 context_texts = []
@@ -168,11 +156,7 @@ class SimpleDatasetGenerator:
                         prompt={
                             "system_prompt": (CONTEXT_EXTRACTION_PROMPT),
                             "user_prompt": (
-                                "Context:\n"
-                                + c.page_content
-                                + "\nQuestion:\n"
-                                + question
-                                + "\nExtracted Sentences: "
+                                "Context:\n" + c.page_content + "\nQuestion:\n" + question + "\nExtracted Sentences: "
                             ),
                         },
                         temperature=0,
@@ -188,11 +172,7 @@ class SimpleDatasetGenerator:
                     prompt={
                         "system_prompt": (ANSWER_PROMPT),
                         "user_prompt": (
-                            "Context:\n"
-                            + "\n".join(context_texts)
-                            + "\nQuestion:\n"
-                            + question
-                            + "\nAnswer: "
+                            "Context:\n" + "\n".join(context_texts) + "\nQuestion:\n" + question + "\nAnswer: "
                         ),
                     },
                     temperature=0,
@@ -224,9 +204,7 @@ class SimpleDatasetGenerator:
     ) -> Dataset:
         assert embedding_vector_size > 0, "embedding_vector_size must be positive"
         assert num_questions > 0, "num_questions must be positive"
-        assert (
-            multi_hop_percentage >= 0 and multi_hop_percentage <= 1
-        ), "multi_hop_percentage must be in [0, 1]"
+        assert multi_hop_percentage >= 0 and multi_hop_percentage <= 1, "multi_hop_percentage must be in [0, 1]"
         assert max_try_ratio > 0, "max_try_ratio must be positive"
         assert num_seed_vectors > 0, "num_seed_vectors must be positive"
         multi_hop_target = int(num_questions * multi_hop_percentage)
@@ -238,9 +216,7 @@ class SimpleDatasetGenerator:
 
         while len(single_hop_questions) < single_hop_target:
             if num_single_hop_tries >= single_hop_target * max_try_ratio:
-                print(
-                    f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries."
-                )
+                print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
                 break
             try:
                 chunks = self._sample_from_vectorstore(
