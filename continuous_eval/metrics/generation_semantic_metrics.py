@@ -8,7 +8,7 @@ from transformers import BertModel, BertTokenizer
 
 from continuous_eval.metrics.base import Metric
 
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 
 # Single Metrics
 
@@ -115,6 +115,7 @@ class DebertaAnswerScores(Metric):
         return entailment_key, contradiction_key
 
     def batch_calculate(self, dataset: List[Dict[str, Any]]):
+        warnings.filterwarnings("ignore", category=UserWarning)
         entailment_key, contradiction_key = self._ret_keys()
         sentence_pairs = list()
         ids = list()
@@ -142,6 +143,7 @@ class DebertaAnswerScores(Metric):
         ]
 
     def calculate(self, answer, ground_truths, **kwargs):
+        warnings.filterwarnings("ignore", category=UserWarning)
         sentence_pairs = list()
         entailment_key, contradiction_key = self._ret_keys()
 
