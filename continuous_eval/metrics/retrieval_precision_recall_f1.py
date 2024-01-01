@@ -31,13 +31,16 @@ class PrecisionRecallF1(Metric):
         ):
             retrieval_sentences = [sentence for chunk in retrieved_contexts for sentence in sent_tokenize(chunk)]
             ground_truth_sentences = [sentence for chunk in ground_truth_contexts for sentence in sent_tokenize(chunk)]
-            relevant_sentences = sum(
-                is_relevant(retrieved_sentence, gt_sentence, self.matching_strategy)
-                for gt_sentence in ground_truth_sentences
-                for retrieved_sentence in retrieval_sentences
-            )
-            precision = relevant_sentences / len(retrieval_sentences) if retrieval_sentences else 0.0
-            recall = relevant_sentences / len(ground_truth_sentences) if ground_truth_sentences else 0.0
+            relevant_retrieval_sentences = 0
+            hit_ground_truth_sentences = set()
+            for ret_sentence in retrieval_sentences:
+                for gt_sentence in ground_truth_sentences:
+                    if is_relevant(ret_sentence, gt_sentence, self.matching_strategy):
+                        relevant_retrieval_sentences += 1
+                        hit_ground_truth_sentences.add(gt_sentence)
+                        continue
+            precision = relevant_retrieval_sentences / len(retrieval_sentences) if retrieval_sentences else 0.0
+            recall = len(hit_ground_truth_sentences) / len(ground_truth_sentences) if ground_truth_sentences else 0.0
 
         try:
             f1 = 2 * (precision * recall) / (precision + recall)
