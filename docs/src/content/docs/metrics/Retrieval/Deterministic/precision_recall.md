@@ -1,5 +1,5 @@
 ---
-title: Precision/Recall/F1
+title: Context Precision & Recall
 ---
 
 ### Definitions
@@ -32,6 +32,7 @@ $$
 This is because a retrieval system is only acceptable for generation if there is confidence that the retrieved context is complete enough to answer the question
 
 :::
+
 
 ##### Matching Strategy
 
@@ -79,7 +80,7 @@ Given that the ground truth contexts can be defined differently from the exact c
 
 ### Example Usage
 
-Required data items: `retrieved_context`, `ground_truth_contexts`
+Required data items: `retrieved_contexts`, `ground_truth_contexts`
 
 ```python
 from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
@@ -103,8 +104,14 @@ print(metric.calculate(**datum))
 
 ```JSON
 {
-    'precision': 0.5, 
-    'recall': 1.0, 
-    'f1': 0.6666666666666666
+    'context_precision': 0.5, 
+    'context_recall': 1.0, 
+    'context_f1': 0.6666666666666666
 }
 ```
+
+:::note
+
+**You can run Precision / Recall / F1 @ top K** to see retrieval performance at the top K chunks over a dataset.
+Check out [Evaluator]() for examples
+:::

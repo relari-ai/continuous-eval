@@ -1,8 +1,10 @@
 ---
-title: Ranked Metrics
+title: Ranked-Aware Metrics
 ---
 
 ### Definitions
+
+Rank-aware metrics takes into account the order in which the contexts are retrieved.
 
 **Average Precision (AP)** measures all relevant chunks retrieved and calculates weighted score. Mean of AP across dataset is frequently referred to as **MAP**.
 
@@ -34,7 +36,7 @@ Please checkout explanation for Matching strategy in [Matching Strategy](/../pre
 
 ### Example Usage
 
-Required data items: `retrieved_context`, `ground_truth_contexts`
+Required data items: `retrieved_contexts`, `ground_truth_contexts`
 
 ```python
 from continuous_eval.metrics import RankedRetrievalMetrics, RougeChunkMatch
@@ -58,8 +60,14 @@ print(metric.calculate(**datum))
 
 ```JSON
 {
-    'Average Precision': 0.5, 
-    'Reciprocal Rank': 0.5, 
+    'average_precision': 0.5, 
+    'reciprocal_rank': 0.5, 
     'NDCG': 0.6309297535714574
 }
 ```
+
+:::note
+
+**You can calculate aggregate metrics such as MAP, MRR (@ top K chunks) over a dataset** to see aggregate rank-aware retrieval performance.
+Check out [Evaluator]() for examples
+:::
