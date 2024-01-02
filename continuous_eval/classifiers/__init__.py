@@ -1,1 +1,1 @@
-from continuous_eval.classifiers.hybrid import ConformalClassifier
+from continuous_eval.classifiers.ensemble import EnsembleMetric

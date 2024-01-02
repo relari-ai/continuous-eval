@@ -3,8 +3,7 @@ from time import perf_counter
 import numpy as np
 import pandas as pd
 
-from continuous_eval import Dataset
-from continuous_eval.classifiers import ConformalClassifier
+from continuous_eval.classifiers import EnsembleMetric
 from continuous_eval.classifiers.utils import eval_prediction
 from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.datatypes import DataSplit, SplitRatios
@@ -43,7 +42,7 @@ datasplit = DataSplit(
     ],
     oversample=True,
 )
-clf = ConformalClassifier(training=datasplit.train, calibration=datasplit.calibration)
+clf = EnsembleMetric(training=datasplit.train, calibration=datasplit.calibration)
 y_hat, y_set = clf.predict(datasplit.test.X)
 num_undecided = np.sum(np.all(y_set, axis=1))
 print(eval_prediction(datasplit.test.y, y_hat))

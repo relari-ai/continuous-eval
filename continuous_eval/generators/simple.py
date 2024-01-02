@@ -190,7 +190,7 @@ class SimpleDatasetGenerator:
                         "question_type": prompt_list[i]["question_type"],
                     }
                 )
-            except Exception as e:
+            except Exception:
                 continue
         return q_a_c_list
 
@@ -207,13 +207,13 @@ class SimpleDatasetGenerator:
         assert multi_hop_percentage >= 0 and multi_hop_percentage <= 1, "multi_hop_percentage must be in [0, 1]"
         assert max_try_ratio > 0, "max_try_ratio must be positive"
         assert num_seed_vectors > 0, "num_seed_vectors must be positive"
-        multi_hop_target = int(num_questions * multi_hop_percentage)
-        single_hop_target = num_questions - multi_hop_target
+
         multi_hop_questions = []
         single_hop_questions = []
         num_single_hop_tries = 0
         num_multi_hop_tries = 0
 
+        multi_hop_target = int(num_questions * multi_hop_percentage)
         while len(multi_hop_questions) < multi_hop_target:
             if num_multi_hop_tries >= multi_hop_target * max_try_ratio:
                 logging.info(
@@ -238,9 +238,7 @@ class SimpleDatasetGenerator:
                 num_multi_hop_tries += 1
                 continue
 
-        multi_hop_gap = multi_hop_target - len(multi_hop_questions)
-        single_hop_target += multi_hop_gap
-
+        single_hop_target = num_questions - len(multi_hop_questions)
         while len(single_hop_questions) < single_hop_target:
             if num_single_hop_tries >= single_hop_target * max_try_ratio:
                 print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
@@ -263,4 +261,8 @@ class SimpleDatasetGenerator:
                 num_single_hop_tries += 1
                 continue
 
-        return Dataset(single_hop_questions + multi_hop_questions)
+        dataset = Dataset(single_hop_questions + multi_hop_questions)
+        if len(dataset) < num_questions:
+            raise Warning(f"Could not generate enough questions. Generated {len(dataset)} questions.")
+
+        return dataset

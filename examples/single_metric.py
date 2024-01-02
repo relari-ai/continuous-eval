@@ -1,6 +1,21 @@
-from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.metrics import MatchingStrategy, PrecisionRecallF1
+from continuous_eval import Dataset
+from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 
-retrieval = example_data_downloader("retrieval")
-metric = PrecisionRecallF1(MatchingStrategy.EXACT_SENTENCE_MATCH)
-print(metric.calculate(**retrieval.datum(0)))
+# Let's create a dataset
+q = {
+    "question": "What is the capital of France?",
+    "retrieved_contexts": [
+        "Paris is the largest city in France.",
+        "Lyon is a major city in France.",
+    ],
+    "ground_truth_contexts": ["Paris is the capital of France."],
+    "answer": "Paris",
+    "ground_truths": ["Paris"],
+}
+dataset = Dataset([q])
+
+# Let's initialize the metric
+metric = PrecisionRecallF1(RougeChunkMatch())
+
+# Let's calculate the metric for the first datum
+print(metric.calculate(**dataset.datum(0)))  # alternatively `metric.calculate(**q)`

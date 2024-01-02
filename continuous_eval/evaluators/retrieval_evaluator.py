@@ -5,14 +5,14 @@ from tqdm import tqdm
 
 from continuous_eval.dataset import Dataset
 from continuous_eval.evaluators.base_evaluator import BaseEvaluator
-from continuous_eval.metrics import MatchingStrategy, Metric, PrecisionRecallF1
+from continuous_eval.metrics import Metric
 
 
 class RetrievalEvaluator(BaseEvaluator):
     def __init__(
         self,
         dataset: Dataset,
-        metrics: List[Metric] = [PrecisionRecallF1(MatchingStrategy.EXACT_CHUNK_MATCH)],
+        metrics: List[Metric],
     ):
         super().__init__(dataset=dataset, metrics=metrics)
 

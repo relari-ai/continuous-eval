@@ -20,6 +20,10 @@ class Dataset(pd.DataFrame):
         super().__init__(data=data, index=index, columns=columns, copy=copy)
         self.validate()
 
+    def iterate(self):
+        for _, row in self.iterrows():
+            yield row.to_dict()
+
     def datum(self, index):
         return self.iloc[index].to_dict()
 
@@ -40,9 +44,7 @@ class Dataset(pd.DataFrame):
             ]
         ):
             raise ValueError(
-                "The dataset should at least have one of the following columns: {}".format(
-                    _MINIMAL_REQUIRED_COLUMNS
-                )
+                "The dataset should at least have one of the following columns: {}".format(_MINIMAL_REQUIRED_COLUMNS)
             )
 
         for item in self.values:
@@ -60,30 +62,22 @@ class Dataset(pd.DataFrame):
                     raise ValueError("Ground truth answers must be a list of strings")
                 for answer in itm:
                     if not isinstance(answer, str):
-                        raise ValueError(
-                            "Ground truth answers must be a list of strings"
-                        )
+                        raise ValueError("Ground truth answers must be a list of strings")
             if DatumField.RETRIEVED_CONTEXTS.value in self.columns:
                 itm = item[self.columns.get_loc(DatumField.RETRIEVED_CONTEXTS.value)]
                 if isinstance(itm, list):
                     for ctx in itm:
                         if not isinstance(ctx, str):
-                            raise ValueError(
-                                "Retrieved context must be a list of strings or a string"
-                            )
+                            raise ValueError("Retrieved context must be a list of strings or a string")
                 elif not isinstance(itm, str):
-                    raise ValueError(
-                        "Retrieved context must be a list of strings or a string"
-                    )
+                    raise ValueError("Retrieved context must be a list of strings or a string")
             if DatumField.GROUND_TRUTH_CONTEXTS.value in self.columns:
                 itm = item[self.columns.get_loc(DatumField.GROUND_TRUTH_CONTEXTS.value)]
                 if not isinstance(itm, list):
                     raise ValueError("Ground truth context must be a list of strings")
                 for answer in itm:
                     if not isinstance(answer, str):
-                        raise ValueError(
-                            "Ground truth context must be a list of strings"
-                        )
+                        raise ValueError("Ground truth context must be a list of strings")
 
     @classmethod
     def from_jsonl(cls, path: Union[str, Path]):
