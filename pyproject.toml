@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "continuous_eval"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9,<3.12"
 python-dotenv = "^1.0.0"
 nltk = "^3.8.1"
 rouge = "^1.0.1"
