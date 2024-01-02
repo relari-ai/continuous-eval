@@ -1,11 +1,11 @@
 from nltk.tokenize import sent_tokenize
 
 from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.retrieval_matching_strategy import MatchingStrategy, MatchingStrategyType
+from continuous_eval.metrics.retrieval_matching_strategy import ExactChunkMatch, MatchingStrategy, MatchingStrategyType
 
 
 class PrecisionRecallF1(Metric):
-    def __init__(self, matching_strategy: MatchingStrategy):
+    def __init__(self, matching_strategy: MatchingStrategy = ExactChunkMatch()):
         super().__init__()
         assert isinstance(
             matching_strategy, MatchingStrategy

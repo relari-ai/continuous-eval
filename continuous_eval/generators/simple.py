@@ -6,7 +6,7 @@ import numpy as np
 from langchain.vectorstores import VectorStore
 
 from continuous_eval import Dataset
-from continuous_eval.llm_factory import LLMFactory
+from continuous_eval.llm_factory import LLMFactory, LLMInterface
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -51,7 +51,7 @@ class SimpleDatasetGenerator:
     def __init__(
         self,
         vector_store_index: VectorStore,
-        generator_llm="gpt-3.5-turbo-1106",
+        generator_llm: LLMInterface = LLMFactory("gpt-3.5-turbo-1106"),
     ):
         if isinstance(vector_store_index, VectorStore):
             if not (
@@ -69,7 +69,8 @@ class SimpleDatasetGenerator:
                 f"Only Langchain VectorStore is supported for Simple Dataset Generator.\
                              Check: https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/vectorstores"
             )
-        self._llm = LLMFactory(model=generator_llm)
+        assert isinstance(generator_llm, LLMInterface), "generator_llm must be an instance of LLMInterface"
+        self._llm = generator_llm
 
     def _sample_from_vectorstore(self, embedding_vector_size: int, num_seed_vectors: int = 1, top_k: int = 3):
         # Sample from vectorstore based on random vectors

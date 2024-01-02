@@ -1,5 +1,6 @@
 import pytest
 
+from continuous_eval.llm_factory import LLMFactory
 from continuous_eval.metrics import (
     ExactSentenceMatch,
     LLMBasedContextCoverage,
@@ -10,7 +11,7 @@ from continuous_eval.metrics import (
     RougeSentenceMatch,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close, in_zero_one, is_close
+from tests.helpers.utils import all_close, in_zero_one
 
 
 def test_precision_recall_exact_chunk_match():
@@ -68,18 +69,18 @@ def test_llm_based_context_precision():
 def test_llm_based_context_coverage_openai():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
 
-    metric = LLMBasedContextCoverage(model="gpt-3.5-turbo-1106")
+    metric = LLMBasedContextCoverage(model=LLMFactory("gpt-3.5-turbo-1106"))
     assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
 
 
 def test_llm_based_context_coverage_claude():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-    metric = LLMBasedContextCoverage(model="claude-2.1")
+    metric = LLMBasedContextCoverage(model=LLMFactory("claude-2.1"))
     assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
 
 
 def test_llm_based_context_coverage_gemini():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
 
-    metric = LLMBasedContextCoverage(model="gemini-pro")
+    metric = LLMBasedContextCoverage(model=LLMFactory("gemini-pro"))
     assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)

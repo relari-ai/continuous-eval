@@ -1,12 +1,11 @@
-import logging as logger
 from math import log
 
 from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.retrieval_matching_strategy import MatchingStrategy, MatchingStrategyType
+from continuous_eval.metrics.retrieval_matching_strategy import ExactChunkMatch, MatchingStrategy, MatchingStrategyType
 
 
 class RankedRetrievalMetrics(Metric):
-    def __init__(self, matching_strategy: MatchingStrategy) -> None:
+    def __init__(self, matching_strategy: MatchingStrategy = ExactChunkMatch()) -> None:
         super().__init__()
         self.matching_strategy = matching_strategy
         assert isinstance(

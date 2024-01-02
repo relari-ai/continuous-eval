@@ -1,14 +1,7 @@
-import os
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
-from dotenv import load_dotenv
-
-from continuous_eval.llm_factory import LLMFactory
-
-load_dotenv()
-
-EVAL_LLM = os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106")
+from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 
 
 class Metric(ABC):
@@ -25,6 +18,7 @@ class LLMBasedMetric(Metric):
     Base class for all LLM based metrics.
     """
 
-    def __init__(self, model=EVAL_LLM):
+    def __init__(self, model: LLMInterface = DefaultLLM):
         super().__init__()
-        self.llm_factory = LLMFactory(model)
+        assert isinstance(model, LLMInterface), "model must be an instance of LLMInterface."
+        self._llm = model

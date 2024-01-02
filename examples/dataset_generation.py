@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.generators import SimpleDatasetGenerator
+from continuous_eval.llm_factory import LLMFactory
 
 load_dotenv()
 
@@ -25,7 +26,7 @@ def main():
     tic = perf_counter()
     dataset_generator = SimpleDatasetGenerator(
         vector_store_index=db,
-        generator_llm=generator_llm,
+        generator_llm=LLMFactory(generator_llm),
     )
     dataset = dataset_generator.generate(
         embedding_vector_size=1536,

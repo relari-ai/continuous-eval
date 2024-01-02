@@ -1,7 +1,11 @@
 import os
+from abc import ABC, abstractmethod
 
 from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
+
 
 try:
     import google.generativeai as google_genai
@@ -15,8 +19,6 @@ try:
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
-
-load_dotenv()
 
 assert os.getenv("OPENAI_API_KEY") is not None, (
     "Please set the environment variable OPENAI_API_KEY. "
@@ -35,19 +37,29 @@ if ANTHROPIC_AVAILABLE:
     )
 
 
-class LLMFactory:
+class LLMInterface(ABC):
+    @abstractmethod
+    def run(self, prompt, temperature=0):
+        pass
+
+
+class LLMFactory(LLMInterface):
     def __init__(self, model):
         super().__init__()
         self.model = model
         if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"]:
             self.client = OpenAI()
         elif model in ["claude-2.1", "claude-2.0", "claude-instant-1.2"]:
+            assert ANTHROPIC_AVAILABLE, "Anthropic is not available. Please install it."
             self.client = Anthropic()
         elif model in ["gemini-pro"]:
+            assert GOOGLE_GENAI_AVAILABLE, "Google GenAI is not available. Please install it."
             self.client = google_genai.GenerativeModel(model_name=model)
         else:
             raise ValueError(
-                f"Model {model} is not supported. Please choose one of the following models: gpt-3.5-turbo-1106, gpt-4-1106-preview, gemini-pro, claude-2.1, claude-2.0, claude-instant-1.2."
+                f"Model {model} is not supported. "
+                "Please choose one of the following models: "
+                "gpt-3.5-turbo-1106, gpt-4-1106-preview, gemini-pro, claude-2.1, claude-2.0, claude-instant-1.2."
             )
 
     def _llm_response(self, prompt, temperature):
@@ -137,3 +149,6 @@ class LLMFactory:
         """
         content = self._llm_response(prompt=prompt, temperature=temperature)
         return content
+
+
+DefaultLLM = LLMFactory(model=os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106"))

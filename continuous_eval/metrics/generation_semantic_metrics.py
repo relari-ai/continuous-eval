@@ -8,8 +8,6 @@ from transformers import BertModel, BertTokenizer
 
 from continuous_eval.metrics.base import Metric
 
-# warnings.filterwarnings("ignore")
-
 # Single Metrics
 
 
