@@ -56,7 +56,7 @@ datum = {
     "question": "Who wrote 'Romeo and Juliet' and where was he born?",
     "retrieved_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "ground_truth_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'.", "William Shakespeare is born in Stratford-upon-Avon."],
-    "answer": "William Shakespeare wrote 'Romeo and Julet'. He is born in Ireland",
+    "answer": "William Shakespeare wrote 'Romeo and Juliet'. He is born in Ireland",
     "ground_truths": ["William Shakespeare, born in Stratford-upon-Avon"]
 }
 
@@ -74,9 +74,9 @@ print(metric.calculate(**datum))
 {
     'rouge_faithfulness': 0.5, 
     'token_overlap_faithfulness': 0.5, 
-    'bleu_faithfulness': 0.34484617832865544, 
-    'rouge_p_by_sentence': [0.6666666666666666, 0.2], 
-    'token_overlap_p_by_sentence': [0.75, 0.2], 
-    'blue_score_by_sentence': [0.6348100945551783, 0.05488226210213251]
+    'bleu_faithfulness': 0.37023896751607194, 
+    'rouge_p_by_sentence': [0.8333333333333334, 0.2], 
+    'token_overlap_p_by_sentence': [0.875, 0.2], 
+    'blue_score_by_sentence': [0.6855956729300113, 0.05488226210213251]
 }
 ```

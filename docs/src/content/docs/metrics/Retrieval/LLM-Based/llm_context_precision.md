@@ -1,8 +1,10 @@
 ---
-title: Context Precision
+title: LLM-based Context Precision
 ---
 
 ### Definition
+
+Context Precision is used to measure information density.
 
 
 $$
@@ -23,7 +25,6 @@ $$
 }
 $$
 
-This metric is used to measure information density.
 
 ### Example Usage
 
@@ -31,6 +32,7 @@ Required data items: `question`, `retrieved_context`
 
 ```python
 from continuous_eval.metrics import LLMBasedContextPrecision
+from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "question": "What is the capital of France?",
@@ -43,7 +45,7 @@ datum = {
     "ground_truths": ["Paris"],
 }
 
-metric = LLMBasedContextPrecision(model = "gpt-4-1106-preview", log_relevance_by_context=True)
+metric = LLMBasedContextPrecision(LLMFactory("gpt-4-1106-preview"), log_relevance_by_context=True)
 print(metric.calculate(**datum))
 ```
 

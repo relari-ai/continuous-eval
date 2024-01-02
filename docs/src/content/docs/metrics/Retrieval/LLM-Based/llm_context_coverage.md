@@ -1,8 +1,10 @@
 ---
-title: Context Coverage
+title: LLM-based Context Coverage
 ---
 
 ### Definition
+
+Context Coverage measures completeness of the retrieved contexts to generated a ground truth answer.
 
 
 $$
@@ -14,7 +16,6 @@ $$
 }
 $$
 
-this metric is used to measure completeness of the retrieved contexts to generated a ground truth answer.
 
 ### Example Usage
 
@@ -22,6 +23,7 @@ Required data items: `question`, `retrieved_context`, `ground_truth_answers`
 
 ```python
 from continuous_eval.metrics import LLMBasedContextCoverage
+from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "question": "What is the largest and second city in France?",
@@ -34,7 +36,7 @@ datum = {
     "ground_truths": ["Paris is the largest city in France and Marseille is the second largest."],
 }
 
-metric = LLMBasedContextCoverage(model = "gpt-4-1106-preview")
+metric = LLMBasedContextCoverage(LLMFactory("gpt-4-1106-preview"))
 print(metric.calculate(**datum))
 ```
 
