@@ -5,7 +5,7 @@ from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 q = {
     "question": "What is the capital of France?",
     "retrieved_contexts": [
-        "Paris is the largest city in France.",
+        "Paris is the capital of France and its largest city.",
         "Lyon is a major city in France.",
     ],
     "ground_truth_contexts": ["Paris is the capital of France."],

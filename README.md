@@ -21,7 +21,7 @@ poetry install --all-extras
 
 ### Prerequisites
 
-The code requires the `OPENAI_API_KEY` (optionally `ANTHROPIC_API_KEY` and/or `GOOGLE_API_KEY`) in .env to run the LLM-based metrics.
+The code requires the `OPENAI_API_KEY` (optionally `ANTHROPIC_API_KEY` and/or `GEMINI_API_KEY`) in .env to run the LLM-based metrics.
 
 ### Usage
 
@@ -39,7 +39,7 @@ datum = {
         "The first season, set primarily in Minnesota and North Dakota from January 2006 to February 2007 and starring Billy Bob Thornton, Allison Tolman, Colin Hanks, and Martin Freeman, received wide acclaim from critics.[5] It won the Primetime Emmy Awards for Outstanding Miniseries, Outstanding Directing, and Outstanding Casting, and received 15 additional nominations including Outstanding Writing, another Outstanding Directing nomination, and acting nominations for all four leads. It also won the Golden Globe Awards for Best Miniseries or Television Film and Best Actor – Miniseries or Television Film for Thornton.",
         "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
     ],
-    "answer": "Berlin",
+    "answer": "Yes they did.",
     "ground_truths": [
         "Yes, they did get a nomination in season 1 and 2.",
         "Not really, they didn't win for season three.",
@@ -91,7 +91,7 @@ For generation you can instead use the `GenerationEvaluator`.
 
 #### Deterministic
 
-- `DeterministicAnswerRelevance`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
+- `DeterministicAnswerCorrectness`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
 - `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
 
 #### Semantic

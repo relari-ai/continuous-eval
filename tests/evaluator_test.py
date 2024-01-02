@@ -5,7 +5,7 @@ import pytest
 
 from continuous_eval.dataset import Dataset
 from continuous_eval.evaluators import GenerationEvaluator, RetrievalEvaluator
-from continuous_eval.metrics import DeterministicAnswerRelevance
+from continuous_eval.metrics import DeterministicAnswerCorrectness
 from tests.helpers.dummy_metric import DummyMetric
 
 retrieval_dataset = Dataset.from_jsonl("tests/data/retrieval_sm.jsonl")
@@ -79,7 +79,7 @@ def test_generation_evaluator():
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )
@@ -110,7 +110,7 @@ def test_generation_evaluator_int_batch_size():
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )
@@ -134,7 +134,7 @@ def test_generation_evaluator_float_batch_size():
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )

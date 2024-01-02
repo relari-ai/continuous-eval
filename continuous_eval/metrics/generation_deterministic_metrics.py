@@ -38,7 +38,11 @@ class TokenOverlap(Metric):
         except ZeroDivisionError:
             f1 = 0.0
 
-        return {"token_precision": precision, "token_recall": recall, "token_f1": f1}
+        return {
+            "token_overlap_precision": precision, 
+            "token_overlap_recall": recall, 
+            "token_overlap_f1": f1
+        }
 
 
 class RougeScore(Metric):
@@ -70,6 +74,7 @@ class BleuScore(Metric):
 class DeterministicFaithfulness(Metric):
     ROUGE_PRECISION_THRESHOLD = 0.5
     TOKEN_OVERLAP_PRECISION_THRESHOLD = 0.5
+    BLEU_SCORE_THRESHOLD = 0.5
 
     def __init__(self):
         _download_punkt()
@@ -81,7 +86,7 @@ class DeterministicFaithfulness(Metric):
 
         rouge_scores = [RougeScore().calculate(sentence, context)["rouge_l_precision"] for sentence in sentences]
         token_overlap_scores = [
-            TokenOverlap().calculate(sentence, context)["token_precision"] for sentence in sentences
+            TokenOverlap().calculate(sentence, context)["token_overlap_precision"] for sentence in sentences
         ]
         bleu_scores = [BleuScore().calculate(sentence, context)["bleu_score"] for sentence in sentences]
 
@@ -89,26 +94,26 @@ class DeterministicFaithfulness(Metric):
         token_overlap_faithfulness = sum(
             score > self.TOKEN_OVERLAP_PRECISION_THRESHOLD for score in token_overlap_scores
         ) / len(sentences)
-        avg_sentence_bleu = sum(score for score in bleu_scores) / len(sentences)
-        min_sentence_bleu = min(bleu_scores)
+        bleu_faithfulness = sum(score for score in bleu_scores) / len(sentences)
 
         return {
             "rouge_faithfulness": rouge_faithfulness,
             "token_overlap_faithfulness": token_overlap_faithfulness,
-            "avg_sentence_bleu": avg_sentence_bleu,
-            "min_sentence_bleu": min_sentence_bleu,
-            "rouge_scores_p_by_sentence": rouge_scores,
+            "bleu_faithfulness": bleu_faithfulness,
+            "rouge_p_by_sentence": rouge_scores,
             "token_overlap_p_by_sentence": token_overlap_scores,
+            "blue_score_by_sentence": bleu_scores,
         }
 
 
-class DeterministicAnswerRelevance(Metric):
+class DeterministicAnswerCorrectness(Metric):
     def calculate(self, answer, ground_truths, **kwargs):
         # calculate the max score across all ground truth answers
         token_scores = [TokenOverlap().calculate(answer, gt_answer) for gt_answer in ground_truths]
         rouge_scores = [RougeScore().calculate(answer, gt_answer) for gt_answer in ground_truths]
         bleu_scores = [BleuScore().calculate(answer, gt_answer) for gt_answer in ground_truths]
+
         return {
             metric: max(score.get(metric, 0) for score in token_scores + rouge_scores + bleu_scores)
-            for metric in set().union(*token_scores, *rouge_scores, *bleu_scores)
+            for metric in ["rouge_l_recall", "rouge_l_precision", "rouge_l_f1", "token_overlap_recall", "token_overlap_precision", "token_overlap_f1", "bleu_score"]
         }

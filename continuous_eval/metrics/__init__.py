@@ -1,6 +1,6 @@
 from continuous_eval.metrics.base import Metric
 from continuous_eval.metrics.generation_deterministic_metrics import (
-    DeterministicAnswerRelevance,
+    DeterministicAnswerCorrectness,
     DeterministicFaithfulness,
 )
 from continuous_eval.metrics.generation_LLM_based_metrics import (

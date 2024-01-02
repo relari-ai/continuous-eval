@@ -1,7 +1,7 @@
 import pytest
 
 from continuous_eval.metrics import (
-    DeterministicAnswerRelevance,
+    DeterministicAnswerCorrectness,
     DeterministicFaithfulness,
     LLMBasedAnswerCorrectness,
     LLMBasedFaithfulness,
@@ -33,7 +33,7 @@ def test_deterministic_answer_relevance():
         },
     ]
 
-    metric = DeterministicAnswerRelevance()
+    metric = DeterministicAnswerCorrectness()
     assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
 

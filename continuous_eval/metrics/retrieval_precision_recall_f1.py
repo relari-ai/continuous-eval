@@ -37,4 +37,4 @@ class PrecisionRecallF1(Metric):
             f1 = 2 * (precision * recall) / (precision + recall)
         except ZeroDivisionError:
             f1 = 0.0
-        return {"precision": precision, "recall": recall, "f1": f1}
+        return {"context_precision": precision, "context_recall": recall, "context_f1": f1}

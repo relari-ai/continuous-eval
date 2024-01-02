@@ -20,7 +20,7 @@ class RankedRetrievalMetrics(Metric):
         map = self.calculate_average_precision(retrieved_contexts, ground_truth_contexts)
         mrr = self.calculate_reciprocal_rank(retrieved_contexts, ground_truth_contexts)
         ndcg = self.calculate_normalized_discounted_cumulative_gain(retrieved_contexts, ground_truth_contexts)
-        return {"Average Precision": map, "Mean Reciprocal Rank": mrr, "NDCG": ndcg}
+        return {"average_precision": map, "reciprocal_rank": mrr, "ndcg": ndcg}
 
     def calculate_average_precision(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate average precision for a single query retrieval

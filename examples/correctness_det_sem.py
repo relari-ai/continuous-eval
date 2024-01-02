@@ -8,7 +8,7 @@ from continuous_eval.classifiers.utils import eval_prediction
 from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.datatypes import DataSplit, SplitRatios
 from continuous_eval.evaluators import GenerationEvaluator
-from continuous_eval.metrics import DebertaAnswerScores, DeterministicAnswerRelevance
+from continuous_eval.metrics import DebertaAnswerScores, DeterministicAnswerCorrectness
 
 dataset = example_data_downloader("correctness")
 dataset = dataset[dataset["annotation"] != "refuse-to-answer"]
@@ -17,7 +17,7 @@ tic = perf_counter()
 evaluator = GenerationEvaluator(
     dataset=dataset,
     metrics=[
-        DeterministicAnswerRelevance(),
+        DeterministicAnswerCorrectness(),
         DebertaAnswerScores(),
     ],
 )

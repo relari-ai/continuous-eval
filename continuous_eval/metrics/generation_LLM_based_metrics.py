@@ -66,15 +66,15 @@ The statement is supported by the context, which states that photosynthesis conv
             score = bool("yes" in score_txt.lower())
 
         return {
-            "LLM_based_faithfulness_score": score,
+            "LLM_based_faithfulness": score,
             "LLM_based_faithfulness_reasoning": reasoning,
         }
 
 
 class LLMBasedAnswerCorrectness(LLMBasedMetric):
     """
-    The LLM based answer relevance metric.
-    Measures whether the generated answer is relenvat to the question.
+    The LLM based answer correctness metric.
+    Measures whether the generated answer is correct compared to the ground truths.
     """
 
     def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
