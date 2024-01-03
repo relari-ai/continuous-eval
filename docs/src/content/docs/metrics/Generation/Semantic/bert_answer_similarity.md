@@ -1,22 +1,22 @@
 ---
-title: BERT Answer Relevance
+title: BERT Answer Similarity
 ---
 
 ### Definitions
 
-**BERT Answer Relevance** measures the semantic similarity between the Generated Answer and the Question
+**BERT Answer Similarity** measures the semantic similarity between the Generated Answer and the Ground Truth Answers.
 
-This metric leverages the [BERT model](https://huggingface.co/bert-base-uncased) to calculate semantic similarity.
+This metric leverages the [110M BERT model](https://huggingface.co/bert-base-uncased) to calculate semantic similarity.
 
 <br>
 
 :::note
-Semantic similarity between `answer` and `question` is not necessarily a good indication that the answer is relevant to the question. Test the metric to see how well correlated with human judgement.
+Semantic similarity between `answer` and `ground_truths` is not necessarily a good indication that the answer is correct. Test the metric to see how well correlated with human judgement.
 :::
 
 ### Example Usage
 
-Required data items: `question`, `answer`
+Required data items: `answer`, `ground_truths`
 
 ```python
 from continuous_eval.metrics import BertAnswerSimilarity
@@ -40,8 +40,10 @@ print(metric.calculate(**datum))
 
 ### Example Output
 
+The metric outputs the max BERT similarity score calculated using items in `ground_truths`
+
 ```JSON
 {
-    'bert_answer_relevance': 0.8146507143974304
+    'bert_answer_similarity': 0.9274404048919678
 }
 ```

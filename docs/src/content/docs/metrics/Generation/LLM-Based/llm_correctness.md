@@ -5,23 +5,20 @@ title: LLM-based Correctness
 ### Definition
 
 
-You need to evaluate the quality of the generated answer based on the question and reference ground truth answer.
-Output a score and the reasoning for your score in a new line.
-Use the following guidelines for evaluation:
-* You should output a single score between 1 to 5.
-* 1 means that the answer is completely irrelevant to the question.
-* 2 means that the answer is relevant to the question but contains major errors.
-* 3 means that the answer is relevant to the question and is partially correct.
-* 4 means that the answer is relevant to the question and is correct.
-* 5 means that the answer is relevant to the question and is correct and complete.
+**LLM-based Answer Correctness** outputs a score between 1 - 5 assessing the overall quality of the answer, given the question and ground truth answer. 
 
-<br>
+**Scoring rubric in LLM Prompt:**
+- 1 means that the answer is completely irrelevant to the question.
+- 2 means that the answer is relevant to the question but contains major errors.
+- 3 means that the answer is relevant to the question and is partially correct.
+- 4 means that the answer is relevant to the question and is correct.
+- 5 means that the answer is relevant to the question and is correct and complete.
 
 
 
 ### Example Usage
 
-Required data items: `answer`, `ground_truths`
+Required data items: `question`, `answer`, `ground_truths`
 
 ```python
 from continuous_eval.metrics import LLMBasedAnswerCorrectness

@@ -1,5 +1,5 @@
 ---
-title: Answer Correctness
+title: Correctness
 ---
 ### Definitions
 
@@ -40,6 +40,8 @@ However, this conclusion likely varies by dataset. Test to see how close these s
 
 
 ### Example Usage
+
+Required data items: `answer`, `ground_truths`
 
 ```python
 from continuous_eval.metrics import DeterministicAnswerCorrectness
