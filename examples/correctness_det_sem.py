@@ -10,9 +10,11 @@ from continuous_eval.datatypes import DataSplit, SplitRatios
 from continuous_eval.evaluators import GenerationEvaluator
 from continuous_eval.metrics import DebertaAnswerScores, DeterministicAnswerCorrectness
 
+# Download the correctness dataset and remove examples where the LLL refused to answer (i.e., said "I don't know")
 dataset = example_data_downloader("correctness")
 dataset = dataset[dataset["annotation"] != "refuse-to-answer"]
 
+# Setup the evaluator to compute the deterministic correctness and the DeBERTa scores
 tic = perf_counter()
 evaluator = GenerationEvaluator(
     dataset=dataset,
@@ -21,16 +23,18 @@ evaluator = GenerationEvaluator(
         DebertaAnswerScores(),
     ],
 )
-evaluator.run()
+evaluator.run(batch_size=100)
 toc = perf_counter()
 print(f"Evaluation completed in {toc - tic:.2f}s")
 print(set(evaluator.aggregated_results))
 
-evaluator.save("det_sem.jsonl")  # Save for future use
+evaluator.save("det_sem.jsonl")  # Save for future use...
 
+# Now let's use the results to train a classifier to predict the correctness of the answers (as evaluated by a human annotator)
 X = pd.DataFrame(evaluator.results)
 y = dataset["annotation"].map({"correct": 1, "incorrect": 0}).astype(int).to_numpy()
 
+# We split the dataset into train, test, and calibration sets
 datasplit = DataSplit(
     X=X,
     y=y,
@@ -42,7 +46,11 @@ datasplit = DataSplit(
     ],
     oversample=True,
 )
+
+# We use the train and calibration sets to train the classifier
 clf = EnsembleMetric(training=datasplit.train, calibration=datasplit.calibration)
+
+# We then use the test set to evaluate the classifier
 y_hat, y_set = clf.predict(datasplit.test.X)
 num_undecided = np.sum(np.all(y_set, axis=1))
 print(eval_prediction(datasplit.test.y, y_hat))

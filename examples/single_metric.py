@@ -1,7 +1,7 @@
 from continuous_eval import Dataset
-from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
+from continuous_eval.metrics import PrecisionRecallF1
 
-# Let's create a dataset
+# A dataset is just a list of dictionaries containing the relevant information
 q = {
     "question": "What is the capital of France?",
     "retrieved_contexts": [
@@ -15,7 +15,7 @@ q = {
 dataset = Dataset([q])
 
 # Let's initialize the metric
-metric = PrecisionRecallF1(RougeChunkMatch())
+metric = PrecisionRecallF1()
 
 # Let's calculate the metric for the first datum
 print(metric.calculate(**dataset.datum(0)))  # alternatively `metric.calculate(**q)`
