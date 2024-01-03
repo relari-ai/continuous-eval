@@ -1,12 +1,12 @@
 from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.evaluators import RetrievalEvaluator
+from continuous_eval.evaluators import GenerationEvaluator
 from continuous_eval.metrics import DeterministicAnswerCorrectness
 
 # Let's download the retrieval dataset example
 dataset = example_data_downloader("correctness")
 
 # Setup the evaluator
-evaluator = RetrievalEvaluator(
+evaluator = GenerationEvaluator(
     dataset=dataset,
     metrics=[
         DeterministicAnswerCorrectness(),
