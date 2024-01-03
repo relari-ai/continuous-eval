@@ -1,8 +1,29 @@
 ---
-title: Automatic Dataset Generation
+title: Dataset Generator
 ---
 
-In this example, we show how to generate an evaluation dataset from a vectorstore.
+**We recommend AI teams invest in manually curating a high-quality golden dataset** (created by users, or domain experts) to properly evaluate and improve the LLM pipeline.
+
+Every (RAG-based) LLM application is different in functionalities and requirements, and the evaluation golden dataset should be diverse enough to capture different design requirements.
+
+If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a silver dataset as a starting point, upon which you can modify and improve.
+
+### Simple Dataset Generator
+
+The `SimpleDatasetGenerator` loads indicies from a vector database (using the Langchain interface) and samples select vectors to create questions.
+
+The follow 4 types of questions can be created:
+
+-   **Single-Hop Fact-Seeking Questions:** An information seeking question, answer pair created based on a single chunk
+-   **Single-Hop Reasoning Questions:** A Why / How question, answer pair created based on a single chunk
+-   **Multi-Hop Fact-Seeking Questions:** An information seeking question, answer pair created based on two chunks
+-   **Multi-Hop Reasoning Questions:** A Why / How question, answer pair created based on a two chunks
+
+There are multiple filtering processes. If the LLM fails to generate a question, extract the relevant sentences from the contexts, or generate a reasonable answer, the generation will fail. The pipeline will try up to `max_try_ratio` for Multi-Hop questions and fill the gap with Single-Hop questions.
+
+### Example Usage
+
+Below is an example of generating dataset
 
 ```python
 import datetime
@@ -17,7 +38,6 @@ from continuous_eval.generators import SimpleDatasetGenerator
 from continuous_eval.llm_factory import LLMFactory
 
 load_dotenv()
-
 
 def main():
     logging.basicConfig(level=logging.INFO)

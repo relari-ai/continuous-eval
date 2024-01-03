@@ -4,7 +4,7 @@ title: Faithfulness
 
 ### Definitions
 
-Faithfulness measures how grounded is the generated answer on the retrieved contexts. 
+**Faithfulness** measures how grounded is the generated answer on the retrieved contexts. 
 
 Below are the list of deterministic metrics that measure the relationship between the generated answer and the retrieved contexts.
 

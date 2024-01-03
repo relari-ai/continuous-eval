@@ -70,17 +70,18 @@ export default defineConfig({
 				// 	],
 				// },
 				{
+					label: 'Datasets',
+					autogenerate: { directory: 'evaluators' },
+				},
+				{
 					label: 'Metric Ensembling',
 					items: [
 						{ label: 'Conformal Prediction', link: '/classification/conformal_prediction/' },
 						{ label: 'Classification', link: '/classification/classifier/' },
 					],
 				},
-				{
-					label: 'Datasets',
-					autogenerate: { directory: 'evaluators' },
-				},
-        {
+
+        		{
 					label: 'Examples',
 					autogenerate: { directory: 'examples' },
 				},

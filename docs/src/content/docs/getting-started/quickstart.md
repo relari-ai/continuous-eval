@@ -1,6 +1,6 @@
 ---
-title: Getting started
-description: How to install continuous-eval
+title: Quick Start
+description: Quick Start
 ---
 
 ## Installation
@@ -11,63 +11,63 @@ python3 -m pip install continuous-eval
 
 ## Run a metric
 
-```bash
-from continuous_eval.metrics import PrecisionRecallF1
+```python
+from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 
 datum = {
-    "question": "Did Fargo win the golden globe nominations for both seasons?",
+    "question": "What is the capital of France?",
     "retrieved_contexts": [
-        "Fargo is an American black comedy crime drama television series created and primarily written by Noah Hawley. The show is inspired by the 1996 film of the same name, which was written and directed by the Coen brothers, and takes place within the same fictional universe.",
-        "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
+        "Paris is the capital of France and its largest city.",
+        "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": [
-        "The first season, set primarily in Minnesota and North Dakota from January 2006 to February 2007 and starring Billy Bob Thornton, Allison Tolman, Colin Hanks, and Martin Freeman, received wide acclaim from critics. It won the Golden Globe Awards for Best Miniseries or Television Film and Best Actor – Miniseries or Television Film for Thornton.",
-        "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
-    ],
-    "answer": "Yes they did.",
-    "ground_truths": [
-        "Yes, they did."
-        "Yes, Fargo received Golden Globe nominations in season 1 and 2.",
-        "Yes, Fargo received three nominations for season 1 and three nominations in season 2."
-    ],
+    "ground_truth_contexts": ["Paris is the capital of France."],
+    "answer": "Paris",
+    "ground_truths": ["Paris"],
 }
 
-metric = PrecisionRecallF1()
+metric = PrecisionRecallF1(RougeChunkMatch())
 print(metric.calculate(**datum))
 ```
 
 ## Run eval on a dataset
 
-**Load Golden Dataset**
+**Load a Golden Dataset**
 
 ```python
-from continuous_eval.dataset import Dataset
+from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.evaluators import RetrievalEvaluator
-from continuous_eval.metrics import (
-  PrecisionRecallF1,
-  RankedRetrievalMetrics,
-  MatchingStrategy,
-)
+from continuous_eval.metrics import PrecisionRecallF1, RankedRetrievalMetrics
 
-# Load golden dataset
-dataset = Dataset.from_jsonl("data/example_dataset.jsonl")
-
-# Select Retrieval or Generation Evaluator
+# Build a dataset: create a dataset from a list of dictionaries containing question/answer/context/etc.
+# Or download one of the of the examples... 
+dataset = example_data_downloader("retrieval")
+# Setup the evaluator
 evaluator = RetrievalEvaluator(
     dataset=dataset,
     metrics=[
-      PrecisionRecallF1(MatchingStrategy.ROUGE_SENTENCE_MATCH),
-      RankedRetrievalMetrics(MatchingStrategy.ROUGE_CHUNK_MATCH),
+        PrecisionRecallF1(),
+        RankedRetrievalMetrics(),
     ],
 )
-evaluator.run(k=2)
+# Run the eval!
+evaluator.run(k=2, batch_size=1)
+# Peaking at the results
+print(evaluator.aggregated_results)
+# Saving the results for future use
+evaluator.save("retrieval_evaluator_results.jsonl")
 ```
 
-If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a silver dataset.
+For generation you can instead use the `GenerationEvaluator`.
+
+### Curate an eval dataset for your application
+
+**We recommend AI teams invest in manually curating a high-quality golden dataset** (created by users, or domain experts) to properly evaluate and improve the LLM pipeline.
+Every (RAG-based) LLM application is different in functionalities and requirements, and the evaluation golden dataset should be diverse enough to capture different design requirements.
+
+If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a silver dataset as a starting point, upon which you can modify and improve.
+
 ```python
 from continuous_eval.simple_dataset_generator import SimpleDatasetGenerator
 
 dataset = SimpleDatasetGenerator(VectorStoreIndex, num_questions=10)
 ```
-
-#### Read results

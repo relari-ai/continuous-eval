@@ -4,7 +4,7 @@ title: LLM-based Faithfulness
 
 ### Definition
 
-Faithfulness measures how grounded is the generated answer on the retrieved contexts. 
+**LLM-based Faithfulness** measures how grounded is the generated answer on the retrieved contexts. 
 
 We have two different ways of prompting the LLM to calculate faithfulness:
 

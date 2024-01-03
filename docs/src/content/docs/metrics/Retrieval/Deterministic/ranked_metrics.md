@@ -62,7 +62,7 @@ print(metric.calculate(**datum))
 {
     'average_precision': 0.5, 
     'reciprocal_rank': 0.5, 
-    'NDCG': 0.6309297535714574
+    'ndcg': 0.6309297535714574
 }
 ```
 

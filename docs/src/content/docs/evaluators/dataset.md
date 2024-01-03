@@ -1,8 +1,10 @@
 ---
-title: Dataset
+title: Dataset Class
 ---
 
-The dataset takes a list of dictionaries or a pandas dataframe and creates a dataset used for the evaluators.
+### `Dataset` Class 
+
+**The `Dataset` class takes a list of dictionaries or a pandas dataframe and creates a dataset used for the `Evaluators`.**
 
 It can be loaded from a jsonl file.
 
@@ -18,8 +20,12 @@ dataset.to_jsonl("data/retrieval.jsonl")
 
 It expects at least one of the following columns combinations:
 
-- ANSWER, QUESTION
-- ANSWER, GROUND_TRUTH_ANSWER
-- ANSWER, RETRIEVED_CONTEXTS
-- QUESTION, RETRIEVED_CONTEXTS
-- RETRIEVED_CONTEXTS, GROUND_TRUTH_CONTEXTS
+- `answer`, `question`
+- `answer`, `ground_truths`
+- `answer`, `retrieved_contexts`
+- `question`, `retrieved_contexts`
+- `retrieved_contexts`, `ground_truth_contexts`
+
+:::tip
+Check out the **[Data Dependency Table]()** in Overview of Metrics, to make sure your dataset contains the columns need to compute the metrics of your choice.
+:::

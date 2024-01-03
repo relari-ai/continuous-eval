@@ -1,6 +1,8 @@
 ---
-title: Deterministic/Semantic Correctness Evaluator
+title: Ensemble Metric Evaluator
 ---
+
+In this example, we show how to create an ensemble metric based on determinitic and semantic metrics.
 
 ```python
 from time import perf_counter

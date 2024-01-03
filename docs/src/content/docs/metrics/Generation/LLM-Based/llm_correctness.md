@@ -46,5 +46,6 @@ print(metric.calculate(**datum))
 ```JSON
 {
     'LLM_based_answer_correctness': 5.0, 
-    'LLM_based_answer_correctness_reasoning': 'The answer is relevant to the question and is correct and complete. It matches the ground truth reference answers provided.'}
+    'LLM_based_answer_correctness_reasoning': 'The answer is relevant to the question and is correct and complete. It matches the ground truth reference answers provided.'
+}
 ```

@@ -4,7 +4,7 @@ title: DeBERTa Answer Scores
 
 ### Definitions
 
-**DeBERTa measures semantic relationship** between the Generated Answer and the Ground Truth Answers **in three categories:**
+**DeBERTa scores** measure semantic relationship between the Generated Answer and the Ground Truth Answers **in three categories:**
 
 - **Entailment**: the Generated Answer IMPLIES a Ground Truth Answer.
 

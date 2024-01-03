@@ -1,11 +1,13 @@
 ---
-title: Getting started
+title: Introduction
 description: Overview
 ---
 
-## Introduction
+**To Improve after drafting Bookface Post**
 
-`continuous-eval` is a package created for the scientific and practical evaluation of LLM application pipelines. Currently, it focuses on retrieval-augmented generation (RAG) pipelines.
+## What is continuous-eval?
+
+`continuous-eval` is an open-source package created for the scientific and practical evaluation of LLM application pipelines. Currently, it focuses on retrieval-augmented generation (RAG) pipelines.
 
 ## Why run evaluation?
 

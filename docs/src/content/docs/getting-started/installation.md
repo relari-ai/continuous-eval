@@ -1,11 +1,9 @@
 ---
-title: Getting started
+title: Installation
 description: How to install continuous-eval
 ---
 
-## Installation
-
-This code is provided as a Python package. To install it, run the following command:
+`continuous-eval` is provided as an open-source Python package. To install it, run the following command:
 
 ```bash
 python3 -m pip install continuous-eval

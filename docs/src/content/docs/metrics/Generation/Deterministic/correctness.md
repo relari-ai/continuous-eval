@@ -3,7 +3,7 @@ title: Correctness
 ---
 ### Definitions
 
-Answer Correctness measures how close the generated answer is the the ground truth reference answers.
+**Answer Correctness** measures how close the generated answer is the the ground truth reference answers.
 
 Below are the list of deterministic metrics that measure the relationship between the generated answer and the ground truth reference answers.
 
