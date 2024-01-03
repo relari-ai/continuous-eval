@@ -6,7 +6,7 @@ title: BERT Answer Similarity
 
 **BERT Answer Similarity** measures the semantic similarity between the Generated Answer and the Ground Truth Answers.
 
-This metric leverages the [110M BERT model](https://huggingface.co/bert-base-uncased) to calculate semantic similarity.
+This metric leverages the [BERT model](https://huggingface.co/bert-base-uncased) to calculate semantic similarity.
 
 <br>
 

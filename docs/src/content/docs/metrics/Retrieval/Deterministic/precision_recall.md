@@ -113,5 +113,5 @@ print(metric.calculate(**datum))
 :::note
 
 **You can run Precision / Recall / F1 @ top K** to see retrieval performance at the top K chunks over a dataset.
-Check out [Evaluator]() for examples
+Check out <a href="/evaluators/evaluator#retrievalevaluator">Retrieval Evaluator</a> for examples
 :::

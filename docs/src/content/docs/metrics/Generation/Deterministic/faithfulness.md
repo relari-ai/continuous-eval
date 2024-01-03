@@ -1,5 +1,7 @@
 ---
 title: Faithfulness
+sidebar:
+    order: 2
 ---
 
 ### Definitions

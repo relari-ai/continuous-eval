@@ -47,7 +47,7 @@ Check out our blog post that dives deeper into the pros and cons of different ty
 ### `Metric` Class 
 
 Below is the list of metrics available:
-#### Retrieval Metrics
+#### Retrieval metrics
 
 ##### Deterministic
 
@@ -135,7 +135,7 @@ Below is the list of metrics available:
 
 </style>
 
-#### Input data for Retrieval Metrics
+#### Input data for retrieval metrics
 
 <table>
 
@@ -183,7 +183,7 @@ Below is the list of metrics available:
   </tr>
 </table>
 
-#### Input data for Generation Metrics
+#### Input data for generation metrics
 
 
 <table>

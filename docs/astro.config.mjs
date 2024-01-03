@@ -12,10 +12,11 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Continuous Eval',
-      customCss: [
-        // Relative path to your custom CSS file
-        './src/styles/custom.css',
-      ],
+			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 4, },
+			customCss: [
+				// Relative path to your custom CSS file
+				'./src/styles/custom.css',
+			],
 			social: {
 				github: 'https://github.com/relari-ai/continuous-eval/tree/main',
 			},
@@ -29,46 +30,37 @@ export default defineConfig({
 						{ label: 'Quick Start', link: '/getting-started/quickstart/' },
 					],
 				},
-				// {
-				// 	label: 'Metrics',
-				// 	items: [
-				// 	  	{ label: 'Overview', link: '/metrics_alt/overview/' },
-				// 	  	{
-				// 			label: 'Retrieval Metrics',
-				// 			link: '/metrics/retrieval_metrics/',
-				// 			subItems: [
-				// 				{
-				// 					label: 'Deterministic',
-				// 					link: '/metrics/retrieval_metrics/deterministic/',
-				// 					subItems: [
-				// 						{ label: 'Sub-item 1', link: '/metrics/retrieval_metrics/deterministic/precision_recall/' },
-				// 						{ label: 'Sub-item 2', link: '/metrics/retrieval_metrics/deterministic/ranked_metrics/' },
-				// 					],
-				// 				},
-				// 				{ label: 'LLM-based', link: '/metrics/retrieval_metrics/LLM_Based/' },
-				// 			],
-				// 		},
-				// 		{
-				// 			label: 'Generation Metrics',
-				// 			link: '/metrics/generation_metrics/',
-				// 			subItems: [
-				// 				{ label: 'Sub-item 3', link: '/metrics/generation_metrics/sub-item-3/' },
-				// 				{ label: 'Sub-item 4', link: '/metrics/generation_metrics/sub-item-4/' },
-				// 			],
-				// 		},
-				// 	],
-				//   },
-				{ label: 'Metrics',
-					autogenerate: { directory: 'metrics' },
+				{
+					label: 'Metrics',
+					items: [
+						{ label: 'Overview', link: '/metrics/overview/' },
+						{
+							label: 'Retrieval',
+							autogenerate: { directory: '/metrics/Retrieval/' }
+						},
+						{
+							label: 'Generation',
+							items: [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Generation/Deterministic/' }
+								},
+								{
+									label: 'Semantic',
+									items: [
+										{ label: 'DeBERTa Answer Scores', link: '/metrics/generation/semantic/deberta_answer_scores/' },
+										{ label: 'BERT Answer Similarity', link: '/metrics/generation/semantic/bert_answer_similarity/' },
+										{ label: 'BERT Answer Relevance', link: '/metrics/generation/semantic/bert_answer_relevance/' },
+									]
+								},
+								{
+									label: 'LLM-Based',
+									autogenerate: { directory: '/metrics/Generation/LLM-Based/' }
+								},
+							]
+						},
+					],
 				},
-				// {
-				// 	label: 'Metrics_Alt',
-				// 	items: [
-				// 		{ label: 'Overview', link: '/metrics/overview/' },
-				// 		{ label: 'Retrieval Metrics', link: '/metrics/retrieval_metrics/' },
-				// 		{ label: 'Generation Metrics', link: '/metrics/generation_metrics/' },
-				// 	],
-				// },
 				{
 					label: 'Datasets',
 					autogenerate: { directory: 'evaluators' },

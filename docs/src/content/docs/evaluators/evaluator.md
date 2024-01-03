@@ -2,15 +2,15 @@
 title: Evaluator Class
 ---
 
-### `Evaluator` Class 
+## `Evaluator` Class 
 
 The `Evaluator` takes a `Dataset` and a list of `Metric` and outputs the evaluation results.
 
 Use `RetrievalEvaluator` for Retrieval Metrics and `GenerationEvaluator` for Generation Metrics.
 
-#### `RetrievalEvaluator`
+### `RetrievalEvaluator`
 
-##### Example Usage
+#### Example Usage
 
 ```python
 from continuous_eval.data_downloader import example_data_downloader
@@ -41,7 +41,7 @@ evaluator.save("retrieval_evaluator_results.jsonl")
 **Check out ["Metric @ K"](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893)** in A Practical Guide to RAG Pipeline Evaluation (scroll to "Action 2: Use [metric]@K") for a deeper dive.
 :::
 
-##### Sample Output
+#### Sample Output
 
 ```bash
 Processing: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 300/300 [00:00<00:00, 29039.05it/s]
@@ -49,9 +49,9 @@ Processing: 100%|█████████████████████
 ```
 
 
-#### `GenerationEvaluator`
+### `GenerationEvaluator`
 
-##### Example Usage
+#### Example Usage
 
 ```python
 from continuous_eval.data_downloader import example_data_downloader
@@ -76,7 +76,7 @@ evaluator.save("generation_evaluator_results.jsonl")
 Semantic metrics such as `DebertaAnswerScores` can be more efficiently calculated in batches.
 :::
 
-##### Sample Output
+#### Sample Output
 
 ```bash
 Processing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:43<00:00,  2.28it/s]

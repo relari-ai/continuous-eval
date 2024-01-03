@@ -27,5 +27,5 @@ It expects at least one of the following columns combinations:
 - `retrieved_contexts`, `ground_truth_contexts`
 
 :::tip
-Check out the **[Data Dependency Table]()** in Overview of Metrics, to make sure your dataset contains the columns need to compute the metrics of your choice.
+Check out the <a href="/metrics/overview/#data-dependencies">Data Dependency Table</a>. in Overview of Metrics, to make sure your dataset contains the columns need to compute the metrics of your choice.
 :::

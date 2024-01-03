@@ -69,5 +69,5 @@ print(metric.calculate(**datum))
 :::note
 
 **You can calculate aggregate metrics such as MAP, MRR (@ top K chunks) over a dataset** to see aggregate rank-aware retrieval performance.
-Check out [Evaluator]() for examples
+Check out <a href="/evaluators/evaluator#retrievalevaluator">Retrieval Evaluator</a> for examples
 :::

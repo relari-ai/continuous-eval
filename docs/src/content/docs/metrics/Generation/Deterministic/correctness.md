@@ -1,5 +1,7 @@
 ---
 title: Correctness
+sidebar:
+    order: 1
 ---
 ### Definitions
 
