@@ -5,7 +5,7 @@ import pytest
 
 from continuous_eval.dataset import Dataset
 from continuous_eval.evaluators import GenerationEvaluator, RetrievalEvaluator
-from continuous_eval.metrics import DeterministicAnswerRelevance
+from continuous_eval.metrics import DeterministicAnswerCorrectness
 from tests.helpers.dummy_metric import DummyMetric
 
 retrieval_dataset = Dataset.from_jsonl("tests/data/retrieval_sm.jsonl")
@@ -67,19 +67,19 @@ def test_retieval_evaluator_float_batch_size():
 def test_generation_evaluator():
     expected_keys = {
         "rouge_l_f1",
-        "token_f1",
+        "token_overlap_f1",
         "bleu_score",
         "rouge_l_precision",
         "rouge_l_recall",
-        "token_recall",
-        "token_precision",
+        "token_overlap_recall",
+        "token_overlap_precision",
         "dummy_correctness",
     }
 
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )
@@ -98,19 +98,19 @@ def test_generation_evaluator():
 def test_generation_evaluator_int_batch_size():
     expected_keys = {
         "rouge_l_f1",
-        "token_f1",
+        "token_overlap_f1",
         "bleu_score",
         "rouge_l_precision",
         "rouge_l_recall",
-        "token_recall",
-        "token_precision",
+        "token_overlap_recall",
+        "token_overlap_precision",
         "dummy_correctness",
     }
 
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )
@@ -122,19 +122,19 @@ def test_generation_evaluator_int_batch_size():
 def test_generation_evaluator_float_batch_size():
     expected_keys = {
         "rouge_l_f1",
-        "token_f1",
+        "token_overlap_f1",
         "bleu_score",
         "rouge_l_precision",
         "rouge_l_recall",
-        "token_recall",
-        "token_precision",
+        "token_overlap_recall",
+        "token_overlap_precision",
         "dummy_correctness",
     }
 
     evaluator = GenerationEvaluator(
         dataset=generation_dataset,
         metrics=[
-            DeterministicAnswerRelevance(),
+            DeterministicAnswerCorrectness(),
             DummyMetric({"dummy_correctness"}),
         ],
     )

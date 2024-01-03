@@ -2,6 +2,7 @@ import string
 
 import pytest
 
+from continuous_eval.llm_factory import LLMFactory
 from continuous_eval.metrics.base import LLMBasedMetric
 
 
@@ -17,7 +18,7 @@ class DummyLLMMetric(LLMBasedMetric):
             ),
             "user_prompt": ("Please tell me `yes`."),
         }
-        return self.llm_factory.run(prompt)
+        return self._llm.run(prompt)
 
 
 def test_llm_based_metric():
@@ -32,7 +33,7 @@ def test_llm_based_metric():
     ]
 
     for mdl in models:
-        metric = DummyLLMMetric(mdl)
+        metric = DummyLLMMetric(LLMFactory(mdl))
         response = metric.calculate()
         assert (
             response.lower()  # make sure the response is lowercased

@@ -20,9 +20,16 @@ class Dataset(pd.DataFrame):
         super().__init__(data=data, index=index, columns=columns, copy=copy)
         self.validate()
 
+    def iterate(self):
+        for _, row in self.iterrows():
+            yield row.to_dict()
+
+    def datum(self, index):
+        return self.iloc[index].to_dict()
+
     def to_dict(self, *args, **kwargs):
-        if 'orient' not in kwargs:
-            kwargs['orient'] = "records"
+        if "orient" not in kwargs:
+            kwargs["orient"] = "records"
         return super().to_dict(*args, **kwargs)
 
     def validate(self):
@@ -80,4 +87,4 @@ class Dataset(pd.DataFrame):
 
     def to_jsonl(self, path: Union[str, Path]):
         with open(path, "w") as f:
-            f.write(self.to_json(orient='records', lines=True))
+            f.write(self.to_json(orient="records", lines=True))

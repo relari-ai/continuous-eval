@@ -54,7 +54,6 @@ class DataSplit:
         oversample: bool = False,
         random_state: Optional[int] = None,
     ):
-
         if isinstance(y, pd.Series):
             y = y.to_numpy()
 

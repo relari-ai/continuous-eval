@@ -1,12 +1,16 @@
 import re
 
-from openai import OpenAI
-
-from continuous_eval.metrics.base import EVAL_LLM, LLMBasedMetric
+from continuous_eval.llm_factory import DefaultLLM, LLMInterface
+from continuous_eval.metrics.base import LLMBasedMetric
 
 
 class LLMBasedContextPrecision(LLMBasedMetric):
-    def __init__(self, model=EVAL_LLM, use_few_shot: bool = True, log_relevance_by_context: bool = False):
+    def __init__(
+        self,
+        model: LLMInterface = DefaultLLM,
+        use_few_shot: bool = True,
+        log_relevance_by_context: bool = False,
+    ):
         super().__init__(model)
         self.use_few_shot = use_few_shot
         self.log_relevance_by_context = log_relevance_by_context
@@ -46,7 +50,7 @@ Given the following question and context, verify if the information in the given
                 "user_prompt": ("Question: " + question + "\nContext: " + context + "\nResponse:"),
             }
 
-            content = self.llm_factory.run(prompt)
+            content = self._llm.run(prompt)
             score = "yes" in content.lower()
             scores.append(score)
 
@@ -73,7 +77,7 @@ Given the following question and context, verify if the information in the given
 
 
 class LLMBasedContextCoverage(LLMBasedMetric):
-    def __init__(self, model=EVAL_LLM, use_few_shot: bool = True):
+    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
@@ -118,7 +122,7 @@ Given a question, context, and answer, analyze each statement in the answer and 
             "user_prompt": ("question: " + question + "\ncontext: " + context + "\nanswer: " + answer),
         }
 
-        content = self.llm_factory.run(prompt)
+        content = self._llm.run(prompt)
 
         try:
             coverage = self.extract_attributed_from_broken_json(content)

@@ -1,4 +1,5 @@
-from continuous_eval.metrics.base import EVAL_LLM, LLMBasedMetric
+from continuous_eval.llm_factory import DefaultLLM, LLMInterface
+from continuous_eval.metrics.base import LLMBasedMetric
 from continuous_eval.metrics.retrieval_LLM_based_metrics import LLMBasedContextCoverage
 
 
@@ -10,7 +11,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
 
     def __init__(
         self,
-        model: str = EVAL_LLM,
+        model: LLMInterface = DefaultLLM,
         use_few_shot: bool = True,
         classify_by_statement: bool = False,
     ):
@@ -60,23 +61,23 @@ The statement is supported by the context, which states that photosynthesis conv
                 "user_prompt": ("Context: " + context + r"\Statement: " + answer),
             }
 
-            response = self.llm_factory.run(prompt)
+            response = self._llm.run(prompt)
             score_txt, reasoning = response.split("\n", 1)
             score = bool("yes" in score_txt.lower())
 
         return {
-            "LLM_based_faithfulness_score": score,
+            "LLM_based_faithfulness": score,
             "LLM_based_faithfulness_reasoning": reasoning,
         }
 
 
 class LLMBasedAnswerCorrectness(LLMBasedMetric):
     """
-    The LLM based answer relevance metric.
-    Measures whether the generated answer is relenvat to the question.
+    The LLM based answer correctness metric.
+    Measures whether the generated answer is correct compared to the ground truths.
     """
 
-    def __init__(self, model: str = EVAL_LLM, use_few_shot: bool = True):
+    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
@@ -116,7 +117,7 @@ Use the following guidelines for evaluation:
             ),
         }
 
-        response = self.llm_factory.run(prompt)
+        response = self._llm.run(prompt)
         score_txt, reasoning = response.split("\n", 1)
         score = float(score_txt.split(":")[-1].strip())
 

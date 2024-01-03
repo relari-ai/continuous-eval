@@ -10,7 +10,7 @@ def eval_prediction(y, y_hat) -> Dict:
     try:
         f1 = 2 * (precision * recall) / (precision + recall)
     except ZeroDivisionError:
-        f1 = float('nan')
+        f1 = float("nan")
     return dict(
         precision=precision,
         recall=recall,

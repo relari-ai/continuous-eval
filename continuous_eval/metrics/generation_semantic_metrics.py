@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, List
 
 import pandas as pd
@@ -112,6 +113,7 @@ class DebertaAnswerScores(Metric):
         return entailment_key, contradiction_key
 
     def batch_calculate(self, dataset: List[Dict[str, Any]]):
+        warnings.filterwarnings("ignore", category=UserWarning)
         entailment_key, contradiction_key = self._ret_keys()
         sentence_pairs = list()
         ids = list()
@@ -139,6 +141,7 @@ class DebertaAnswerScores(Metric):
         ]
 
     def calculate(self, answer, ground_truths, **kwargs):
+        warnings.filterwarnings("ignore", category=UserWarning)
         sentence_pairs = list()
         entailment_key, contradiction_key = self._ret_keys()
 
@@ -153,7 +156,11 @@ class DebertaAnswerScores(Metric):
         scores = DebertaScores().calculate(sentence_pairs)
         # Get the score for the pair with the highest entailment
         scores_with_max_entailment = max(scores, key=lambda sublist: sublist[1])
+
+        # convert logits into normalized probabilities
+        probs = torch.nn.functional.softmax(torch.tensor(scores_with_max_entailment), dim=0)
+        
         return {
-            entailment_key: scores_with_max_entailment[1],
-            contradiction_key: scores_with_max_entailment[0],
+            entailment_key: probs[1].item(),
+            contradiction_key: probs[0].item(),
         }

@@ -10,7 +10,7 @@ from sklearn.model_selection import GridSearchCV
 from continuous_eval.datatypes import XYData
 
 
-class ConformalClassifier:
+class EnsembleMetric:
     def __init__(
         self,
         training: XYData,
@@ -69,5 +69,5 @@ class ConformalClassifier:
         pickle.dump(self, open(savepath, "wb"))
 
     @staticmethod
-    def load(loadpath: str) -> "ConformalClassifier":
+    def load(loadpath: str) -> "EnsembleMetric":
         return pickle.load(open(loadpath, "rb"))
