@@ -85,7 +85,7 @@ For generation you can instead use the `GenerationEvaluator`.
 - `LLMBasedContextPrecision`: Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
 - `LLMBasedContextCoverage`: Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calcualted by LLM
 
-### Generation-based metrics
+### Generation metrics
 
 #### Deterministic
 

@@ -3,7 +3,7 @@ from continuous_eval.evaluators import RetrievalEvaluator
 from continuous_eval.metrics import PrecisionRecallF1, RankedRetrievalMetrics
 
 # Let's download the retrieval dataset example
-retrieval = example_data_downloader("retrieval")
+dataset = example_data_downloader("retrieval")
 
 # Setup the evaluator
 evaluator = RetrievalEvaluator(
