@@ -105,5 +105,6 @@ def test_semantic_outputs():
         "AnswerSimilarity": BertAnswerSimilarity().calculate(**wrong),
     }
     assert d1["AnswerScore"]["deberta_answer_entailment"] > d2["AnswerScore"]["deberta_answer_entailment"]
+    assert d1["AnswerScore"]["deberta_answer_entailment"] < 1.0 and d1["AnswerScore"]["deberta_answer_contradiction"] > 0
     assert d1["AnswerSimilarity"]["bert_answer_similarity"] > d2["AnswerSimilarity"]["bert_answer_similarity"]
     assert d1["AnswerRelevance"]["bert_answer_relevance"] > 0 and d1["AnswerRelevance"]["bert_answer_relevance"] < 1.0

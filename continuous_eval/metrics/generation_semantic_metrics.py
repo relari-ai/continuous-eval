@@ -156,7 +156,11 @@ class DebertaAnswerScores(Metric):
         scores = DebertaScores().calculate(sentence_pairs)
         # Get the score for the pair with the highest entailment
         scores_with_max_entailment = max(scores, key=lambda sublist: sublist[1])
+
+        # convert logits into normalized probabilities
+        probs = torch.nn.functional.softmax(torch.tensor(scores_with_max_entailment), dim=0)
+        
         return {
-            entailment_key: scores_with_max_entailment[1],
-            contradiction_key: scores_with_max_entailment[0],
+            entailment_key: probs[1].item(),
+            contradiction_key: probs[0].item(),
         }

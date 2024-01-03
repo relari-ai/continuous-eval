@@ -26,7 +26,7 @@ The code requires the `OPENAI_API_KEY` (optionally `ANTHROPIC_API_KEY` and/or `G
 ### Usage
 
 ```python
-from continuous_eval.metrics import PrecisionRecallF1, MatchingStrategy
+from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 
 datum = {
     "question": "What is the capital of France?",
@@ -39,7 +39,7 @@ datum = {
     "ground_truths": ["Paris"],
 }
 
-metric = PrecisionRecallF1()
+metric = PrecisionRecallF1(RougeChunkMatch())
 print(metric.calculate(**datum))
 ```
 

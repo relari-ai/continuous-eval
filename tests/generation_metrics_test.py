@@ -14,23 +14,23 @@ def test_deterministic_answer_relevance():
     data = [example_datum.ROMEO_AND_JULIET, example_datum.IMPLICATIONS_GLOBAL_WARMING]
     expected_results = [
         {
-            "rouge_l_f1": 0.999999995,
-            "token_f1": 1.0,
-            "rouge_l_recall": 1.0,
-            "token_precision": 1.0,
-            "token_recall": 1.0,
-            "rouge_l_precision": 1.0,
-            "bleu_score": 1.0,
+            'rouge_l_recall': 1.0, 
+            'rouge_l_precision': 1.0, 
+            'rouge_l_f1': 0.999999995, 
+            'token_overlap_recall': 1.0, 
+            'token_overlap_precision': 1.0, 
+            'token_overlap_f1': 1.0, 
+            'bleu_score': 1.0
         },
         {
-            "rouge_l_f1": 0.49999999555555563,
-            "token_f1": 0.6153846153846153,
-            "token_recall": 1.0,
-            "rouge_l_recall": 0.75,
-            "bleu_score": 0.4734525552325106,
-            "token_precision": 0.4444444444444444,
-            "rouge_l_precision": 0.375,
-        },
+            'rouge_l_recall': 0.75, 
+            'rouge_l_precision': 0.375, 
+            'rouge_l_f1': 0.49999999555555563, 
+            'token_overlap_recall': 1.0, 
+            'token_overlap_precision': 0.4444444444444444, 
+            'token_overlap_f1': 0.6153846153846153, 
+            'bleu_score': 0.4734525552325106
+        }
     ]
 
     metric = DeterministicAnswerCorrectness()
@@ -41,12 +41,12 @@ def test_rouge_sentence_faithfulness():
     data = [example_datum.CAPITAL_OF_FRANCE]
     expected_results = [
         {
-            "rouge_faithfulness": 1.0,
-            "token_overlap_faithfulness": 1.0,
-            "avg_sentence_bleu": 0.0,
-            "min_sentence_bleu": 0.0,
-            "rouge_scores_p_by_sentence": [1.0],
-            "token_overlap_p_by_sentence": [1.0],
+            'rouge_faithfulness': 1.0, 
+            'token_overlap_faithfulness': 1.0, 
+            'bleu_faithfulness': 3.3720152341391845e-06, 
+            'rouge_p_by_sentence': [1.0], 
+            'token_overlap_p_by_sentence': [1.0], 
+            'blue_score_by_sentence': [3.3720152341391845e-06]
         },
     ]
 
@@ -60,7 +60,7 @@ def test_llm_based_faithfulness():
     metric = LLMBasedFaithfulness()
     results = [metric.calculate(**datum) for datum in data]
     for result in results:
-        assert isinstance(result["LLM_based_faithfulness_score"], bool)
+        assert isinstance(result["LLM_based_faithfulness"], bool)
 
 
 def test_llm_based_answer_correctness():
