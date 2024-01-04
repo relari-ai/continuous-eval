@@ -15,7 +15,6 @@ class EnsembleMetric:
         self,
         training: XYData,
         calibration: XYData,
-        judicator: Optional[Callable] = None,
         alpha: float = 0.1,
         random_state: Optional[int] = None,
     ) -> None:
@@ -29,7 +28,6 @@ class EnsembleMetric:
         # fmt: on
         self.features = set(training.X.columns)
         self._regressor = self._make_regressor(training.X, training.y)
-        self._judicator = judicator
         self._alpha = alpha
         self._classifier = MapieClassifier(
             estimator=self._regressor,
@@ -50,11 +48,11 @@ class EnsembleMetric:
         clf.fit(X, y)
         return clf
 
-    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, X: pd.DataFrame, judicator: Optional[Callable] = None) -> pd.DataFrame:
         assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
         assert set(X.columns) == self.features, "X must have the same features as the training data"
         y_pred, y_set = self._classifier.predict(X, alpha=self._alpha)
-        if self._judicator is None:
+        if judicator is None:
             return y_pred, y_set
         y_set = y_set.squeeze()
         y_hat = np.empty(len(y_set), dtype=int)
@@ -62,7 +60,9 @@ class EnsembleMetric:
             if np.sum(y_set[i]) == 1:
                 y_hat[i] = np.argmax(y_set[i])
             else:
-                y_hat[i] = self._judicator(i)
+                y_hat[i] = judicator(i)
+                y_set[i] = np.zeros(len(y_set[i]), dtype=int)
+                y_set[i][y_hat[i]] = 1
         return y_hat, y_set
 
     def save(self, savepath: str) -> None:

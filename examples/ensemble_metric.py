@@ -23,7 +23,7 @@ evaluator = GenerationEvaluator(
         DebertaAnswerScores(),
     ],
 )
-evaluator.run(batch_size=100)
+results = evaluator.run(batch_size=100)
 toc = perf_counter()
 print(f"Evaluation completed in {toc - tic:.2f}s")
 print(set(evaluator.aggregated_results))
@@ -31,16 +31,17 @@ print(set(evaluator.aggregated_results))
 evaluator.save("det_sem.jsonl")  # Save for future use...
 
 # Now let's use the results to train a classifier to predict the correctness of the answers (as evaluated by a human annotator)
-X = pd.DataFrame(evaluator.results)
+X = pd.DataFrame(results)
 y = dataset["annotation"].map({"correct": 1, "incorrect": 0}).astype(int).to_numpy()
 
 # We split the dataset into train, test, and calibration sets
 datasplit = DataSplit(
     X=X,
     y=y,
+    dataset=dataset,
     split_ratios=SplitRatios(train=0.6, test=0.2, calibration=0.2),
     features=[
-        "token_recall",
+        "token_overlap_recall",
         "deberta_answer_entailment",
         "deberta_answer_contradiction",
     ],

@@ -51,6 +51,7 @@ class DataSplit:
         y: np.ndarray,
         features: List[str],
         split_ratios: SplitRatios,
+        dataset: Optional[pd.DataFrame] = None,
         oversample: bool = False,
         random_state: Optional[int] = None,
     ):
@@ -64,6 +65,14 @@ class DataSplit:
         assert len(y.shape) == 1, "y must be a 1-dimensional array"
 
         self.features = features
+
+        if dataset is not None:
+            # Merge the dataset with the features in a single DataFrame
+            assert isinstance(dataset, pd.DataFrame), "dataset must be a Dataset or a DataFrame object"
+            assert len(dataset) == len(X), "X and dataset must have the same number of rows"
+            X = dataset.reset_index(drop=True).merge(
+                X.reset_index(drop=True), left_index=True, right_index=True, copy=True
+            )
 
         # Split the data into training, testing and calibration sets
         X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=split_ratios.test, random_state=random_state)
