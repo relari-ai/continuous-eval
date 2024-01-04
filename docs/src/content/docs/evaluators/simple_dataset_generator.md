@@ -3,7 +3,7 @@ title: Dataset Generator
 sidebar:
   badge:
     text: beta
-    variant: caution
+    variant: tip
 ---
 
 **We recommend AI teams invest in manually curating a high-quality golden dataset** (created by users, or domain experts) to properly evaluate and improve the LLM pipeline.

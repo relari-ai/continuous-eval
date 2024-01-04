@@ -1,5 +1,9 @@
 ---
 title: Metric Ensembling
+sidebar:
+  badge:
+    text: beta
+    variant: tip
 ---
 
 ## Metric Ensembling

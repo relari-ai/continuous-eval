@@ -59,19 +59,20 @@ export default defineConfig({
 								},
 							]
 						},
+						{
+							label: 'Metric Ensembling',
+							items: [
+								{ label: 'Metric Ensembling', link: '/metrics/ensembling/ensembling/' },
+								{ label: 'Classification', link: '/metrics/ensembling/classifier/' },
+							],
+						},
 					],
 				},
 				{
 					label: 'Datasets',
 					autogenerate: { directory: 'evaluators' },
 				},
-				{
-					label: 'Metric Ensembling',
-					items: [
-						{ label: 'Conformal Prediction', link: '/classification/conformal_prediction/' },
-						{ label: 'Classification', link: '/classification/classifier/' },
-					],
-				},
+
 
         		{
 					label: 'Examples',

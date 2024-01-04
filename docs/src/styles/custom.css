@@ -3,3 +3,9 @@
   font-family: var(--__sl-font);
   font-size: var(--sl-text-sm);
 }
+
+.top-level>li>details>ul>li>details>summary>div>span {
+  font-weight: light;
+  font-family: var(--__sl-font);
+  font-size: var(--sl-text-sm);
+}
