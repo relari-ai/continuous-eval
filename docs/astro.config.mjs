@@ -25,7 +25,8 @@ export default defineConfig({
 					label: 'Getting Started',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Introduction', link: '/getting-started/introduction/'},
+						{ label: 'Start Here!', link: '/'},
+						{ label: 'Why continuous-eval?', link: '/getting-started/introduction/'},
 						{ label: 'Installation', link: '/getting-started/installation/' },
 						{ label: 'Quick Start', link: '/getting-started/quickstart/' },
 					],
@@ -61,15 +62,13 @@ export default defineConfig({
 						},
 						{
 							label: 'Metric Ensembling',
-							items: [
-								{ label: 'Classification', link: '/metrics/ensembling/classifier/' },
-							],
+							autogenerate: { directory: '/metrics/ensembling/' },
 						},
 					],
 				},
 				{
 					label: 'Datasets',
-					autogenerate: { directory: 'evaluators' },
+					autogenerate: { directory: '/dataset/' }
 				},
         		{
 					label: 'Examples',

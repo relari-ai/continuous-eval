@@ -3,13 +3,11 @@ title: Quick Start
 description: Quick Start
 ---
 
-## Installation
+If you haven't installed continuous-eval, go <a href="/getting-started/installation">here</a>.
 
-```bash
-python3 -m pip install continuous-eval
-```
+## Run a single metric
 
-## Run a metric
+Import the metric of your choice (<a href="/metrics/overview">see all metrics</a>) and get the results.
 
 ```python
 from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
@@ -29,9 +27,11 @@ metric = PrecisionRecallF1(RougeChunkMatch())
 print(metric.calculate(**datum))
 ```
 
-## Run eval on a dataset
+## Run evalulation over a dataset
 
-**Load a Golden Dataset**
+In the following code example, we load an example evaluation dataset `retrieval`, create an `RetrievalEvaluator`, and selected two metric groups `PrecisionRecallF1`, `RankedRetrievalMetrics`. 
+
+The aggregated results are printed in the terminal and the results per datum is saved at `retrieval_evaluator_results.jsonl`.
 
 ```python
 from continuous_eval.data_downloader import example_data_downloader
@@ -50,24 +50,19 @@ evaluator = RetrievalEvaluator(
     ],
 )
 # Run the eval!
-evaluator.run(k=2, batch_size=1)
+evaluator.run()
 # Peaking at the results
 print(evaluator.aggregated_results)
 # Saving the results for future use
 evaluator.save("retrieval_evaluator_results.jsonl")
 ```
 
-For generation you can instead use the `GenerationEvaluator`.
+Learn more about the <a href="/dataset/dataset">dataset</a> class and the <a href="/dataset/evaluator">`Evaluator`</a> class.
 
-### Curate an eval dataset for your application
+## Curate the dataset
 
-**We recommend AI teams invest in manually curating a high-quality golden dataset** (created by users, or domain experts) to properly evaluate and improve the LLM pipeline.
-Every (RAG-based) LLM application is different in functionalities and requirements, and the evaluation golden dataset should be diverse enough to capture different design requirements.
+**We recommend AI teams invest in manually curating a high-quality golden dataset** (curated domain experts and checked against user data) to properly evaluate and improve the LLM pipeline. The evaluation golden dataset should be diverse enough to capture unique design requirements in each LLM pipeline.
 
-If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a silver dataset as a starting point, upon which you can modify and improve.
+**If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a "silver dataset" as a starting point, upon which you can modify and improve.**
 
-```python
-from continuous_eval.simple_dataset_generator import SimpleDatasetGenerator
-
-dataset = SimpleDatasetGenerator(VectorStoreIndex, num_questions=10)
-```
+Checkout the guide to create a "silver dataset" using <a href="/dataset/simple_dataset_genetator">`SimpleDatasetGenerator`</a>.

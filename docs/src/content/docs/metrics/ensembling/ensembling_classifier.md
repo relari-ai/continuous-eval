@@ -2,8 +2,8 @@
 title: Metric Ensembling
 sidebar:
   badge:
-    text: beta
-    variant: tip
+    text: new
+    variant: note
 ---
 
 
