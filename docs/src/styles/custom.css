@@ -1,3 +1,7 @@
+:root {
+	--sl-color-accent-high: #7ccab0;
+}
+
 .top-level>li>details>ul>li>details>ul>li>details>summary>div>span {
   font-weight: normal;
   font-family: var(--__sl-font);
