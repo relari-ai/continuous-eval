@@ -98,7 +98,7 @@ class LLMFactory(LLMInterface):
                     presence_penalty=0,
                 )
             content = response.choices[0].message.content
-        elif isinstance(self.client, Anthropic):
+        elif ANTHROPIC_AVAILABLE and isinstance(self.client, Anthropic):
             response = self.client.completions.create(
                 model="claude-2.1",
                 max_tokens_to_sample=1024,
@@ -106,7 +106,7 @@ class LLMFactory(LLMInterface):
                 prompt=f"{prompt['system_prompt']}{HUMAN_PROMPT}{prompt['user_prompt']}{AI_PROMPT}",
             )
             content = response.completion
-        elif isinstance(self.client, google_genai.GenerativeModel):
+        elif GOOGLE_GENAI_AVAILABLE and isinstance(self.client, google_genai.GenerativeModel):
             generation_config = {
                 "temperature": temperature,
                 "top_p": 1,
