@@ -1,25 +1,34 @@
 ---
-title: Continuous-Evaluation Documentation
+title: Welcome!
 description: Making LLM development a science rather than an art.
 ---
 
 Start today with continuous-eval and make your LLM development a science rather than an art.
 
-```bash
-pip install continuous-eval
-```
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+import { Icon } from '@astrojs/starlight/components';
 
-:::tip
 
-**Pro tip.**
-Use metric ensamble to get the best of both worlds.
 
-:::
-
-You can also put notes
-
-:::note
-
-We are working on a managed cloud service.
-
-:::
+<CardGrid>
+  <LinkCard
+    title="🚀 Getting Started"
+    description="Install the package and learn how to get started quickly."
+    href="/getting-started/introduction/"
+  />
+  <LinkCard
+    title="📊 Metrics"
+    description="Explore the available metrics and learn how to combine multiple metrics effectively."
+    href="/metrics/overview/"
+  />
+  <LinkCard
+    title="🔍 Datasets"
+    description="Perform evaluations on datasets and generate synthetic datasets."
+    href="/evaluators/dataset/"
+  />
+  <LinkCard
+    title="💡 Examples"
+    description="Discover code snippets and examples to help you understand and implement the functionality."
+    href="/examples/single_metric/"
+  />
+</CardGrid>

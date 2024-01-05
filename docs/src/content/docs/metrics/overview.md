@@ -2,7 +2,9 @@
 title: Overview of Metrics
 description: Overview of different types of metrics
 sidebar:
-  order: -1
+  badge:
+    text: beta
+    variant: tip
 ---
 
 ## What the Metrics Measure

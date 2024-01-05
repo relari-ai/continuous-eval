@@ -1,9 +1,11 @@
 ---
 title: Introduction
 description: Overview
+sidebar:
+  badge:
+    text: new
+    variant: tip
 ---
-
-**To Improve after drafting Bookface Post**
 
 ## What is continuous-eval?
 
@@ -11,13 +13,18 @@ description: Overview
 
 ## Why run evaluation?
 
-Running evaluation can help accelerate your development. Without understanding the performance of your pipeline, it is difficult to know what and how to improve.
+Running evaluation can help you 1) identify pipeline strengths and weaknesses, 2) know what / how to improve, 3) accelerate your development.
 
 ## Why use continuous eval?
 
-- No need for LLMs
-- Scientific
-- Advanced tool for metric ensembling
+- **Most Complete RAG Metric Library:** mix and match Deterministic, Semantic and LLM-based metrics.
+
+- **Trustworthy Ensemble Metric:** easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
+
+- **Cheaper and Faster:** our hybrid pipeline slashes cost by up to 15x compared to pure LLM-based metrics, and reduces eval time on large datasets from hours to minutes.
+
+- **Tailored to Your Data:** our evaluation pipeline can be customized to your use case and leverages the data you trust. We can help you curate a golden dataset if you don’t have one.
+
 
 ## Resources
 

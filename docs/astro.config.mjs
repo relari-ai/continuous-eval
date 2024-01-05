@@ -62,7 +62,6 @@ export default defineConfig({
 						{
 							label: 'Metric Ensembling',
 							items: [
-								{ label: 'Metric Ensembling', link: '/metrics/ensembling/ensembling/' },
 								{ label: 'Classification', link: '/metrics/ensembling/classifier/' },
 							],
 						},
@@ -72,8 +71,6 @@ export default defineConfig({
 					label: 'Datasets',
 					autogenerate: { directory: 'evaluators' },
 				},
-
-
         		{
 					label: 'Examples',
 					autogenerate: { directory: 'examples' },
