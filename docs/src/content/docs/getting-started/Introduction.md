@@ -13,7 +13,9 @@ sidebar:
 
 ## Why another eval package?
 
-Good LLM evaluation should help you reliably identify weaknesses in the pipeline, inform what actions to take, and accelerate your development from prototype to production. However, LLM evalulation today remains challenging because:
+Good LLM evaluation should help you reliably identify weaknesses in the pipeline, inform what actions to take, and accelerate your development from prototype to production. 
+
+As AI developers, we always wanted to put LLM Evaluation as part of our CI/CD pipeline just like any other part of software, but today it remains challenging because:
 
 **Human evaluation is trustworthy but not scalable**
 - Eyeballing can only be done on a small dataset, and it has to be repeated for any pipeline update  
@@ -22,10 +24,6 @@ Good LLM evaluation should help you reliably identify weaknesses in the pipeline
 **Using LLMs to evaluate LLMs is expensive, slow and difficult to trust**
 - Can be very costly and slow to run at scale
 - Can be biased towards certain answers and often doesn’t align well with human evaluation
-
-**Metrics don’t produce actions**
-- End-to-end eval doesn’t reveal component-level performance
-- It is difficult to turn metrics into “what’s next to try”
 
 ## How is continuous-eval different?
 
