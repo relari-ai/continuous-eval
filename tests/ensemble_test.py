@@ -82,9 +82,8 @@ def test_ensemble_classifier_with_judicator():
     clf = EnsembleMetric(
         training=datasplit.train,
         calibration=datasplit.calibration,
-        judicator=lambda idx: datasplit.test.y[idx],
     )
-    y_hat_with_judge, _ = clf.predict(datasplit.test.X)
+    y_hat_with_judge, _ = clf.predict(datasplit.test.X, judicator=lambda idx: datasplit.test.y[idx])
     eval_with_judge = eval_prediction(datasplit.test.y, y_hat_with_judge)
 
     assert eval_no_judge["f1"] <= eval_with_judge["accuracy"]
