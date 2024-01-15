@@ -18,8 +18,8 @@ def test_bert_similarity_mean():
     x = metric.batch_calculate(data, pooler_output=False)
     assert x["bert_similarity"][0] > x["bert_similarity"][1]
 
-    x = metric.calculate("The pen is on the table", "This book is red", pooler_output=False)
-    assert x["bert_similarity"] > 0 and x["bert_similarity"] < 1
+    y = metric.calculate("The pen is on the table", "This book is red", pooler_output=False)
+    assert y["bert_similarity"] > 0 and y["bert_similarity"] < 1
 
 
 def test_bert_similarity_mean_pooler_output():
@@ -32,8 +32,8 @@ def test_bert_similarity_mean_pooler_output():
     x = metric.batch_calculate(data, pooler_output=True)
     assert x["bert_similarity"][0] > x["bert_similarity"][1]
 
-    x = metric.calculate("The pen is on the table", "This book is red", pooler_output=True)
-    assert x["bert_similarity"] > 0 and x["bert_similarity"] < 1
+    y = metric.calculate("The pen is on the table", "This book is red", pooler_output=True)
+    assert y["bert_similarity"] > 0 and y["bert_similarity"] < 1
 
 
 def test_answer_relevance():
@@ -48,8 +48,9 @@ def test_answer_relevance():
         },
     ]
     metric = BertAnswerRelevance()
-    metric.batch_calculate(dataset)
-    metric.calculate(**dataset[0])
+    x = metric.batch_calculate(dataset)
+    y = metric.calculate(**dataset[0])
+    assert abs(x[0]["bert_answer_relevance"] - y["bert_answer_relevance"]) < 1e-1
 
 
 def test_answer_similarity():
@@ -64,8 +65,9 @@ def test_answer_similarity():
         },
     ]
     metric = BertAnswerSimilarity()
-    metric.batch_calculate(dataset)
-    metric.calculate(**dataset[0])
+    x = metric.batch_calculate(dataset)
+    y = metric.calculate(**dataset[0])
+    assert abs(x[0]["bert_answer_similarity"] - y["bert_answer_similarity"]) < 1e-1
 
 
 def test_deberta_answer_scores():
@@ -80,8 +82,10 @@ def test_deberta_answer_scores():
         },
     ]
     metric = DebertaAnswerScores()
-    metric.batch_calculate(dataset)
-    metric.calculate(**dataset[0])
+    x = metric.batch_calculate(dataset)
+    y = metric.calculate(**dataset[0])
+    assert abs(x[0]["deberta_answer_entailment"] - y["deberta_answer_entailment"]) < 1e-5
+    assert abs(x[0]["deberta_answer_contradiction"] - y["deberta_answer_contradiction"]) < 1e-5
 
 
 def test_semantic_outputs():
@@ -105,6 +109,8 @@ def test_semantic_outputs():
         "AnswerSimilarity": BertAnswerSimilarity().calculate(**wrong),
     }
     assert d1["AnswerScore"]["deberta_answer_entailment"] > d2["AnswerScore"]["deberta_answer_entailment"]
-    assert d1["AnswerScore"]["deberta_answer_entailment"] < 1.0 and d1["AnswerScore"]["deberta_answer_contradiction"] > 0
+    assert (
+        d1["AnswerScore"]["deberta_answer_entailment"] < 1.0 and d1["AnswerScore"]["deberta_answer_contradiction"] > 0
+    )
     assert d1["AnswerSimilarity"]["bert_answer_similarity"] > d2["AnswerSimilarity"]["bert_answer_similarity"]
     assert d1["AnswerRelevance"]["bert_answer_relevance"] > 0 and d1["AnswerRelevance"]["bert_answer_relevance"] < 1.0

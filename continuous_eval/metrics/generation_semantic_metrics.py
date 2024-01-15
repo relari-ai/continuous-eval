@@ -127,10 +127,11 @@ class DebertaAnswerScores(Metric):
                     sentence_pairs.append((datum["answer"], gt_answer))
                 ids.append(i)
 
-        scores = DebertaScores().calculate(sentence_pairs)
+        logits = DebertaScores().calculate(sentence_pairs)
+        probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
 
         # Group by 'ids' and get the score for the pair with the highest entailment
-        df = pd.DataFrame({entailment_key: scores[:, 1], contradiction_key: scores[:, 0], "ids": ids})
+        df = pd.DataFrame({entailment_key: probs[:, 1], contradiction_key: probs[:, 0], "ids": ids})
         idx = df.groupby("ids")[entailment_key].idxmax()
         return [
             {entailment_key: entailment_value, contradiction_key: contradiction_value}
@@ -153,13 +154,13 @@ class DebertaAnswerScores(Metric):
                 # premise=answer => hypothesis=ground truth
                 sentence_pairs.append((answer, gt_answer))
 
-        scores = DebertaScores().calculate(sentence_pairs)
+        logits = DebertaScores().calculate(sentence_pairs)
         # Get the score for the pair with the highest entailment
-        scores_with_max_entailment = max(scores, key=lambda sublist: sublist[1])
+        logits_with_max_entailment = max(logits, key=lambda sublist: sublist[1])
 
         # convert logits into normalized probabilities
-        probs = torch.nn.functional.softmax(torch.tensor(scores_with_max_entailment), dim=0)
-        
+        probs = torch.nn.functional.softmax(torch.tensor(logits_with_max_entailment), dim=0)
+
         return {
             entailment_key: probs[1].item(),
             contradiction_key: probs[0].item(),
