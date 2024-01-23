@@ -7,6 +7,7 @@ from langchain.vectorstores import VectorStore
 
 from continuous_eval import Dataset
 from continuous_eval.llm_factory import LLMFactory, LLMInterface
+from continuous_eval.utils.telemetry import telemetry
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -208,6 +209,8 @@ class SimpleDatasetGenerator:
         assert multi_hop_percentage >= 0 and multi_hop_percentage <= 1, "multi_hop_percentage must be in [0, 1]"
         assert max_try_ratio > 0, "max_try_ratio must be positive"
         assert num_seed_vectors > 0, "num_seed_vectors must be positive"
+
+        telemetry.log_event("simple_dataset_generation", f"num_questions: {num_questions}")
 
         multi_hop_questions = []
         single_hop_questions = []
