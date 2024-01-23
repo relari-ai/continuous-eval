@@ -1,5 +1,5 @@
 import json
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from functools import cached_property
 from typing import List, Optional, Union
 
@@ -7,13 +7,22 @@ import pandas as pd
 
 from continuous_eval.dataset import Dataset
 from continuous_eval.metrics.base import Metric
+from continuous_eval.utils.telemetry import telemetry
 
 
 def _required_args(fn):
     return set(fn.__code__.co_varnames[1 : fn.__code__.co_argcount])
 
 
-class BaseEvaluator(ABC):
+class EvaluatorDecoratorMeta(ABCMeta, type):
+    def __new__(cls, name, bases, dct):
+        for attr, value in dct.items():
+            if callable(value) and attr == 'run':
+                dct[attr] = telemetry.evaluator_telemetry(value)
+        return type.__new__(cls, name, bases, dct)
+
+
+class BaseEvaluator(metaclass=EvaluatorDecoratorMeta):
     def __init__(self, dataset: Union[Dataset, pd.DataFrame], metrics: List[Metric]):
         if not isinstance(dataset, (Dataset, pd.DataFrame)):
             raise ValueError("dataset must be a Dataset or DataFrame object")

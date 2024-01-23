@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "continuous-eval"
-version = "0.2.0"
+version = "0.2.1"
 description = "Continuous evaluation for retrieval-based LLMs pipelines."
 authors = ["Yi Zhang <yi@relari.ai>", "Pasquale Antonante <pasquale@relari.ai>"]
 readme = "README.md"
@@ -28,6 +28,7 @@ pinecone-client = {version = "^2.2.4", optional = true}
 chromadb = {version = "^0.4.21", optional = true}
 tiktoken = {version = "^0.5.2", optional = true}
 unstructured = {version = "^0.11.6", optional = true}
+appdirs = "^1.4.4"
 
 [tool.poetry.extras]
 anthropic = ["anthropic"]

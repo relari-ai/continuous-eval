@@ -133,3 +133,10 @@ For generation you can instead use the `GenerationEvaluator`.
 ## License
 
 This project is licensed under the Apache 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## Open Analytics
+
+We monitor basic anonymous usage statistics to understand our users' preferences, inform new features, and identify areas that might need improvement.
+You can take a look at exactly what we track in the [telemetry code](continuous_eval/utils/telemetry.py)
+
+To disable usage-tracking you set the `CONTINUOUS_EVAL_DO_NOT_TRACK` flag to `true`.

@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 
 from continuous_eval.datatypes import XYData
+from continuous_eval.utils.telemetry import telemetry
 
 
 class EnsembleMetric:
@@ -18,6 +19,7 @@ class EnsembleMetric:
         alpha: float = 0.1,
         random_state: Optional[int] = None,
     ) -> None:
+        telemetry.log_metric_call(self.__class__.__name__)
         # fmt: off
         assert alpha > 0.0 and alpha < 1.0, "Alpha must be between 0 and 1"
         assert isinstance(training, XYData), "Training data must be an XYData object"

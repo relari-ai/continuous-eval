@@ -38,11 +38,7 @@ class TokenOverlap(Metric):
         except ZeroDivisionError:
             f1 = 0.0
 
-        return {
-            "token_overlap_precision": precision, 
-            "token_overlap_recall": recall, 
-            "token_overlap_f1": f1
-        }
+        return {"token_overlap_precision": precision, "token_overlap_recall": recall, "token_overlap_f1": f1}
 
 
 class RougeScore(Metric):
@@ -115,5 +111,13 @@ class DeterministicAnswerCorrectness(Metric):
 
         return {
             metric: max(score.get(metric, 0) for score in token_scores + rouge_scores + bleu_scores)
-            for metric in ["rouge_l_recall", "rouge_l_precision", "rouge_l_f1", "token_overlap_recall", "token_overlap_precision", "token_overlap_f1", "bleu_score"]
+            for metric in [
+                "rouge_l_recall",
+                "rouge_l_precision",
+                "rouge_l_f1",
+                "token_overlap_recall",
+                "token_overlap_precision",
+                "token_overlap_f1",
+                "bleu_score",
+            ]
         }

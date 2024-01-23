@@ -5,6 +5,7 @@ from zipfile import ZipFile
 import requests
 
 from continuous_eval.dataset import Dataset
+from continuous_eval.utils.telemetry import telemetry
 
 EXAMPLES_DATA_URL = "https://ceevaldata.blob.core.windows.net/examples/"
 
@@ -53,6 +54,7 @@ def example_data_downloader(resource: str, destination_dir: Path = Path("data"),
     assert resource in _DATA_RESOURCES, f"Resource {resource} not found"
     destination_dir.mkdir(parents=True, exist_ok=True)
     res = _DATA_RESOURCES[resource]
+    telemetry.log_event("data_downloader", resource)
     if res["type"] == "dataset":
         out_fname = destination_dir / res["filename"]
         file = _download_file(
