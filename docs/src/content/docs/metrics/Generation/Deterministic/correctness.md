@@ -3,6 +3,7 @@ title: Correctness
 sidebar:
     order: 1
 ---
+
 ### Definitions
 
 **Answer Correctness** measures how close the generated answer is the the ground truth reference answers.
