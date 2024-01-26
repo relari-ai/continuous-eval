@@ -12,7 +12,13 @@ The Flesch–Kincaid measures how easy it is to understand an by considering fac
 
 **Flesch–Kincaid Grade Level** corresponds to a U.S. grade level. For example, a score of 8.0 suggests that the text should be understandable by an 8th grader. Higher scores indicate material that is more complex and thus requires a higher level of education to understand.
 
-To know more about the test read [Wikepedia](https://en.wikipedia.org/wiki/Flesch–Kincaid_readability_tests).
+:::note
+**Negative scores.** Both scores can be negative.
+A negative Flesh reading ease indicates that the text is very difficult to read and a negative Flesch–Kincaid grade level indicates that the text is very easy to read (they are inversely correlated).
+Note that the lowest grade level score in theory is −3.40.
+:::
+
+To know more about the test read [Wikipedia](https://en.wikipedia.org/wiki/Flesch–Kincaid_readability_tests).
 
 ### Example Usage
 
