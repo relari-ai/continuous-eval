@@ -1,13 +1,13 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy to Azure Static Web Apps
 
 on:
   push:
     branches:
-      - docs
+      - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - docs
+      - main
 
 jobs:
   build_and_deploy_job:
