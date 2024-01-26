@@ -111,6 +111,7 @@ For generation you can instead use the `GenerationEvaluator`.
 
 - `DeterministicAnswerCorrectness`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
 - `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
+- `FleschKincaidReadability`: how easy or difficult it is to understand the LLM generated answer.
 
 #### Semantic
 
