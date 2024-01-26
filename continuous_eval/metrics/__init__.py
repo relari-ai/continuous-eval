@@ -2,6 +2,7 @@ from continuous_eval.metrics.base import Metric
 from continuous_eval.metrics.generation_deterministic_metrics import (
     DeterministicAnswerCorrectness,
     DeterministicFaithfulness,
+    FleschKincaidReadability,
 )
 from continuous_eval.metrics.generation_LLM_based_metrics import (
     LLMBasedAnswerCorrectness,

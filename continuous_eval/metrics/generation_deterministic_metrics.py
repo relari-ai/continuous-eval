@@ -38,7 +38,11 @@ class TokenOverlap(Metric):
         except ZeroDivisionError:
             f1 = 0.0
 
-        return {"token_overlap_precision": precision, "token_overlap_recall": recall, "token_overlap_f1": f1}
+        return {
+            "token_overlap_precision": precision,
+            "token_overlap_recall": recall,
+            "token_overlap_f1": f1,
+        }
 
 
 class RougeScore(Metric):
@@ -120,4 +124,31 @@ class DeterministicAnswerCorrectness(Metric):
                 "token_overlap_f1",
                 "bleu_score",
             ]
+        }
+
+
+class FleschKincaidReadability(Metric):
+    def __init__(self):
+        super().__init__()
+        self._word_tokenizer = nltk.tokenize.RegexpTokenizer(r"\w+")
+        self._syl_tokenizer = nltk.tokenize.SyllableTokenizer()
+
+    def calculate(self, answer, **kwargs):
+        if answer.strip() == "":
+            return {
+                "flesch_reading_ease": 121.22,
+                "flesch_kincaid_grade_level": 0.0,
+            }
+        # Calculate the number of sentences, words, and syllables.
+        words = self._word_tokenizer.tokenize(answer)
+        num_syllables = sum(len(self._syl_tokenizer.tokenize(word)) for word in words)
+        num_sentences = len(nltk.sent_tokenize(answer))
+        num_words = len(words)
+        # Flesch Reading-Ease score
+        fre_score = 206.835 - 1.015 * (num_words / num_sentences) - 84.6 * (num_syllables / num_words)
+        # Flesch–Kincaid Grade Level
+        fk_grade = 0.39 * (num_words / num_sentences) + 11.8 * (num_syllables / num_words) - 15.59
+        return {
+            "flesch_reading_ease": fre_score,
+            "flesch_kincaid_grade_level": fk_grade,
         }
