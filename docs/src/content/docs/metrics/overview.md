@@ -23,7 +23,8 @@ In Retrieval-augmented Generation (RAG) pipelines, we seperate the evaluation pr
 - **Overall Correctness:** how closely the answer match with an ideal reference answer?
 - **Faithfulness:** how well is the answer grounded on context retrieved?
 - **Relevance:** is the answer a direct response to the question?
-- **Logic, Style, and many more aspects**
+- **Style:** is the answer in a style consistent with design (reference answer)?
+- **Many more aspects**
 
 <br>
 
@@ -67,6 +68,7 @@ Below is the list of metrics available:
 
 - `DeterministicAnswerRelevance`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
 - `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
+- `FleschKincaidReadability`: how easy or difficult it is to understand the LLM generated answer.
 
 ##### Semantic
 
@@ -78,6 +80,8 @@ Below is the list of metrics available:
 
 - `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
 - `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
+- `LLMBasedAnswerRelevance`: Relevance of the Generated Answer w.r.t the Question
+- `LLMBasedStyleConsistency`: Consistency of style bwtween the Generated Answer and the Ground Truth Answer(s)
 
 
 ## Data Dependencies
@@ -233,7 +237,7 @@ Below is the list of metrics available:
     <td class = "grey"></td>
   </tr>
   <tr>
-    <td>Deberta Answer Scores</td>
+    <td>Deberta Answer Scores (Entailment & Contradiction)</td>
     <td class = "grey"></td>
     <td class = "grey"></td>
     <td class = "grey"></td>
@@ -241,7 +245,7 @@ Below is the list of metrics available:
     <td class = "check"></td>
   </tr>
   <tr>
-    <th rowspan="2">LLM-Based</th>
+    <th rowspan="4">LLM-Based</th>
     <td>Correctness</td>
     <td class = "check"></td>
     <td class = "grey"></td>
@@ -256,6 +260,22 @@ Below is the list of metrics available:
     <td class = "grey"></td>
     <td class = "check"></td>
     <td class = "grey"></td>
+  </tr>
+    <tr>
+    <td>Relevance</td>
+    <td class = "check"></td>
+    <td class = "grey"></td>
+    <td class = "grey"></td>
+    <td class = "check"></td>
+    <td class = "grey"></td>
+  </tr>
+    <tr>
+    <td>Style Consistency</td>
+    <td class = "grey"></td>
+    <td class = "grey"></td>
+    <td class = "grey"></td>
+    <td class = "check"></td>
+    <td class = "check"></td>
   </tr>
 
 

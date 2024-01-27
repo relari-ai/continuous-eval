@@ -7,7 +7,8 @@ from continuous_eval.metrics.generation_deterministic_metrics import (
 from continuous_eval.metrics.generation_LLM_based_metrics import (
     LLMBasedAnswerCorrectness,
     LLMBasedFaithfulness,
-    LLMBasedAnswerRelevance
+    LLMBasedAnswerRelevance,
+    LLMBasedStyleConsistency
 )
 from continuous_eval.metrics.generation_semantic_metrics import (
     BertAnswerRelevance,

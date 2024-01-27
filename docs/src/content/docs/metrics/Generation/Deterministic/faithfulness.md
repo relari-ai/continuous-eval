@@ -55,11 +55,8 @@ Required data items: `retrieved_contexts`, `answer`
 from continuous_eval.metrics import DeterministicFaithfulness
 
 datum = {
-    "question": "Who wrote 'Romeo and Juliet' and where was he born?",
     "retrieved_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
-    "ground_truth_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'.", "William Shakespeare is born in Stratford-upon-Avon."],
     "answer": "William Shakespeare wrote 'Romeo and Juliet'. He is born in Ireland",
-    "ground_truths": ["William Shakespeare, born in Stratford-upon-Avon"]
 }
 
 metric = DeterministicFaithfulness()
