@@ -4,6 +4,7 @@ version = "0.2.2"
 description = "Continuous evaluation for retrieval-based LLMs pipelines."
 authors = ["Yi Zhang <yi@relari.ai>", "Pasquale Antonante <pasquale@relari.ai>"]
 readme = "README.md"
+license = "Apache-2.0"
 packages = [{include = "continuous_eval"}]
 
 [tool.poetry.dependencies]

@@ -1,13 +1,14 @@
 <h3 align="center">
   <img
-    src="https://github.com/relari-ai/continuous-eval/blob/fix/readme/docs/public/continuous-eval.png"
-    height="100"
+    src="docs/public/continuous-eval-logo.png"
+    width="350"
   >
 </h3>
 
 <div align="center">
 
-  <a href="https://github.com/relari-ai/continuous-eval/blob/main/LICENSE">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/pyversions/unstructured.svg)</a>
+  <a a href="https://github.com/relari-ai/continuous-eval/blob/main/LICENSE">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/l/continuous-eval.svg)</a>
+  <a href="https://pypi.python.org/pypi/continuous-eval">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/pyversions/continuous-eval.svg)</a>
   <a href="https://github.com/relari-ai/continuous-eval/releases">![https://GitHub.com/relari-ai/continuous-eval/releases](https://img.shields.io/github/release/relari-ai/continuous-eval)</a>
   <a href="https://pypi.python.org/pypi/continuous-eval/">![https://github.com/Naereen/badges/](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)</a>
   [![Downloads](https://static.pepy.tech/badge/continuous-eval)](https://pepy.tech/project/continuous-eval)
