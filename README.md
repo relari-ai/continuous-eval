@@ -7,17 +7,21 @@
 
 <div align="center">
 
-  <a a href="https://github.com/relari-ai/continuous-eval/blob/main/LICENSE">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/l/continuous-eval.svg)</a>
+  
+  <a href="https://docs.relari.ai/" target="_blank"><img src="https://img.shields.io/badge/docs-view-blue" alt="Documentation"></a>
   <a href="https://pypi.python.org/pypi/continuous-eval">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/pyversions/continuous-eval.svg)</a>
   <a href="https://github.com/relari-ai/continuous-eval/releases">![https://GitHub.com/relari-ai/continuous-eval/releases](https://img.shields.io/github/release/relari-ai/continuous-eval)</a>
   <a href="https://pypi.python.org/pypi/continuous-eval/">![https://github.com/Naereen/badges/](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)</a>
-  [![Downloads](https://static.pepy.tech/badge/continuous-eval)](https://pepy.tech/project/continuous-eval)
-  [![Downloads](https://static.pepy.tech/badge/continuous-eval/month)](https://pepy.tech/project/continuous-eval)
+  <a a href="https://github.com/relari-ai/continuous-eval/blob/main/LICENSE">![https://pypi.python.org/pypi/continuous-eval/](https://img.shields.io/pypi/l/continuous-eval.svg)</a>
+
 
 </div>
 
+<h2 align="center">
+  <p>Open-Source Evaluation Framework for LLM Pipelines</p>
+</h2>
 
-# Continuous Evaluation for retrieval-based LLM pipelines
+## Overview
 
 `continuous-eval` is an open-source package created for the scientific and practical evaluation of LLM application pipelines. Currently, it focuses on retrieval-augmented generation (RAG) pipelines.
 
