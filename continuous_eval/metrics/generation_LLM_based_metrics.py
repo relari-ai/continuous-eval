@@ -125,3 +125,61 @@ Use the following guidelines for evaluation:
             "LLM_based_answer_correctness": score,
             "LLM_based_answer_correctness_reasoning": reasoning,
         }
+
+
+class LLMBasedAnswerRelevance(LLMBasedMetric):
+    """
+    The LLM based answer relevance metric.
+    Measures whether the generated answer is relevant to the question.
+    """
+
+    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
+        super().__init__(model)
+        self.use_few_shot = use_few_shot
+
+    def __str__(self):
+        return f"LLMBasedAnswerRelevance(model={self.model}, use_few_shot={self.use_few_shot})"
+
+    def calculate(self, question, answer, **kwargs):
+        """
+        Calculate the faithfulness score for the given datapoint.
+        """
+        if self.use_few_shot:
+            few_shot_prompt = """
+Example:
+Question:
+What is the process of photosynthesis?
+Answer:
+Photosynthesis is an important process of all plants.
+Response:
+2
+The answer acknowledges the importance of photosynthesis for plants, which is partially relevant. However, it fails to explain the process of photosynthesis, thereby only partially answering the question.
+
+"""
+        else:
+            few_shot_prompt = ""
+        prompt = {
+            "system_prompt": (
+                """
+You are an expert evaluator system for a question answering system.
+You need to evaluate the relevance and completeness of the generated answer based on the question.
+Output a score and the reasoning for your score in a new line.
+Use the following guidelines for evaluation:
+* You should output a single score between 1 to 3.
+* 1 means that the answer is completely irrelevant to the question.
+* 2 means that the answer is partially relevant to the question or it only partially answers the question.
+* 3 means that the answer is relevant to the question and completely answers the question.
+"""
+                + few_shot_prompt
+            ),
+            "user_prompt": ("Question: " + question + "\nAnswer: " + answer),
+        }
+
+        response = self._llm.run(prompt)
+        score_txt, reasoning = response.split("\n", 1)
+        score = float(score_txt.split(":")[-1].strip())
+
+        return {
+            "LLM_based_answer_relevance": score,
+            "LLM_based_answer_relevance_reasoning": reasoning,
+        }

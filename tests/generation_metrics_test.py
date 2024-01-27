@@ -5,6 +5,7 @@ from continuous_eval.metrics import (
     DeterministicFaithfulness,
     FleschKincaidReadability,
     LLMBasedAnswerCorrectness,
+    LLMBasedAnswerRelevance,
     LLMBasedFaithfulness,
 )
 from tests.helpers import example_datum
@@ -71,6 +72,15 @@ def test_llm_based_answer_correctness():
     results = [metric.calculate(**datum) for datum in data]
     for result in results:
         assert 1.0 <= result["LLM_based_answer_correctness"] <= 5.0
+
+
+def test_llm_based_answer_relevance():
+    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
+
+    metric = LLMBasedAnswerRelevance()
+    results = [metric.calculate(**datum) for datum in data]
+    for result in results:
+        assert 1.0 <= result["LLM_based_answer_relevance"] <= 3.0
 
 
 def test_flesch_kincaid():
