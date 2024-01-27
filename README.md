@@ -1,6 +1,6 @@
 <h3 align="center">
   <img
-    src="https://github.com/relari-ai/continuous-eval/blob/main/docs/public/continuous-eval.png"
+    src="https://github.com/relari-ai/continuous-eval/blob/fix/readme/docs/public/continuous-eval.png"
     height="100"
   >
 </h3>
