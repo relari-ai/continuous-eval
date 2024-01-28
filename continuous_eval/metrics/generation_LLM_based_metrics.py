@@ -244,5 +244,5 @@ Use the following guidelines for evaluation:
 
         return {
             "LLM_based_style_consistency": normalized_score,
-            "LLM_based_style_consisntency_reasoning": reasoning,
+            "LLM_based_style_consistency_reasoning": reasoning,
         }
