@@ -40,9 +40,6 @@ datum = {
         "Paris is the capital of France and also the largest city in the country.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
-    "answer": "Paris",
-    "ground_truths": ["Paris"],
 }
 
 metric = LLMBasedContextPrecision(LLMFactory("gpt-4-1106-preview"), log_relevance_by_context=True)

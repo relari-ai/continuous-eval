@@ -42,14 +42,11 @@ Required data items: `retrieved_contexts`, `ground_truth_contexts`
 from continuous_eval.metrics import RankedRetrievalMetrics, RougeChunkMatch
 
 datum = {
-    "question": "What is the capital of France?",
     "retrieved_contexts": [
         "Lyon is a major city in France.",
         "Paris is the capital of France and also the largest city in the country.",
     ],
     "ground_truth_contexts": ["Paris is the capital of France."],
-    "answer": "Paris",
-    "ground_truths": ["Paris"],
 }
 
 metric = RankedRetrievalMetrics(RougeChunkMatch())

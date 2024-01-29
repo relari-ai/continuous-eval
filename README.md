@@ -144,8 +144,11 @@ For generation you can instead use the `GenerationEvaluator`.
 
 #### LLM-based
 
-- `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
-- `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
+- `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts
+- `LLMBasedAnswerCorrectness`: Overall correctness of the Generated Answer based on the Question and Ground Truth Answer(s)
+- `LLMBasedAnswerRelevance`: Relevance of the Generated Answer w.r.t the Question
+- `LLMBasedStyleConsistency`: Consistency of style bwtween the Generated Answer and the Ground Truth Answer(s)
+
 
 ## Resources
 

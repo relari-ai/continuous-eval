@@ -19,7 +19,7 @@ $$
 
 ### Example Usage
 
-Required data items: `question`, `retrieved_context`, `ground_truth_answers`
+Required data items: `question`, `retrieved_context`, `ground_truths`
 
 ```python
 from continuous_eval.metrics import LLMBasedContextCoverage
@@ -31,8 +31,6 @@ datum = {
         "Lyon is a major city in France.",
         "Paris is the capital of France and also the largest city in the country.",
     ],
-    "ground_truth_contexts": ["Marseille is the second largest city in France.", "Paris is the largest city in the country." ],
-    "answer": "Paris",
     "ground_truths": ["Paris is the largest city in France and Marseille is the second largest."],
 }
 

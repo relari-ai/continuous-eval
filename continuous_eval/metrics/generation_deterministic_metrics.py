@@ -90,9 +90,9 @@ class DeterministicFaithfulness(Metric):
         ]
         bleu_scores = [BleuScore().calculate(sentence, context)["bleu_score"] for sentence in sentences]
 
-        rouge_faithfulness = sum(score > self.ROUGE_PRECISION_THRESHOLD for score in rouge_scores) / len(sentences)
+        rouge_faithfulness = sum(score >= self.ROUGE_PRECISION_THRESHOLD for score in rouge_scores) / len(sentences)
         token_overlap_faithfulness = sum(
-            score > self.TOKEN_OVERLAP_PRECISION_THRESHOLD for score in token_overlap_scores
+            score >= self.TOKEN_OVERLAP_PRECISION_THRESHOLD for score in token_overlap_scores
         ) / len(sentences)
         bleu_faithfulness = sum(score for score in bleu_scores) / len(sentences)
 

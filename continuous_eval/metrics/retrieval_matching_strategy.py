@@ -64,4 +64,4 @@ class RougeSentenceMatch(MatchingStrategy):
         return MatchingStrategyType.SENTENCE_MATCH
 
     def is_relevant(self, retrieved_component, ground_truth_component):
-        return Rouge().get_scores(retrieved_component, ground_truth_component)[0]["rouge-l"]["r"] > self.threshold
+        return Rouge().get_scores(retrieved_component, ground_truth_component)[0]["rouge-l"]["r"] >= self.threshold

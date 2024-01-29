@@ -86,14 +86,11 @@ Required data items: `retrieved_contexts`, `ground_truth_contexts`
 from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 
 datum = {
-    "question": "What is the capital of France?",
     "retrieved_contexts": [
         "Paris is the capital of France and also the largest city in the country.",
         "Lyon is a major city in France.",
     ],
     "ground_truth_contexts": ["Paris is the capital of France."],
-    "answer": "Paris",
-    "ground_truths": ["Paris"],
 }
 
 metric = PrecisionRecallF1(RougeChunkMatch())
