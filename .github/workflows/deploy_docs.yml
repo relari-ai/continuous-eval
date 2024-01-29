@@ -1,11 +1,15 @@
-name: Deploy to Azure Static Web Apps
+name: Deploy docs
 
 on:
   push:
     branches:
       - main
+    paths:
+      - docs/**
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    paths:
+      - docs/**
     branches:
       - main
 
