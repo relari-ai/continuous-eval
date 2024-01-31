@@ -76,6 +76,6 @@ print(metric.calculate(**datum))
     'bleu_faithfulness': 0.37023896751607194, 
     'rouge_p_by_sentence': [0.8333333333333334, 0.2], 
     'token_overlap_p_by_sentence': [0.875, 0.2], 
-    'blue_score_by_sentence': [0.6855956729300113, 0.05488226210213251]
+    'bleu_score_by_sentence': [0.6855956729300113, 0.05488226210213251]
 }
 ```
