@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.metrics.base import LLMBasedMetric
@@ -7,7 +8,7 @@ from continuous_eval.metrics.base import LLMBasedMetric
 class LLMBasedContextPrecision(LLMBasedMetric):
     def __init__(
         self,
-        model: LLMInterface = DefaultLLM,
+        model: Optional[LLMInterface] = None,
         use_few_shot: bool = True,
         log_relevance_by_context: bool = False,
     ):
@@ -77,7 +78,7 @@ Given the following question and context, verify if the information in the given
 
 
 class LLMBasedContextCoverage(LLMBasedMetric):
-    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
+    def __init__(self, model: Optional[LLMInterface] = None, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 

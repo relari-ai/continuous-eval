@@ -1,3 +1,5 @@
+from typing import Optional
+
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.metrics.base import LLMBasedMetric
 from continuous_eval.metrics.retrieval_LLM_based_metrics import LLMBasedContextCoverage
@@ -11,7 +13,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
 
     def __init__(
         self,
-        model: LLMInterface = DefaultLLM,
+        model: Optional[LLMInterface] = None,
         use_few_shot: bool = True,
         classify_by_statement: bool = False,
     ):
@@ -77,7 +79,7 @@ class LLMBasedAnswerCorrectness(LLMBasedMetric):
     Measures whether the generated answer is correct compared to the ground truths.
     """
 
-    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
+    def __init__(self, model: Optional[LLMInterface] = None, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
@@ -134,7 +136,7 @@ class LLMBasedAnswerRelevance(LLMBasedMetric):
     Measures whether the generated answer is relevant to the question.
     """
 
-    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
+    def __init__(self, model: Optional[LLMInterface] = None, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
@@ -193,7 +195,7 @@ class LLMBasedStyleConsistency(LLMBasedMetric):
     Measures whether the generated answer is relevant to the question.
     """
 
-    def __init__(self, model: LLMInterface = DefaultLLM, use_few_shot: bool = True):
+    def __init__(self, model: Optional[LLMInterface] = None, use_few_shot: bool = True):
         super().__init__(model)
         self.use_few_shot = use_few_shot
 
