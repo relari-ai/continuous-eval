@@ -1,22 +1,19 @@
 import warnings
 
 import nltk
+from nltk import download as nltk_download
 from rouge import Rouge
 
 from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.utils.smart_tokenizer import SmartTokenizer
-
+from continuous_eval.metrics.utils.simple_tokenizer import SimpleTokenizer
 
 # Single Metrics
-def _download_punkt():
-    nltk.download("punkt", quiet=True)
 
 
 class TokenOverlap(Metric):
     def __init__(self):
-        _download_punkt()
         super().__init__()
-        self._tokenizer = SmartTokenizer()
+        self._tokenizer = SimpleTokenizer()
 
     def _tokenize(self, text, language="english"):
         sentences = nltk.tokenize.sent_tokenize(text, language)
@@ -82,7 +79,7 @@ class DeterministicFaithfulness(Metric):
     BLEU_SCORE_THRESHOLD = 0.5
 
     def __init__(self):
-        _download_punkt()
+        nltk_download("punkt", quiet=True)
         super().__init__()
 
     def calculate(self, answer, retrieved_contexts, **kwargs):
