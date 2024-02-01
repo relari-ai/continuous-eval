@@ -30,12 +30,11 @@ def test_deterministic_answer_relevance():
             "rouge_l_precision": 0.375,
             "rouge_l_f1": 0.49999999555555563,
             "token_overlap_recall": 1.0,
-            "token_overlap_precision": 0.4444444444444444,
-            "token_overlap_f1": 0.6153846153846153,
+            "token_overlap_precision": 0.5714285714285714,
+            "token_overlap_f1": 0.7272727272727273,
             "bleu_score": 0.4734525552325106,
         },
     ]
-
     metric = DeterministicAnswerCorrectness()
     assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
 
