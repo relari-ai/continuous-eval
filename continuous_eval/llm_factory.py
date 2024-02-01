@@ -20,22 +20,6 @@ try:
 except ImportError:
     ANTHROPIC_AVAILABLE = False
 
-assert os.getenv("OPENAI_API_KEY") is not None, (
-    "Please set the environment variable OPENAI_API_KEY. "
-    "You can get one at https://beta.openai.com/account/api-keys."
-)
-if GOOGLE_GENAI_AVAILABLE:
-    assert os.getenv("GEMINI_API_KEY") is not None, (
-        "Please set the environment variable GEMINI_API_KEY. "
-        "You can get one at https://ai.google.dev/tutorials/setup."
-    )
-    google_genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-if ANTHROPIC_AVAILABLE:
-    assert os.getenv("ANTHROPIC_API_KEY") is not None, (
-        "Please set the environment variable ANTHROPIC_API_KEY. " "You can get one at https://www.anthropic.com/signup."
-    )
-
 
 class LLMInterface(ABC):
     @abstractmethod
@@ -48,12 +32,25 @@ class LLMFactory(LLMInterface):
         super().__init__()
         self.model = model
         if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"]:
+            assert os.getenv("OPENAI_API_KEY") is not None, (
+                "Please set the environment variable OPENAI_API_KEY. "
+                "You can get one at https://beta.openai.com/account/api-keys."
+            )
             self.client = OpenAI()
         elif model in ["claude-2.1", "claude-2.0", "claude-instant-1.2"]:
             assert ANTHROPIC_AVAILABLE, "Anthropic is not available. Please install it."
+            assert os.getenv("ANTHROPIC_API_KEY") is not None, (
+                "Please set the environment variable ANTHROPIC_API_KEY. "
+                "You can get one at https://www.anthropic.com/signup."
+            )
             self.client = Anthropic()
         elif model in ["gemini-pro"]:
             assert GOOGLE_GENAI_AVAILABLE, "Google GenAI is not available. Please install it."
+            assert os.getenv("GEMINI_API_KEY") is not None, (
+                "Please set the environment variable GEMINI_API_KEY. "
+                "You can get one at https://ai.google.dev/tutorials/setup."
+            )
+            google_genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
             self.client = google_genai.GenerativeModel(model_name=model)
         else:
             raise ValueError(
@@ -151,4 +148,4 @@ class LLMFactory(LLMInterface):
         return content
 
 
-DefaultLLM = LLMFactory(model=os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106"))
+DefaultLLM = lambda: LLMFactory(model=os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106"))

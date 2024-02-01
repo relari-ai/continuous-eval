@@ -1,5 +1,5 @@
 from abc import ABC, ABCMeta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
@@ -28,7 +28,10 @@ class LLMBasedMetric(Metric):
     Base class for all LLM based metrics.
     """
 
-    def __init__(self, model: LLMInterface = DefaultLLM):
+    def __init__(self, model: Optional[LLMInterface] = None):
         super().__init__()
-        assert isinstance(model, LLMInterface), "model must be an instance of LLMInterface."
-        self._llm = model
+        if model is None:
+            self._llm = DefaultLLM()
+        else:
+            self._llm = model
+        assert isinstance(self._llm, LLMInterface), "model must be an instance of LLMInterface."
