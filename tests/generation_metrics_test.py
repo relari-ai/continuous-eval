@@ -49,7 +49,7 @@ def test_rouge_sentence_faithfulness():
             "bleu_faithfulness": 3.3720152341391845e-06,
             "rouge_p_by_sentence": [1.0],
             "token_overlap_p_by_sentence": [1.0],
-            "blue_score_by_sentence": [3.3720152341391845e-06],
+            "bleu_score_by_sentence": [3.3720152341391845e-06],
         },
     ]
 
