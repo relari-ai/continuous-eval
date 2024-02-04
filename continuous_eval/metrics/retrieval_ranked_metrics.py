@@ -17,10 +17,18 @@ class RankedRetrievalMetrics(Metric):
 
     def calculate(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate ranked metrics (MAP, MRR, NDCG) based on different matching strategies.
-        map = self.calculate_average_precision(retrieved_contexts, ground_truth_contexts)
-        mrr = self.calculate_reciprocal_rank(retrieved_contexts, ground_truth_contexts)
-        ndcg = self.calculate_normalized_discounted_cumulative_gain(retrieved_contexts, ground_truth_contexts)
-        return {"average_precision": map, "reciprocal_rank": mrr, "ndcg": ndcg}
+        if not ground_truth_contexts or ground_truth_contexts == [""]:
+            if not retrieved_contexts or retrieved_contexts == [""]:
+                # If no relevant context exists, the retrieval metrics are 1.0 when the retrieved contexts are also empty.
+                return {"average_precision": 1.0, "reciprocal_rank": 1.0, "ndcg": 1.0}
+            else:
+                # Otherwise, the retrieval metrics are 0.0 because any chunk retrieved is not relevant.
+                return {"average_precision": 0.0, "reciprocal_rank": 0.0, "ndcg": 0.0}
+        else:
+            map = self.calculate_average_precision(retrieved_contexts, ground_truth_contexts)
+            mrr = self.calculate_reciprocal_rank(retrieved_contexts, ground_truth_contexts)
+            ndcg = self.calculate_normalized_discounted_cumulative_gain(retrieved_contexts, ground_truth_contexts)
+            return {"average_precision": map, "reciprocal_rank": mrr, "ndcg": ndcg}
 
     def calculate_average_precision(self, retrieved_contexts, ground_truth_contexts, **kwargs):
         # Calculate average precision for a single query retrieval
