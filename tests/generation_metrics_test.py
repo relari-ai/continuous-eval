@@ -62,7 +62,12 @@ def test_llm_based_faithfulness():
     metric = LLMBasedFaithfulness()
     results = [metric.calculate(**datum) for datum in data]
     for result in results:
-        assert isinstance(result["LLM_based_faithfulness"], bool)
+        assert 0.0 <= result["LLM_based_faithfulness"] <= 1.0
+
+    metric = LLMBasedFaithfulness(classify_by_statement=True)
+    results = [metric.calculate(**datum) for datum in data]
+    for result in results:
+        assert 0.0 <= result["LLM_based_faithfulness"] <= 1.0
 
 
 def test_llm_based_answer_correctness():

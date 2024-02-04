@@ -64,8 +64,12 @@ The statement is supported by the context, which states that photosynthesis conv
             }
 
             response = self._llm.run(prompt)
-            score_txt, reasoning = response.split("\n", 1)
-            score = bool("yes" in score_txt.lower())
+            try:
+                score_txt, reasoning = response.split("\n", 1)
+                score = float("yes" in score_txt.lower())
+            except Exception as e:
+                score = None
+                reasoning = "Error parsing LLM response: " + response
 
         return {
             "LLM_based_faithfulness": score,
@@ -120,9 +124,13 @@ Use the following guidelines for evaluation:
         }
 
         response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 4
+        try:
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 4
+        except Exception as e:
+            normalized_score = None
+            reasoning = "Error parsing LLM response: " + response
 
         return {
             "LLM_based_answer_correctness": normalized_score,
@@ -179,9 +187,13 @@ Use the following guidelines for evaluation:
         }
 
         response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 2
+        try:
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 2
+        except Exception as e:
+            normalized_score = None
+            reasoning = "Error parsing LLM response: " + response
 
         return {
             "LLM_based_answer_relevance": normalized_score,
@@ -240,9 +252,13 @@ Use the following guidelines for evaluation:
         }
 
         response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 3
+        try:
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 3
+        except Exception as e:
+            normalized_score = None
+            reasoning = "Error parsing LLM response: " + response
 
         return {
             "LLM_based_style_consistency": normalized_score,
