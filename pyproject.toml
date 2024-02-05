@@ -13,7 +13,7 @@ python-dotenv = "^1.0.0"
 nltk = "^3.8.1"
 rouge = "^1.0.1"
 openai = "^1.3.7"
-langchain = "^0.0.345"
+langchain = {version = "^0.0.345", optional = true}
 transformers = "^4.35.2"
 torch = "^2.1.1"
 anthropic = {version = "^0.7.7", optional = true}
@@ -34,7 +34,7 @@ appdirs = "^1.4.4"
 [tool.poetry.extras]
 anthropic = ["anthropic"]
 gemini = ["google-generativeai"]
-generators = ["unstructured", "tiktoken", "pinecone-client", "chromadb"]
+generators = ["unstructured", "tiktoken", "pinecone-client", "chromadb", "langchain"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.11.0"
