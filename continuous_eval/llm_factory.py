@@ -31,20 +31,20 @@ class LLMFactory(LLMInterface):
     def __init__(self, model):
         super().__init__()
         self.model = model
-        if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"]:
+        if model.startswith("gpt"):
             assert os.getenv("OPENAI_API_KEY") is not None, (
                 "Please set the environment variable OPENAI_API_KEY. "
                 "You can get one at https://beta.openai.com/account/api-keys."
             )
             self.client = OpenAI()
-        elif model in ["claude-2.1", "claude-2.0", "claude-instant-1.2"]:
+        elif model.startswith("claude"):
             assert ANTHROPIC_AVAILABLE, "Anthropic is not available. Please install it."
             assert os.getenv("ANTHROPIC_API_KEY") is not None, (
                 "Please set the environment variable ANTHROPIC_API_KEY. "
                 "You can get one at https://www.anthropic.com/signup."
             )
             self.client = Anthropic()
-        elif model in ["gemini-pro"]:
+        elif model.startswith("gemini"):
             assert GOOGLE_GENAI_AVAILABLE, "Google GenAI is not available. Please install it."
             assert os.getenv("GEMINI_API_KEY") is not None, (
                 "Please set the environment variable GEMINI_API_KEY. "
@@ -55,8 +55,8 @@ class LLMFactory(LLMInterface):
         else:
             raise ValueError(
                 f"Model {model} is not supported. "
-                "Please choose one of the following models: "
-                "gpt-3.5-turbo-1106, gpt-4-1106-preview, gemini-pro, claude-2.1, claude-2.0, claude-instant-1.2."
+                "Please choose from one of the following LLM providers: "
+                "OpenAI gpt models (e.g. gpt-4-turbo-preview, gpt-3.5-turbo-0125), Anthropic claude models (e.g. claude-2.1, claude-instant-1.2), Google Gemini models (e.g. gemini-pro)."
             )
 
     def _llm_response(self, prompt, temperature):
