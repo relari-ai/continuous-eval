@@ -31,7 +31,7 @@ class LLMFactory(LLMInterface):
     def __init__(self, model):
         super().__init__()
         self.model = model
-        if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"]:
+        if model in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-1106-preview", "gpt-4-0125-preview"]:
             assert os.getenv("OPENAI_API_KEY") is not None, (
                 "Please set the environment variable OPENAI_API_KEY. "
                 "You can get one at https://beta.openai.com/account/api-keys."
@@ -56,7 +56,7 @@ class LLMFactory(LLMInterface):
             raise ValueError(
                 f"Model {model} is not supported. "
                 "Please choose one of the following models: "
-                "gpt-3.5-turbo-1106, gpt-4-1106-preview, gemini-pro, claude-2.1, claude-2.0, claude-instant-1.2."
+                "gpt-3.5-turbo-1106, gpt-4-1106-preview, gpt-4-0125-preview, gemini-pro, claude-2.1, claude-2.0, claude-instant-1.2."
             )
 
     def _llm_response(self, prompt, temperature):
