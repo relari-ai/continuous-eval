@@ -21,7 +21,7 @@ class LLMBasedContextPrecision(LLMBasedMetric):
 
     def calculate(self, question, retrieved_contexts, **kwargs):
         """
-        Calculate the context relevance score for the given datapoint.
+        Calculate the context precision score for the given datapoint.
         """
         scores = []
         for context in retrieved_contexts:
@@ -87,7 +87,7 @@ class LLMBasedContextCoverage(LLMBasedMetric):
 
     def calculate(self, question, retrieved_contexts, answer, **kwargs):
         """
-        Calculate the context relevance score for the given datapoint.
+        Calculate the context coverage score for the given datapoint.
         """
         context = "\n".join(retrieved_contexts)
 

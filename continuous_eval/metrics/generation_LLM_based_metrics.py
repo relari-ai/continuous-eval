@@ -88,7 +88,7 @@ class LLMBasedAnswerCorrectness(LLMBasedMetric):
 
     def calculate(self, question, answer, ground_truths, **kwargs):
         """
-        Calculate the faithfulness score for the given datapoint.
+        Calculate the correctness score for the given datapoint.
         """
         gt_answers = "\n".join(ground_truths)
         if self.use_few_shot:
@@ -145,7 +145,7 @@ class LLMBasedAnswerRelevance(LLMBasedMetric):
 
     def calculate(self, question, answer, **kwargs):
         """
-        Calculate the faithfulness score for the given datapoint.
+        Calculate the answer relevance score for the given datapoint.
         """
         if self.use_few_shot:
             few_shot_prompt = """
@@ -191,8 +191,8 @@ Use the following guidelines for evaluation:
 
 class LLMBasedStyleConsistency(LLMBasedMetric):
     """
-    The LLM based answer relevance metric.
-    Measures whether the generated answer is relevant to the question.
+    The LLM based style consistency metric.
+    Measures whether the generated answer is consistent in style to the ground truth answer.
     """
 
     def __init__(self, model: Optional[LLMInterface] = None, use_few_shot: bool = True):
@@ -204,7 +204,7 @@ class LLMBasedStyleConsistency(LLMBasedMetric):
 
     def calculate(self, answer, ground_truths, **kwargs):
         """
-        Calculate the faithfulness score for the given datapoint.
+        Calculate the style consistency score for the given datapoint.
         """
         gt_answers = "\n".join(ground_truths)
         if self.use_few_shot:
@@ -224,7 +224,7 @@ The generated answer is more brief and doesn't have the formality and empathetic
             "system_prompt": (
                 """
 You are an expert evaluator system for a question answering system.
-You need to evaluate the style of the generated answer based on some reference answers.
+You only need to evaluate the style of the generated answer based on some reference answers, regardless of whether the answer is correct or not.
 Assess style aspects such as tone, verbosity, formality, complexity, use of terminology, etc.
 Output a score and the reasoning for your score in a new line.
 Use the following guidelines for evaluation:
