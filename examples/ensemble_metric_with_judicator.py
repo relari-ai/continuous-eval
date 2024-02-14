@@ -45,7 +45,7 @@ def judicator(idx):
     # and in this case, since we are computing the correctness of the sample,
     # it returns True if the example is correct and False otherwise
     datum = datasplit.test_full.X.iloc[idx].to_dict()
-    return llm_metric.calculate(**datum)["LLM_based_answer_correctness"] >= 3
+    return llm_metric.calculate(**datum)["LLM_based_answer_correctness"] >= 0.5
 
 
 # Let's train a metric ensamble classifier
