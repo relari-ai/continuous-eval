@@ -97,3 +97,11 @@ FARGO = {
         "Not really, they didn't win for season three.",
     ],
 }
+
+PYTHON_FUNCTION_EXAMPLE = {
+    "answer": "def function(x, y): return x + y",
+    "ground_truths": [
+        "def foo(x, y): return x * y",
+        "def foo(x, y): return x + y",
+    ],
+}

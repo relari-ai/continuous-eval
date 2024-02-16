@@ -27,3 +27,7 @@ from continuous_eval.metrics.retrieval_matching_strategy import (
 )
 from continuous_eval.metrics.retrieval_precision_recall_f1 import PrecisionRecallF1
 from continuous_eval.metrics.retrieval_ranked_metrics import RankedRetrievalMetrics
+from continuous_eval.metrics.code_deterministic_metrics import (
+    CodeStringMatch,
+    PythonASTSimilarity,
+)

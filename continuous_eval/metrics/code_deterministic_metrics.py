@@ -1,4 +1,5 @@
 import ast
+import warnings
 from _ast import *
 
 from munkres import Munkres
@@ -301,8 +302,13 @@ class PythonASTSimilarity(Metric):
 
     def calculate(self, answer, ground_truths, **kwargs):
 
-        answer_tree = ast.parse(answer, mode="exec")
-        ground_truth_trees = [ast.parse(ground_truth, mode="exec") for ground_truth in ground_truths]
+        try:
+            answer_tree = ast.parse(answer, mode="exec")
+            ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truths]
+        except SyntaxError as e:
+            warning_msg = f"Error: {e}: AST cannot be parsed from answer: {answer} or ground_truths:{ground_truths}. Returning -1.0."
+            warnings.warn(warning_msg, Warning)
+            return {"Python_AST_Similarity": -1.0}
 
         answer_subtree = PythonASTSimilarity._get_significant_subtrees(answer_tree)
         ground_truth_subtrees = [
