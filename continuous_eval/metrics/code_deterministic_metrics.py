@@ -41,7 +41,7 @@ class PythonASTSimilarity(Metric):
             performance.
 
         Returns:
-            True if the ASTs are equivalent, otherwise False.
+            The number of matching nodes in the ASTs.
         """
         children_a = list(ast.iter_child_nodes(ast_a))
         children_b = list(ast.iter_child_nodes(ast_b))
