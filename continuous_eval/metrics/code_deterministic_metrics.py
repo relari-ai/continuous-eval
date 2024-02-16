@@ -1,6 +1,4 @@
 import ast
-import warnings
-from _ast import *
 
 from munkres import Munkres
 from thefuzz import fuzz
@@ -19,19 +17,22 @@ class CodeStringMatch(Metric):
                 max_exact_match = exact_match
             if similarity_score > max_similarity_score:
                 max_similarity_score = similarity_score
-        return {"Exact_Match_Score": max_exact_match, "Fuzzy_Match_Score": max_similarity_score}
+        return {
+            "Exact_Match_Score": max_exact_match,
+            "Fuzzy_Match_Score": max_similarity_score,
+        }
 
 
 class PythonASTSimilarity(Metric):
-    '''
+    """
     The following functions are adapted from python-ast-comparison by Pedro Salazar Paredes
     Copyright (c) 2023 Pedro Salazar Paredes
     Licensed under the MIT License
     Source: https://github.com/PedroSalazarParedes/python-ast-comparison
     Modifications: Adjusted to be used in the context of generated code evaluation
-    '''
+    """
 
-    def _compare_ASTs(ast_a: AST, ast_b: AST, reorder_depth: int) -> int:
+    def _compare_ASTs(self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int) -> int:
         """Compare two ASTs corresponding to python programs.
 
         Args:
@@ -54,19 +55,19 @@ class PythonASTSimilarity(Metric):
         if reorder_depth == 0:
             match_index = sum(
                 map(
-                    lambda pairs: PythonASTSimilarity._compare_ASTs(pairs[0], pairs[1], reorder_depth),
+                    lambda pairs: self._compare_ASTs(pairs[0], pairs[1], reorder_depth),
                     zip(children_a, children_b),
                 )
             )
             return match_index + 1
 
         elif reorder_depth > 0:
-            match_index = PythonASTSimilarity._reorder_children_compare(ast_a, ast_b, reorder_depth - 1)
+            match_index = self._reorder_children_compare(ast_a, ast_b, reorder_depth - 1)
             return match_index + 1
 
         return 0
 
-    def _reorder_children_compare(ast_a: AST, ast_b: AST, reorder_depth: int) -> int:
+    def _reorder_children_compare(self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int) -> int:
         """Reorders child nodes and compares them.
 
         Args:
@@ -88,13 +89,13 @@ class PythonASTSimilarity(Metric):
         if len(children_a) <= 1 or len(children_b) <= 1:
             for child_a in children_a:
                 for child_b in children_b:
-                    best_match_value += PythonASTSimilarity._compare_ASTs(child_a, child_b, reorder_depth)
+                    best_match_value += self._compare_ASTs(child_a, child_b, reorder_depth)
         else:
             for child_a in children_a:
                 row = []
                 cost_row = []
                 for child_b in children_b:
-                    similarity = PythonASTSimilarity._compare_ASTs(child_a, child_b, reorder_depth)
+                    similarity = self._compare_ASTs(child_a, child_b, reorder_depth)
                     row.append(similarity)
                     cost_row.append(10000000 - similarity)
 
@@ -102,14 +103,14 @@ class PythonASTSimilarity(Metric):
                 cost_matrix.append(cost_row)
 
             m = Munkres()
-            indices = m.compute(cost_matrix)
+            indices = m.compute(cost_matrix)  # type: ignore
 
             for row, col in indices:
                 best_match_value += comparison_matrix[row][col]
 
         return best_match_value
 
-    def _compare_subtrees(sig_subtrees_p1: list, sig_subtrees_p2: list, reorder_depth: int) -> tuple:
+    def _compare_subtrees(self, sig_subtrees_p1: list, sig_subtrees_p2: list, reorder_depth: int) -> tuple:
         """Compare two significant subtree lists reordering up to a certain depth.
 
         Args:
@@ -134,14 +135,14 @@ class PythonASTSimilarity(Metric):
             for child_a in children_a:
                 best_match += [child_a]
                 for child_b in children_b:
-                    best_match_value += PythonASTSimilarity._compare_ASTs(child_a, child_b, reorder_depth)
+                    best_match_value += self._compare_ASTs(child_a, child_b, reorder_depth)
                     best_match += [child_b]
         else:
             for child_a in children_a:
                 row = []
                 cost_row = []
                 for child_b in children_b:
-                    similarity = PythonASTSimilarity._compare_ASTs(child_a, child_b, reorder_depth)
+                    similarity = self._compare_ASTs(child_a, child_b, reorder_depth)
                     row.append(similarity)
                     cost_row.append(10000000 - similarity)
 
@@ -149,26 +150,24 @@ class PythonASTSimilarity(Metric):
                 cost_matrix.append(cost_row)
 
             m = Munkres()
-            indices = m.compute(cost_matrix)
+            indices = m.compute(cost_matrix)  # type: ignore
 
             for row, col in indices:
-                best_match_weight += PythonASTSimilarity._apply_weights_to_subtrees_mult(
-                    comparison_matrix[row][col], sig_subtrees_p1[row], sig_subtrees_p2[col]
+                best_match_weight += self._apply_weights_to_subtrees_mult(
+                    comparison_matrix[row][col],
+                    sig_subtrees_p1[row],
+                    sig_subtrees_p2[col],
                 )
                 best_match += [sig_subtrees_p1[row], sig_subtrees_p2[col]]
 
         all_subtrees_weight = sum(
             map(
-                lambda tree: PythonASTSimilarity._apply_weights_to_subtrees(
-                    PythonASTSimilarity._get_num_nodes(tree), tree
-                ),
+                lambda tree: self._apply_weights_to_subtrees(self._get_num_nodes(tree), tree),
                 sig_subtrees_p1,
             )
         ) + sum(
             map(
-                lambda tree: PythonASTSimilarity._apply_weights_to_subtrees(
-                    PythonASTSimilarity._get_num_nodes(tree), tree
-                ),
+                lambda tree: self._apply_weights_to_subtrees(self._get_num_nodes(tree), tree),
                 sig_subtrees_p2,
             )
         )
@@ -177,7 +176,7 @@ class PythonASTSimilarity(Metric):
 
         return round(similarity, 4), best_match
 
-    def _is_significant(root: AST) -> bool:
+    def _is_significant(self, root: ast.AST) -> bool:
         """Determine if an AST is significant.
 
         Args:
@@ -187,17 +186,17 @@ class PythonASTSimilarity(Metric):
             True for if it is significant, False otherwise.
         """
         return (
-            isinstance(root, Import)
-            or isinstance(root, FunctionDef)
-            or isinstance(root, If)
-            or isinstance(root, ClassDef)
-            or isinstance(root, While)
-            or isinstance(root, For)
-            or isinstance(root, comprehension)
-            or isinstance(root, Return)
+            isinstance(root, ast.Import)
+            or isinstance(root, ast.FunctionDef)
+            or isinstance(root, ast.If)
+            or isinstance(root, ast.ClassDef)
+            or isinstance(root, ast.While)
+            or isinstance(root, ast.For)
+            or isinstance(root, ast.comprehension)
+            or isinstance(root, ast.Return)
         )
 
-    def _get_significant_subtrees(root: AST) -> list:
+    def _get_significant_subtrees(self, root: ast.AST) -> list:
         """Find the significant subtrees of an AST.
 
         Args:
@@ -208,11 +207,11 @@ class PythonASTSimilarity(Metric):
         """
         significant_subtrees = []
         for node in ast.walk(root):
-            if PythonASTSimilarity._is_significant(node):
+            if self._is_significant(node):
                 significant_subtrees.append(node)
         return significant_subtrees
 
-    def _get_num_nodes(root: AST) -> int:
+    def _get_num_nodes(self, root: ast.AST) -> int:
         """Find the number of nodes for a given tree.
 
         Args:
@@ -223,7 +222,7 @@ class PythonASTSimilarity(Metric):
         """
         return len(list(ast.walk(root)))
 
-    def _apply_weights_to_subtrees(weight: float, subtree: AST) -> float:
+    def _apply_weights_to_subtrees(self, weight: float, subtree: ast.AST) -> float:
         """Apply weights to subtrees according to the time por their roots.
 
         Args:
@@ -234,27 +233,27 @@ class PythonASTSimilarity(Metric):
             The weighed weight of the tree.
         """
         new_weight = weight
-        if isinstance(subtree, Import):
+        if isinstance(subtree, ast.Import):
             new_weight *= 0.3
-        elif isinstance(subtree, Module):
+        elif isinstance(subtree, ast.Module):
             new_weight *= 1
-        elif isinstance(subtree, FunctionDef):
+        elif isinstance(subtree, ast.FunctionDef):
             new_weight *= 1.2
-        elif isinstance(subtree, If):
+        elif isinstance(subtree, ast.If):
             new_weight *= 0.5
-        elif isinstance(subtree, ClassDef):
+        elif isinstance(subtree, ast.ClassDef):
             new_weight *= 1
-        elif isinstance(subtree, While):
+        elif isinstance(subtree, ast.While):
             new_weight *= 1
-        elif isinstance(subtree, For):
+        elif isinstance(subtree, ast.For):
             new_weight *= 1
-        elif isinstance(subtree, comprehension):
+        elif isinstance(subtree, ast.comprehension):
             new_weight *= 1
-        elif isinstance(subtree, Return):
+        elif isinstance(subtree, ast.Return):
             new_weight *= 1
         return new_weight
 
-    def _apply_weights_to_subtrees_mult(weight: float, ast_1: AST, ast_2: AST) -> float:
+    def _apply_weights_to_subtrees_mult(self, weight: float, ast_1: ast.AST, ast_2: ast.AST) -> float:
         """Find the average weight of both trees in order to weigh the comparison.
 
         Args:
@@ -268,12 +267,9 @@ class PythonASTSimilarity(Metric):
         if weight == 0:
             return 0
         else:
-            return (
-                PythonASTSimilarity._apply_weights_to_subtrees(weight, ast_1)
-                + PythonASTSimilarity._apply_weights_to_subtrees(weight, ast_2)
-            ) / 2
+            return (self._apply_weights_to_subtrees(weight, ast_1) + self._apply_weights_to_subtrees(weight, ast_2)) / 2
 
-    def _compare_many(programs: list) -> list:
+    def _compare_many(self, programs: list) -> list:
         """Compare all of the programs in the list.
 
         Args:
@@ -282,7 +278,7 @@ class PythonASTSimilarity(Metric):
         Returns:
             A matrix with the similarity rating of between all the programs.
         """
-        tree_list = list(map(lambda prog: PythonASTSimilarity._get_significant_subtrees(ast.parse(prog)), programs))
+        tree_list = list(map(lambda prog: self._get_significant_subtrees(ast.parse(prog)), programs))
 
         matrix = []
         for program_1_tree_num in range(0, len(tree_list)):
@@ -293,7 +289,7 @@ class PythonASTSimilarity(Metric):
                 subtrees1 = tree_list[program_1_tree_num]
                 subtrees2 = tree_list[program_2_tree_num]
 
-                result = PythonASTSimilarity._compare_subtrees(subtrees1, subtrees2, 1000)[0]
+                result = self._compare_subtrees(subtrees1, subtrees2, 1000)[0]
 
                 matrix.append((program_1_tree_num, program_2_tree_num, result))
                 matrix.append((program_2_tree_num, program_1_tree_num, result))
@@ -306,17 +302,15 @@ class PythonASTSimilarity(Metric):
             answer_tree = ast.parse(answer, mode="exec")
             ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truths]
         except SyntaxError as e:
-            warning_msg = f"Error: {e}: AST cannot be parsed from answer: {answer} or ground_truths:{ground_truths}. Returning -1.0."
-            warnings.warn(warning_msg, Warning)
             return {"Python_AST_Similarity": -1.0}
 
-        answer_subtree = PythonASTSimilarity._get_significant_subtrees(answer_tree)
+        answer_subtree = self._get_significant_subtrees(answer_tree)
         ground_truth_subtrees = [
-            PythonASTSimilarity._get_significant_subtrees(ground_truth_tree) for ground_truth_tree in ground_truth_trees
+            self._get_significant_subtrees(ground_truth_tree) for ground_truth_tree in ground_truth_trees
         ]
 
         similarity_scores = [
-            PythonASTSimilarity._compare_subtrees(answer_subtree, ground_truth_subtree, 1000)[0]
+            self._compare_subtrees(answer_subtree, ground_truth_subtree, 1000)[0]
             for ground_truth_subtree in ground_truth_subtrees
         ]
 

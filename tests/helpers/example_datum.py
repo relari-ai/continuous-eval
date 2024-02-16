@@ -98,10 +98,40 @@ FARGO = {
     ],
 }
 
-PYTHON_FUNCTION_EXAMPLE = {
-    "answer": "def function(x, y): return x + y",
-    "ground_truths": [
-        "def foo(x, y): return x * y",
-        "def foo(x, y): return x + y",
-    ],
-}
+# =====================================================================================
+# CODE METRICS EXAMPLES
+# =====================================================================================
+
+PYTHON_CODE_EXAMPLES = [
+    {
+        "answer": "def function(x, y):\n  return x + y",
+        "ground_truths": [
+            "def foo(x, y):\n  return x * y",
+            "def foo(x, y):\n  return x + y",
+        ],
+    },
+    {
+        "answer": "def foo(x, y):\n  print(x + y)",
+        "ground_truths": ["def function(x, y):\n  return x + y"],
+    },
+    {
+        "answer": "class MyClass:\n  def __init__(self, x):\n        self.x = x",
+        "ground_truths": [
+            "class MyClass:\n  def __init__(self, x):\n    self._x = x\n    @property\n    def x(self):\n      return self._x",
+        ],
+    },
+    {
+        "answer": "print('Hello, World!')",
+        "ground_truths": ["def function(x, y):\n  return x + y"],
+    },
+    {
+        "answer": "function(x, y):\nreturn x + y",
+        "ground_truths": ["def function(x, y):\n  return x + y"],
+    },
+    {
+        "answer": "def rotate(text, key):\n    alpha = string.ascii_lowercase\n    alpha_shift = alpha[key:] + alpha[:key]\n    table = str.maketrans(alpha + alpha.upper(), alpha_shift + alpha_shift.upper())\n    return text.translate(table)",
+        "ground_truths": [
+            "def rotate(text, key):\n    newchars = string.ascii_lowercase[key:] + string.ascii_lowercase[:key]\n    trans = str.maketrans(string.ascii_lowercase + string.ascii_lowercase.upper(), newchars + newchars.upper())\n    return text.translate(trans)"
+        ],
+    },
+]
