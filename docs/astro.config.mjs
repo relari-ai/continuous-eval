@@ -61,6 +61,10 @@ export default defineConfig({
 							]
 						},
 						{
+							label: 'Code',
+							autogenerate: {directory: '/metrics/Code/'}
+						},
+						{
 							label: 'Metric Ensembling',
 							autogenerate: { directory: '/metrics/ensembling/' },
 						},
