@@ -137,13 +137,13 @@ classification:
                         "LLM_based_context_statements": content,
                     }
                 )
-
-            scores.append(
-                {
-                    "LLM_based_context_coverage": coverage,
-                    "LLM_based_context_statements": content,
-                }
-            )
+            else:
+                scores.append(
+                    {
+                        "LLM_based_context_coverage": coverage,
+                        "LLM_based_context_statements": content,
+                    }
+                )
 
         return max(scores, key=lambda x: x["LLM_based_context_coverage"])
 
