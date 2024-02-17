@@ -85,7 +85,7 @@ class LLMBasedContextCoverage(LLMBasedMetric):
     def __str__(self):
         return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
 
-    def calculate(self, question, retrieved_contexts, answer, **kwargs):
+    def calculate(self, question, retrieved_contexts, ground_truths, **kwargs):
         """
         Calculate the context coverage score for the given datapoint.
         """
@@ -113,31 +113,39 @@ classification:
             else ""
         )
 
-        prompt = {
-            "system_prompt": (
-                """
-Given a question, context, and answer, analyze each statement in the answer and classify if the statement can be attributed to the given context or not. Output JSON strictly in the following format.
-"""
-                + few_shot_prompt
-            ),
-            "user_prompt": ("question: " + question + "\ncontext: " + context + "\nanswer: " + answer),
-        }
-
-        content = self._llm.run(prompt)
-
-        try:
-            coverage = self.extract_attributed_from_broken_json(content)
-        except Exception as e:
-            print(f"{type(e).__name__} Error: {content}, skipping")
-            return {
-                "LLM_based_context_coverage": None,
-                "LLM_based_context_statements": content,
+        scores = []
+        for gt in ground_truths:
+            prompt = {
+                "system_prompt": (
+                    """
+    Given a question, context, and answer, analyze each statement in the answer and classify if the statement can be attributed to the given context or not. Output JSON strictly in the following format.
+    """
+                    + few_shot_prompt
+                ),
+                "user_prompt": ("question: " + question + "\ncontext: " + context + "\nanswer: " + gt),
             }
 
-        return {
-            "LLM_based_context_coverage": coverage,
-            "LLM_based_context_statements": content,
-        }
+            content = self._llm.run(prompt)
+
+            try:
+                coverage = self.extract_attributed_from_broken_json(content)
+            except Exception as e:
+                print(f"{type(e).__name__} Error: {content}, skipping")
+                scores.append(
+                    {
+                        "LLM_based_context_coverage": -1.0,
+                        "LLM_based_context_statements": content,
+                    }
+                )
+
+            scores.append(
+                {
+                    "LLM_based_context_coverage": coverage,
+                    "LLM_based_context_statements": content,
+                }
+            )
+
+        return max(scores, key=lambda x: x["LLM_based_context_coverage"])
 
     @staticmethod
     def extract_attributed_from_broken_json(statements):
@@ -147,6 +155,6 @@ Given a question, context, and answer, analyze each statement in the answer and 
             attributed_numbers = [int(num) for group in attributed_numbers for num in group if num]
         except Exception as e:
             print(f"{type(e).__name__} Error: {attributed_numbers}, skipping")
-            return None
-        coverage = sum(attributed_numbers) / len(attributed_numbers) if attributed_numbers else None
+            return -1.0
+        coverage = sum(attributed_numbers) / len(attributed_numbers) if attributed_numbers else -1.0
         return coverage

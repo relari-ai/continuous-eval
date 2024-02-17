@@ -16,6 +16,8 @@ $$
 }
 $$
 
+This metric requires the LLM evaluator to output correct and complex JSON. If the JSON cannot be parsed, the score returns -1.0.
+
 
 ### Example Usage
 
@@ -41,9 +43,9 @@ print(metric.calculate(**datum))
 ### Sample Output
 
 ```JSON
-{   
-    'LLM_based_context_coverage': 0.5,
-    'LLM_based_context_statements': 
+{
+    'LLM_based_context_coverage': 0.5, 
+    'LLM_based_context_statements':
     {
         "classification": [
             {
@@ -52,8 +54,8 @@ print(metric.calculate(**datum))
                 "Attributed": 1
             },
             {
-                "statement_2": "Lyon is the second largest city in France.",
-                "reason": "The context does not provide information about the ranking of Lyon in terms of size compared to other French cities.",
+                "statement_2": "Marseille is the second largest city in France.",
+                "reason": "This information is not provided in the context, which only mentions Paris and Lyon.",
                 "Attributed": 0
             }
         ]
