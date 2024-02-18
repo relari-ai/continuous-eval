@@ -19,6 +19,13 @@ try:
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
+try:
+    from langchain.chat_models import AzureChatOpenAI
+    from langchain.schema import HumanMessage, SystemMessage
+
+    AZURE_OPENAI_AVAILABLE = True
+except ImportError:
+    AZURE_OPENAI_AVAILABLE = False
 
 
 class LLMInterface(ABC):
@@ -52,11 +59,35 @@ class LLMFactory(LLMInterface):
             )
             google_genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
             self.client = google_genai.GenerativeModel(model_name=model)
+        elif model.startswith("azure"):
+            assert AZURE_OPENAI_AVAILABLE, "Azure OpenAI is not available. Please install it."
+            assert os.getenv("AZURE_OPENAI_API_KEY") is not None, (
+                "Please set the environment variable AZURE_OPENAI_API_KEY. "
+                "You can get one at https://portal.azure.com."
+            )
+            assert os.getenv("AZURE_OPENAI_API_VERSION") is not None, (
+                "Please set the environment variable AZURE_OPENAI_API_VERSION. "
+                "You can get one at https://portal.azure.com."
+            )
+            assert os.getenv("AZURE_ENDPOINT") is not None, (
+                "Please set the environment variable AZURE_ENDPOINT. "
+                "You can get one at https://portal.azure.com."
+            )
+            assert os.getenv("AZURE_DEPLOYMENT") is not None, (
+                "Please set the environment variable AZURE_DEPLOYMENT. "
+                "You can get one at https://portal.azure.com."
+            )
+            self.client = AzureChatOpenAI(
+                azure_endpoint=os.getenv("AZURE_ENDPOINT"),
+                azure_deployment=os.getenv("AZURE_DEPLOYMENT"),
+                openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                openai_api_key=os.getenv("AZURE_OPENAI_API_KEY")
+            )
         else:
             raise ValueError(
                 f"Model {model} is not supported. "
                 "Please choose from one of the following LLM providers: "
-                "OpenAI gpt models (e.g. gpt-4-turbo-preview, gpt-3.5-turbo-0125), Anthropic claude models (e.g. claude-2.1, claude-instant-1.2), Google Gemini models (e.g. gemini-pro)."
+                "OpenAI gpt models (e.g. gpt-4-turbo-preview, gpt-3.5-turbo-0125), Anthropic claude models (e.g. claude-2.1, claude-instant-1.2), Google Gemini models (e.g. gemini-pro), Azure OpenAI deployment (azure)"
             )
 
     def _llm_response(self, prompt, temperature):
@@ -134,6 +165,17 @@ class LLMFactory(LLMInterface):
                 safety_settings=safety_settings,
             )
             content = response.text
+        elif AZURE_OPENAI_AVAILABLE and isinstance(self.client, AzureChatOpenAI):
+            response = self.client.invoke(
+                input=[
+                    SystemMessage(content=prompt['system_prompt']),
+                    HumanMessage(content=prompt['user_prompt'])
+                ],
+                temperature=temperature,
+                max_tokens=1024,
+                top_p=1
+            )
+            content = response.dict()['content']
         else:
             raise ValueError(f"Unknown model client")
 
