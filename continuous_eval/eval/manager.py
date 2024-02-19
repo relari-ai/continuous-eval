@@ -207,5 +207,14 @@ class EvaluationManager:
         with open(filepath, "r") as json_file:
             self._test_results = json.load(json_file)
 
+    def test_graph(self):
+        pipeline_graph = self._pipeline.graph_repr()
+        tests = "\n    %% Tests\n"
+        for module, results in self._test_results.items():
+            metrics = "<br>".join([f"<i>{metric}: {value}</i>" for metric, value in results.items()])
+            tests += f"    {module}[<b>{module}</b><br>---<br>{metrics}]\n"
+
+        return pipeline_graph + tests
+
 
 eval_manager = EvaluationManager()
