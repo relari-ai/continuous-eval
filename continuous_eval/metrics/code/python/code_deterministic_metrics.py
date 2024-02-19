@@ -7,10 +7,10 @@ from continuous_eval.metrics.base import Metric
 
 
 class CodeStringMatch(Metric):
-    def calculate(self, answer, ground_truths, **kwargs):
+    def __call__(self, answer, ground_truth_answers):
         max_exact_match = 0
         max_similarity_score = 0
-        for gt in ground_truths:
+        for gt in ground_truth_answers:
             exact_match = float(answer == gt)
             similarity_score = fuzz.ratio(answer, gt) / 100
             if exact_match > max_exact_match:
@@ -296,11 +296,11 @@ class PythonASTSimilarity(Metric):
 
         return matrix
 
-    def calculate(self, answer, ground_truths, **kwargs):
+    def __call__(self, answer, ground_truth_answers):
 
         try:
             answer_tree = ast.parse(answer, mode="exec")
-            ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truths]
+            ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truth_answers]
         except SyntaxError as e:
             return {"Python_AST_Similarity": -1.0}
 

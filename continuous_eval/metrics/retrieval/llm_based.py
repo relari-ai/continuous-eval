@@ -1,7 +1,8 @@
 import re
+from functools import partialmethod
 from typing import Optional
 
-from continuous_eval.llm_factory import DefaultLLM, LLMInterface
+from continuous_eval.llm_factory import LLMInterface
 from continuous_eval.metrics.base import LLMBasedMetric
 
 
@@ -19,12 +20,12 @@ class LLMBasedContextPrecision(LLMBasedMetric):
     def __str__(self):
         return f"LLMBasedContextPrecision(model={self.model}, use_few_shot={self.use_few_shot})"
 
-    def calculate(self, question, retrieved_contexts, **kwargs):
+    def __call__(self, retrieved_context, question, **kwargs):
         """
         Calculate the context precision score for the given datapoint.
         """
         scores = []
-        for context in retrieved_contexts:
+        for context in retrieved_context:
             few_shot_prompt = (
                 """Example 1:
 Question: What is the capital of France?
@@ -85,7 +86,10 @@ class LLMBasedContextCoverage(LLMBasedMetric):
     def __str__(self):
         return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
 
-    def calculate(self, question, retrieved_contexts, ground_truths, **kwargs):
+    def __call__(self, question, retrieved_contexts, ground_truth_answers, **kwargs):
+        """
+        Calculate the context coverage score for the given datapoint.
+        """
         """
         Calculate the context coverage score for the given datapoint.
         """
@@ -114,7 +118,7 @@ classification:
         )
 
         scores = []
-        for gt in ground_truths:
+        for gt in ground_truth_answers:
             prompt = {
                 "system_prompt": (
                     """
@@ -155,6 +159,6 @@ classification:
             attributed_numbers = [int(num) for group in attributed_numbers for num in group if num]
         except Exception as e:
             print(f"{type(e).__name__} Error: {attributed_numbers}, skipping")
-            return -1.0
-        coverage = sum(attributed_numbers) / len(attributed_numbers) if attributed_numbers else -1.0
+            return None
+        coverage = sum(attributed_numbers) / len(attributed_numbers) if attributed_numbers else None
         return coverage

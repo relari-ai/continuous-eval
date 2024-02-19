@@ -1,7 +1,9 @@
+from typing import List
+
 from nltk.tokenize import sent_tokenize
 
 from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.retrieval_matching_strategy import RougeChunkMatch, MatchingStrategy, MatchingStrategyType
+from continuous_eval.metrics.retrieval.matching_strategy import MatchingStrategy, MatchingStrategyType, RougeChunkMatch
 
 
 class PrecisionRecallF1(Metric):
@@ -12,15 +14,19 @@ class PrecisionRecallF1(Metric):
         ), "Matching strategy must be an instance of MatchingStrategy."
         self.matching_strategy = matching_strategy
 
-    def calculate(self, retrieved_contexts, ground_truth_contexts, **kwargs):
+    def __call__(self, retrieved_context: List[str], ground_truth_context: List[str], **kwargs):
+        """
+        Calculate the precision, recall, and f1 score for the given datapoint.
+        """
+
         # Calculate precision, recall and f1 based on different matching strategies.
         # These metrics do not consider the order or rank of relevant information in the retrieval.
         if self.matching_strategy.type == MatchingStrategyType.CHUNK_MATCH:
-            ret_components = retrieved_contexts
-            gt_components = ground_truth_contexts
+            ret_components = retrieved_context
+            gt_components = ground_truth_context
         elif self.matching_strategy.type == MatchingStrategyType.SENTENCE_MATCH:
-            ret_components = [sentence for chunk in retrieved_contexts for sentence in sent_tokenize(chunk)]
-            gt_components = [sentence for chunk in ground_truth_contexts for sentence in sent_tokenize(chunk)]
+            ret_components = [sentence for chunk in retrieved_context for sentence in sent_tokenize(chunk)]
+            gt_components = [sentence for chunk in ground_truth_context for sentence in sent_tokenize(chunk)]
 
         relevant_ret_components = 0
         hit_gt_components = set()
@@ -37,4 +43,8 @@ class PrecisionRecallF1(Metric):
             f1 = 2 * (precision * recall) / (precision + recall)
         except ZeroDivisionError:
             f1 = 0.0
-        return {"context_precision": precision, "context_recall": recall, "context_f1": f1}
+        return {
+            "context_precision": precision,
+            "context_recall": recall,
+            "context_f1": f1,
+        }
