@@ -72,12 +72,6 @@ class MetricsResults:
         actual_results = {
             module_name: dict(ChainMap(*metrics.values())) for module_name, metrics in aggregated_samples.items()
         }
-        # for module_name, metrics in aggregated_samples.items():
-        # actual_results[module_name]=dict(ChainMap(*metrics.values()))
-        # return {
-        #     module_name: [dict(ChainMap(*x)) for x in zip(*eval_res.values())]
-        #     for module_name, eval_res in aggregated_samples.items()
-        # }
         return actual_results
 
     def save(self, filepath: Path):
