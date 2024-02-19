@@ -165,7 +165,7 @@ class EvaluationManager:
         assert self._eval_results is not None, "No samples to save"
         assert self._dataset is not None, "Dataset not set"
         assert all(
-            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results.values()]
         ), "Evaluation is not complete"
         with open(filepath, "w") as json_file:
             json.dump(self._eval_results, json_file, indent=None)
@@ -176,7 +176,7 @@ class EvaluationManager:
         with open(filepath, "r") as json_file:
             self._eval_results = json.load(json_file)
         assert all(
-            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results.values()]
         ), "Evaluation is not complete"
 
     # Tests
@@ -187,7 +187,7 @@ class EvaluationManager:
         assert self._dataset is not None, "Dataset not set"
         assert self._eval_results is not None, "Evaluation results not set"
         assert all(
-            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results.values()]
         ), "Evaluation is not complete"
         self._test_results = {
             module.name: {test.name: test.run(self._eval_results[module.name]) for test in module.tests}
