@@ -5,8 +5,10 @@ import rehypeMathjax from 'rehype-mathjax';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://red-meadow-00dc81510.4.azurestaticapps.net',
   base: '/v0.3',
   outDir: './dist/v0.3',
+  trailingSlash: "never",
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeMathjax],
