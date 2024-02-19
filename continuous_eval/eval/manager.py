@@ -211,7 +211,11 @@ class EvaluationManager:
         pipeline_graph = self._pipeline.graph_repr()
         tests = "\n    %% Tests\n"
         for module, results in self._test_results.items():
-            metrics = "<br>".join([f"<i>{metric}: {value}</i>" for metric, value in results.items()])
+            metrics_lines = []
+            for metric, passed in results.items():
+                status = "Pass" if passed else "Fail"
+                metrics_lines.append(f"<i>{metric}: {status}</i>")
+            metrics = "<br>".join(metrics_lines)
             tests += f"    {module}[<b>{module}</b><br>---<br>{metrics}]\n"
 
         return pipeline_graph + tests
