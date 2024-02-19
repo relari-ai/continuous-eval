@@ -9,8 +9,8 @@ export const collections = {
 export const base = '/';
 
 export const versions = [
-  ['v0.3', 'v0.3 (canary)'],
-  ['v0.2', 'v0.2 (latest)'],
+  ['v0.3', 'v0.3.x (canary)'],
+  ['v0.2', 'v0.2.x (latest)'],
 ];
 
 export const defaultVersion = 'v0.3';

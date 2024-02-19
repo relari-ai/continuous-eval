@@ -5,9 +5,10 @@ import Select from '@astrojs/starlight/components/Select.astro';
 import { defaultVersion, versions } from '../content/config.ts';
 
 const url = new URL(Astro.url);
-const currentVersion = /^\/v\d+/.test(url.pathname)
+const currentVersion = /^\/v\d\.\d+/.test(url.pathname)
   ? url.pathname.split('/')[1]
   : defaultVersion;
+console.log(currentVersion);
 const options = versions.map(([version, label]) => ({
   label,
   selected: currentVersion === version,
@@ -19,7 +20,7 @@ const options = versions.map(([version, label]) => ({
   const select = document.querySelector('select');
   select?.addEventListener('change', () => {
     const url = new URL(window.location.href);
-    const pathname = select.value + url.pathname.replace(/^\/v\d/, '');
+    const pathname = select.value + url.pathname.replace(/^\/v\d\.\d+/, '');
     url.pathname = pathname.replace(/\/$/, '');
     window.location.href = url.href;
   });
