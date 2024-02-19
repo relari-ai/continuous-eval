@@ -51,11 +51,11 @@ class EvaluationManager:
         return self._samples
 
     @property
-    def pipeline(self) -> Pipeline | None:
+    def pipeline(self) -> Pipeline:
         return self._pipeline
 
     @property
-    def dataset(self) -> Dataset | None:
+    def dataset(self) -> Dataset:
         return self._dataset
 
     @property
@@ -164,7 +164,9 @@ class EvaluationManager:
         assert filepath.suffix == ".json", "File must be a JSON file"
         assert self._eval_results is not None, "No samples to save"
         assert self._dataset is not None, "Dataset not set"
-        assert len(self._eval_results) == len(self._dataset.data), "Evaluation is not complete"
+        assert all(
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+        ), "Evaluation is not complete"
         with open(filepath, "w") as json_file:
             json.dump(self._eval_results, json_file, indent=None)
 
@@ -173,7 +175,9 @@ class EvaluationManager:
         assert self._dataset is not None, "Dataset not set"
         with open(filepath, "r") as json_file:
             self._eval_results = json.load(json_file)
-        assert len(self._eval_results) == len(self._dataset.data), "Samples not complete"
+        assert all(
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+        ), "Evaluation is not complete"
 
     # Tests
 
@@ -182,7 +186,9 @@ class EvaluationManager:
         assert self._pipeline is not None, "Pipeline not set"
         assert self._dataset is not None, "Dataset not set"
         assert self._eval_results is not None, "Evaluation results not set"
-        assert len(self._eval_results) == len(self._dataset.data), "Samples not complete"
+        assert all(
+            [len(module_res) == len(self._dataset.data) for module_res in self._eval_results]
+        ), "Evaluation is not complete"
         self._test_results = {
             module.name: {test.name: test.run(self._eval_results[module.name]) for test in module.tests}
             for module in self._pipeline.modules
