@@ -1,5 +1,7 @@
 from abc import ABC, ABCMeta
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
+
+import pandas as pd
 
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
@@ -36,8 +38,15 @@ class Metric(ABC):  # , metaclass=MetricDecoratorMeta):
         raise NotImplementedError()
 
     def batch(self, **kwargs) -> Any:
+        # Default implementation
         kwargs_ = [{key: kwargs[key][i] for key in kwargs} for i in range(len(next(iter(kwargs.values()))))]
         return [self(**kw) for kw in kwargs_]
+
+    def aggregate(self, results: List[Any]) -> Any:
+        # Default implementation
+        sanitize = lambda results: [{k: v for k, v in r.items() if not isinstance(v, (list, str))} for r in results]
+        agg = pd.DataFrame(sanitize(results))
+        return agg.mean().to_dict()
 
     @property
     def name(self):

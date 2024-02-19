@@ -22,7 +22,7 @@ class Graph:
 
 
 class Pipeline:
-    def __init__(self, modules: List[Module], dataset: Optional[Dataset] = None) -> None:
+    def __init__(self, modules: List[Module], dataset: Dataset) -> None:
         self._modules = modules
         self._dataset = dataset
         self._graph = self._build_graph()
@@ -40,6 +40,14 @@ class Pipeline:
             if module.name == name:
                 return module
         raise ValueError(f"Module {name} not found")
+
+    def get_metric(self, module_name: str, metric_name: str):
+        module = self.module_by_name(module_name)
+        try:
+            metric = [m for m in module.eval if m.name == metric_name][0]
+        except IndexError:
+            raise ValueError(f"Metric {metric_name} not found in module {module_name}")
+        return metric
 
     def _validate_modules(self):
         names = set()

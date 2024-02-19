@@ -23,9 +23,9 @@ class Dataset:
     def __init__(self, dataset_path: typing.Union[str, Path]) -> None:
         if isinstance(dataset_path, str):
             dataset_path = Path(dataset_path)
-        assert dataset_path.exists(), f"Dataset folder {dataset_name} does not exist"
-        assert (dataset_path / "manifest.yaml").exists(), f"Manifest file not found in {dataset_name}"
-        assert (dataset_path / "dataset.jsonl").exists(), f"Dataset file not found in {dataset_name}"
+        assert dataset_path.exists(), f"Dataset folder {dataset_path} does not exist"
+        assert (dataset_path / "manifest.yaml").exists(), f"Manifest file not found in {dataset_path}"
+        assert (dataset_path / "dataset.jsonl").exists(), f"Dataset file not found in {dataset_path}"
         # Load manifest
         with open(dataset_path / "manifest.yaml", "r") as manifest_file:
             self._manifest = yaml.safe_load(manifest_file)
@@ -61,11 +61,3 @@ class Dataset:
     @property
     def data(self):
         return self._data
-
-    # def get_value(self, field: typing.Union[str, DatasetField], index: int):
-    #     if isinstance(field, str):
-    #         return self._data[index][field]
-    #     elif isinstance(field, DatasetField):
-    #         return self._data[index][field.name]
-    #     else:
-    #         raise ValueError(f"field {field} not recognized")

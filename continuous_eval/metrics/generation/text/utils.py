@@ -1,3 +1,4 @@
+import string
 import warnings
 
 import nltk
@@ -46,7 +47,8 @@ class TokenOverlap:
 class RougeScore:
     def calculate(self, prediction, reference):
         rouge = Rouge()
-        if prediction == "":
+        if prediction == "" or all(c in string.punctuation for c in prediction):
+            # If the prediction is empty or only punctuation, the ROUGE score is 0
             rouge_l_score = {"p": 0.0, "r": 0.0, "f": 0.0}
         else:
             scores = rouge.get_scores(prediction, reference)
