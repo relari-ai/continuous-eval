@@ -1,13 +1,23 @@
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Set, Tuple, get_origin
+from typing import Any, Callable, List, Optional, Set, Tuple
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
 from continuous_eval.eval.modules import Module
+from continuous_eval.eval.utils import type_hint_to_str
 
 
 @dataclass
 class ModuleOutput:
-    selector: callable = field(default=lambda x: x)
+    selector: Callable = field(default=lambda x: x)
+    module: Optional[Module] = None
+
+    def __call__(self, *args: Any) -> Any:
+        return self.selector(*args)
+
+
+@dataclass
+class CalledTools:
+    selector: Callable = field(default=lambda x: x)
     module: Optional[Module] = None
 
     def __call__(self, *args: Any) -> Any:
@@ -43,6 +53,8 @@ class Pipeline:
 
     def get_metric(self, module_name: str, metric_name: str):
         module = self.module_by_name(module_name)
+        if module.eval is None:
+            raise ValueError(f"Module {module_name} has no metrics")
         try:
             metric = [m for m in module.eval if m.name == metric_name][0]
         except IndexError:
@@ -54,17 +66,10 @@ class Pipeline:
         for module in self._modules:
             if module.name in names:
                 raise ValueError(f"Module {module.name} already exists")
-            if module.reference is not None:
-                assert (
-                    module.reference is not None and module.reference in self._dataset.fields
-                ), f"Field {module.reference.name} not found"
             names.add(module.name)
-            if self._dataset is not None and module.expected_output is not None:
-                if get_origin(module.output) != get_origin(self._dataset.getattr(self, module.expected_output).type):
-                    raise ValueError(f"Field {module.output} does not match expected type in the dataset.")
 
     def _build_graph(self):
-        nodes = {m.name: m for m in self._modules}
+        nodes = {m.name for m in self._modules}
         edges = set()
         dataset_edges = set()
         for module in self._modules:

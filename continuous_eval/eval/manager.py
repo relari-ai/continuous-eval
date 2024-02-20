@@ -1,13 +1,17 @@
-import json
 import warnings
-from pathlib import Path
-from typing import Dict, List, Optional, get_origin
+from enum import Enum
+from typing import Any, List, Optional, get_origin
 
 from loguru import logger
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
-from continuous_eval.eval.pipeline import ModuleOutput, Pipeline
-from continuous_eval.eval.result_types import EvaluationResults, MetricsResults, TestResults
+from continuous_eval.eval.pipeline import CalledTools, ModuleOutput, Pipeline
+from continuous_eval.eval.result_types import TOOL_PREFIX, EvaluationResults, MetricsResults, TestResults
+
+
+class LogMode(Enum):
+    APPEND = 0
+    REPLACE = 1
 
 
 class EvaluationManager:
@@ -87,22 +91,40 @@ class EvaluationManager:
 
     # Logging results
 
-    def log(self, key, value):
+    def log(
+        self,
+        module: str,
+        value: Any,
+        mode: LogMode = LogMode.REPLACE,
+        **kwargs,
+    ):
         # Make sure everything looks good
         if self._pipeline is None:
             raise ValueError("Pipeline not set")
-        assert type(value) == get_origin(self._pipeline.module_by_name(key).output) or isinstance(
-            value, self._pipeline.module_by_name(key).output
-        ), f"Value {value} does not match expected type in the pipeline"
+        # assert type(value) == get_origin(
+        #     self._pipeline.module_by_name(module).output
+        # ) or isinstance(
+        #     value, self._pipeline.module_by_name(module).output
+        # ), f"Value {value} does not match expected type in the pipeline"
         if not self._is_running:
             raise ValueError("Cannot log when not running")
-        if key not in self._eval_results.results[self._idx]:
-            raise ValueError(f"Key {key} not found, review your pipeline")
+        if module not in self._eval_results.results[self._idx]:
+            raise ValueError(f"module {module} not found, review your pipeline")
 
-        if isinstance(self._eval_results.results[self._idx][key], dict):
-            self._eval_results.results[self._idx][key].update(value)
+        if kwargs and "tool_args" in kwargs:
+            key = f"{TOOL_PREFIX}{module}"
+            self._eval_results.results[self._idx][key].append({"name": value, "kwargs": kwargs["tool_args"]})
         else:
-            self._eval_results.results[self._idx][key] = value
+            if mode == LogMode.REPLACE:
+                self._eval_results.results[self._idx][module] = value
+            elif mode == LogMode.APPEND:
+                if not isinstance(self._eval_results.results[self._idx][module], list):
+                    if isinstance(value, list):
+                        self._eval_results.results[self._idx][module].extend(value)
+                    else:
+                        self._eval_results.results[self._idx][module].append(value)
+                else:
+                    self._eval_results.results[self._idx][module].add(value)
 
     # Evaluate
 
@@ -115,6 +137,10 @@ class EvaluationManager:
                 elif isinstance(val, ModuleOutput):
                     module_name = module.name if val.module is None else val.module.name
                     kwargs[key] = [val(x[module_name]) for x in self._eval_results.results]
+                elif isinstance(val, CalledTools):
+                    module_name = module.name if val.module is None else val.module.name
+                    val_key = f"{TOOL_PREFIX}{module_name}"
+                    kwargs[key] = [val(x[val_key]) for x in self._eval_results.results]
                 else:
                     raise ValueError(f"Invalid promised parameter {key}={val}")
         return kwargs
@@ -138,15 +164,6 @@ class EvaluationManager:
         assert all(
             [len(module_res) == len(self.dataset.data) for module_res in self._metrics_results.results.values()]
         ), "Evaluation is not complete"
-        # aggregated_results = dict()
-        # for module in self._pipeline.modules:
-        #     if module.eval is not None:
-        #         for metric in module.eval:
-        #             aggregated_results
-        #             if metric.aggregate is not None:
-        #                 self._eval_results[module.name][metric.name] = metric.aggregate(
-        #                     self._eval_results[module.name][metric.name]
-        #                 )
         return self._metrics_results.results
 
     # Tests

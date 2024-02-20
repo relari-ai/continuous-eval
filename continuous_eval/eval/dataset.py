@@ -5,10 +5,11 @@ from pathlib import Path
 
 import yaml
 
-UUID = str
+from continuous_eval.eval.types import UUID, ToolCall
 
 _SAFE_DICT = {k: v for k, v in typing.__dict__.items() if not k.startswith("__")}
 _SAFE_DICT["UUID"] = UUID
+_SAFE_DICT["ToolCall"] = ToolCall
 
 
 @dataclass(frozen=True)

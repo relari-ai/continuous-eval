@@ -4,8 +4,11 @@ from functools import cached_property, lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from continuous_eval.eval.modules import AgentModule
 from continuous_eval.eval.pipeline import Pipeline
 from continuous_eval.eval.utils import instantiate_type
+
+TOOL_PREFIX = "_tool__"
 
 
 class EvaluationResults:
@@ -28,6 +31,8 @@ class EvaluationResults:
         empty_samples = dict()
         for module in pipeline.modules:
             empty_samples[module.name] = instantiate_type(module.output)
+            if isinstance(module, AgentModule):
+                empty_samples[f"{TOOL_PREFIX}{module.name}"] = list()
         return empty_samples
 
     def save(self, filepath: Path):

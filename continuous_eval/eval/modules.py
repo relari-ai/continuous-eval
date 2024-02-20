@@ -36,5 +36,3 @@ class Module:
 @dataclass(frozen=True, eq=True)
 class AgentModule(Module):
     tools: Optional[List[Tool]] = field(default=None)
-    reference_tool_calls: Optional[DatasetField] = field(default=None)
-    is_recursive: bool = field(default=False)
