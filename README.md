@@ -43,7 +43,7 @@
 
 - **Synthetic Dataset Generation**: Generate large-scale synthetic dataset to test your pipeline.
 
-## Installation
+## Getting Started
 
 This code is provided as a Python package. To install it, run the following command:
 
@@ -57,14 +57,9 @@ if you want to install from source
 git clone https://github.com/relari-ai/continuous-eval.git && cd continuous-eval
 poetry install --all-extras
 ```
-
-## Getting Started
-
-### Prerequisites for LLM-based metrics
-
 To run LLM-based metrics, the code requires at least one of the LLM API keys in `.env`. Take a look at the example env file `.env.example`.
 
-### Run a single metric
+## Run a single metric
 Here's how you run a single metric on a datum.
 Check all available metrics here: [link](https://docs.relari.ai/)
 
@@ -86,8 +81,59 @@ metric = PrecisionRecallF1()
 
 print(metric(**datum))
 ```
+### Off-the-shelf Metrics
 
-### Run modularized evaluation over a dataset
+<table border="0">
+    <tr>
+        <th>Module</th>
+        <th>Subcategory</th>
+        <th>Metrics</th>
+    </tr>
+    <tr>
+        <td rowspan="2">Retrieval</td>
+        <td>Deterministic</td>
+        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
+    </tr>
+    <tr>
+        <td rowspan="3">Text Generation</td>
+        <td>Deterministic</td>
+        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
+    </tr>
+    <tr>
+        <td>Semantic</td>
+        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
+    </tr>
+    <tr>
+        <td rowspan="1">Classification</td>
+        <td>Deterministic</td>
+        <td>ClassificationAccuracy</td>
+    </tr>
+    <tr>
+        <td rowspan="2">Code Generation</td>
+        <td>Deterministic</td>
+        <td>CodeStringMatch, PythonASTSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedCodeGeneration</td>
+    </tr>
+    <tr>
+        <td>Agent Tools</td>
+        <td>Deterministic</td>
+        <td>ToolSelectionAccuracy</td>
+    </tr>
+</table>
+
+You can also define your own metrics (coming soon).
+## Run modularized evaluation over a dataset
 
 Define your pipeline and select the metrics for each.
 
@@ -161,58 +207,6 @@ eval_manager.run_eval()
 print(eval_manager.eval_graph())
 ```
 
-## Plug and Play Metrics
-
-<table border="0">
-    <tr>
-        <th>Module</th>
-        <th>Subcategory</th>
-        <th>Metrics</th>
-    </tr>
-    <tr>
-        <td rowspan="2">Retrieval</td>
-        <td>Deterministic</td>
-        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
-    </tr>
-    <tr>
-        <td rowspan="3">Text Generation</td>
-        <td>Deterministic</td>
-        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
-    </tr>
-    <tr>
-        <td>Semantic</td>
-        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
-    </tr>
-    <tr>
-        <td rowspan="1">Classification</td>
-        <td>Deterministic</td>
-        <td>ClassificationAccuracy</td>
-    </tr>
-    <tr>
-        <td rowspan="2">Code Generation</td>
-        <td>Deterministic</td>
-        <td>CodeStringMatch, PythonASTSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedCodeGeneration</td>
-    </tr>
-    <tr>
-        <td>Agent Tools</td>
-        <td>Deterministic</td>
-        <td>ToolSelectionAccuracy</td>
-    </tr>
-</table>
-
-You can also define your own metrics (coming soon).
 
 ## Resources
 
