@@ -1,4 +1,3 @@
-from continuous_eval import Dataset
 from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
 # A dataset is just a list of dictionaries containing the relevant information
