@@ -2,13 +2,14 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
+import astroD2 from 'astro-d2'
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://red-meadow-00dc81510.4.azurestaticapps.net',
   base: '/v0.3',
   outDir: './dist/v0.3',
-  trailingSlash: "never",
+  trailingSlash: "always",
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeMathjax],
@@ -39,6 +40,10 @@ export default defineConfig({
 						{ label: 'Quick Start', link: '/getting-started/quickstart/' },
 					],
 				},
+        {
+					label: 'Pipeline',
+          autogenerate: { directory: 'pipeline' }
+        },
 				{
 					label: 'Metrics',
 					items: [
@@ -88,5 +93,6 @@ export default defineConfig({
 				},
 			],
 		}),
+    astroD2({output: 'd2', basePath: '/v0.3'}),
 	],
 });

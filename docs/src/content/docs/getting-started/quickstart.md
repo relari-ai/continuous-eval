@@ -3,28 +3,32 @@ title: Quick Start
 description: Quick Start
 ---
 
-If you haven't installed continuous-eval, go <a href="/getting-started/installation">here</a>.
+If you haven't installed continuous-eval, go [here](../installation/).
 
 ## Run a single metric
 
-Import the metric of your choice (<a href="/metrics/overview">see all metrics</a>) and get the results.
+Import the metric of your choice ([see all metrics](../../metrics/overview/)) and get the results.
 
 ```python
-from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
+from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
+# A dataset is just a list of dictionaries containing the relevant information
 datum = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the capital of France and its largest city.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
 
-metric = PrecisionRecallF1(RougeChunkMatch())
-print(metric.calculate(**datum))
+# Let's initialize the metric
+metric = PrecisionRecallF1()
+
+# Let's calculate the metric for the first datum
+print(metric(**datum))
 ```
 
 ## Run evalulation over a dataset
