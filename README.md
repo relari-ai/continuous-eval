@@ -21,16 +21,17 @@
   <p>Open-Source Module-level Evaluation for LLM Pipelines</p>
 </h2>
 
-<h1 align="center">
-  <img
-    src="docs/public/module-level-eval.png"
-    width="500"
-  >
-</h1>
+
 
 ## Overview
 
 `continuous-eval` is an open-source package created for granular and holistic evaluation of LLM application pipelines. 
+
+<h1 align="center">
+  <img
+    src="docs/public/module-level-eval.png"
+  >
+</h1>
 
 ## How is continuous-eval different?
 
@@ -162,7 +163,7 @@ print(eval_manager.eval_graph())
 
 ## Plug and Play Metrics
 
-<table border="1">
+<table border="0">
     <tr>
         <th>Module</th>
         <th>Subcategory</th>
