@@ -37,9 +37,9 @@
 
 - **Modularized Evaluation**: Measure each module in the pipeline with tailored metrics.
 
-- **Comprehensive Metric Library**: Covers Retrieval-Augmented Generation (RAG), Code Generation, Tool Use, Agent Tool, Classification and a variety of LLM use cases. Mix and match Deterministic, Semantic and LLM-based metrics.
+- **Comprehensive Metric Library**: Covers Retrieval-Augmented Generation (RAG), Code Generation, Agent Tool Use, Classification and a variety of other LLM use cases. Mix and match Deterministic, Semantic and LLM-based metrics.
 
-- **Leverage User Feedback in Evaluation**: easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
+- **Leverage User Feedback in Evaluation**: Easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
 
 - **Synthetic Dataset Generation**: Generate large-scale synthetic dataset to test your pipeline.
 
@@ -51,7 +51,7 @@ This code is provided as a PyPi package. To install it, run the following comman
 python3 -m pip install continuous-eval
 ```
 
-if you want to install from source
+if you want to install from source:
 
 ```bash
 git clone https://github.com/relari-ai/continuous-eval.git && cd continuous-eval
@@ -133,10 +133,19 @@ print(metric(**datum))
         <td>Deterministic</td>
         <td>ToolSelectionAccuracy</td>
     </tr>
+    <tr>
+        <td>Custom</td>
+        <td></td>
+        <td>Define your own metrics</td>
+    </tr>
 </table>
 
-You can also define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#23) class implementing the `__call__` method.
+To define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#L23C7-L23C13) class implementing the `__call__` method.
 Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
+
+## Run evaluation on pipeline modules
+
+Define modules in your pipeline and select corresponding metrics.
 
 ```python
 from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset
@@ -184,6 +193,7 @@ llm = Module(
 )
 
 pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
+print(pipeline.graph_repr()) # optional: visualize the pipeline
 ```
 
 Now you can run the evaluation on your pipeline
@@ -204,7 +214,7 @@ To **log** the results you just need to call the `eval_manager.log` method with 
 eval_manager.log("answer_generator", response)
 ```
 
-the evaluator manager also offers
+The evaluator manager also offers
 
 - `eval_manager.run_metrics()` to run all the metrics defined in the pipeline
 - `eval_manager.run_tests()` to run the tests defined in the pipeline (see the documentation [docs](docs.relari.ai) for more details)
