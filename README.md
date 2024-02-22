@@ -45,7 +45,7 @@
 
 ## Getting Started
 
-This code is provided as a Python package. To install it, run the following command:
+This code is provided as a PyPi package. To install it, run the following command:
 
 ```bash
 python3 -m pip install continuous-eval
@@ -57,9 +57,11 @@ if you want to install from source
 git clone https://github.com/relari-ai/continuous-eval.git && cd continuous-eval
 poetry install --all-extras
 ```
+
 To run LLM-based metrics, the code requires at least one of the LLM API keys in `.env`. Take a look at the example env file `.env.example`.
 
 ## Run a single metric
+
 Here's how you run a single metric on a datum.
 Check all available metrics here: [link](https://docs.relari.ai/)
 
@@ -81,6 +83,7 @@ metric = PrecisionRecallF1()
 
 print(metric(**datum))
 ```
+
 ### Off-the-shelf Metrics
 
 <table border="0">
@@ -132,45 +135,40 @@ print(metric(**datum))
     </tr>
 </table>
 
-You can also define your own metrics (coming soon).
-## Run modularized evaluation over a dataset
-
-Define your pipeline and select the metrics for each.
+You can also define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#23) class implementing the `__call__` method.
+Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
 
 ```python
-from continuous_eval.eval import Module, Pipeline, Dataset
+from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset
 from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
 from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
 from typing import List, Dict
 
 dataset = Dataset("dataset_folder")
-Documents = List[Dict[str, str]]
-DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])
 
 # Simple 3-step RAG pipeline with Retriever->Reranker->Generation
-
 retriever = Module(
     name="Retriever",
     input=dataset.question,
-    output=List[Dict[str, str]],
-    eval={
+    output=List[str],
+    eval=[
         PrecisionRecallF1().use(
-            retrieved_context=DocumentsContent,
+            retrieved_context=ModuleOutput(),
             ground_truth_context=dataset.ground_truth_contexts,
         ),
-    },
+    ],
 )
 
 reranker = Module(
     name="reranker",
     input=retriever,
     output=List[Dict[str, str]],
-    eval={
+    eval=[
         RankedRetrievalMetrics().use(
-            retrieved_context=DocumentsContent,
+            retrieved_context=ModuleOutput(),
             ground_truth_context=dataset.ground_truth_contexts,
         ),
-    },
+    ],
 )
 
 llm = Module(
@@ -188,25 +186,28 @@ llm = Module(
 pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
 ```
 
-Log your results in your pipeline (see full example)
+Now you can run the evaluation on your pipeline
 
 ```python
-
-from continuous_eval.eval.manager import eval_manager
-
-...
-# Run and log module outputs
-response = ask(q, reranked_docs)
-eval_manager.log("answer_generator", response)
-...
-# Set the pipeline
-eval_manager.set_pipeline(pipeline)
-...
-# View the results
-eval_manager.run_eval()
-print(eval_manager.eval_graph())
+eval_manager.start_run()
+  while eval_manager.is_running():
+    if eval_manager.curr_sample is None:
+      break
+    q = eval_manager.curr_sample["question"] # get the question or any other field
+    # run your pipeline ...
+    eval_manager.next_sample()
 ```
 
+To **log** the results you just need to call the `eval_manager.log` method with the module name and the output, for example:
+
+```python
+eval_manager.log("answer_generator", response)
+```
+
+the evaluator manager also offers
+
+- `eval_manager.run_metrics()` to run all the metrics defined in the pipeline
+- `eval_manager.run_tests()` to run the tests defined in the pipeline (see the documentation [docs](docs.relari.ai) for more details)
 
 ## Resources
 
