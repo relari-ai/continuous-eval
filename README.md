@@ -18,14 +18,14 @@
 </div>
 
 <h2 align="center">
-  <p>Open-Source Module-level Evaluation for LLM Pipelines</p>
+  <p>Open-Source Evaluation for GenAI Application Pipelines</p>
 </h2>
 
 
 
 ## Overview
 
-`continuous-eval` is an open-source package created for granular and holistic evaluation of LLM application pipelines. 
+`continuous-eval` is an open-source package created for granular and holistic evaluation of GenAI application pipelines. 
 
 <h1 align="center">
   <img
