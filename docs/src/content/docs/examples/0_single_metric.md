@@ -25,5 +25,5 @@ dataset = Dataset([q])
 metric = PrecisionRecallF1()
 
 # Let's calculate the metric for the first datum
-print(metric.calculate(**dataset.datum(0)))  # alternatively `metric.calculate(**q)`
+print(metric(**dataset.datum(0)))  # alternatively `metric.calculate(**q)`
 ```

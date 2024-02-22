@@ -60,7 +60,7 @@ datum = {
 }
 
 metric = DeterministicAnswerCorrectness()
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

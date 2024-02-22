@@ -94,7 +94,7 @@ datum = {
 }
 
 metric = PrecisionRecallF1(RougeChunkMatch())
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

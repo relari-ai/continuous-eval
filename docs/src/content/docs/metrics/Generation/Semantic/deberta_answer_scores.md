@@ -45,7 +45,7 @@ datum = {
 }
 
 metric = DebertaAnswerScores()
-print(metric.calculate(**datum))
+print(metric(**datum))
 
 reverse_metric = DebertaAnswerScores(reverse=True)
 print(reverse_metric.calculate(**datum))

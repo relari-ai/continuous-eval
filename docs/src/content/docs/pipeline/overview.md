@@ -1,8 +1,8 @@
 ---
-title: Overview
+title: Pipeline
 sidebar:
   badge:
-    text: beta
+    text: new
     variant: tip
 ---
 
@@ -18,16 +18,16 @@ Consider the following example:
 
 ```d2
 direction: right
-Retriever -> LLM
+Retriever -> Reranker -> Generator
 ```
 
-In the example above, the pipeline consists of two modules: a retriever and a language model (LLM).
+In the example above, the pipeline consists of three simple modules: a retriever and an LLM generator.
 
 ```python
 from continuous_eval.eval import Module, Pipeline, Dataset
 from typing import List, Dict
 
-dataset = Dataset("dataset_folder")
+dataset = Dataset("dataset_folder") # This is the dataset you will use you evaluate the pipeline module.
 
 retriever = Module(
     name="Retriever",
@@ -35,13 +35,19 @@ retriever = Module(
     output=List[Dict[str, str]],
 )
 
+reranker = Module(
+    name="Reranker",
+    input=retriever,
+    output=List[Dict[str, str]],
+)
+
 llm = Module(
     name="LLM",
-    input=retriever,
+    input=reranker,
     output=str,
 )
 
-pipeline = Pipeline([retriever, llm], dataset=dataset)
+pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
+print(pipeline.graph_repr()) # visualize the pipeline in Mermaid graph format
 ```
 
-> We will talk about the dataset later

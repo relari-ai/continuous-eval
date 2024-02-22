@@ -29,7 +29,7 @@ datum = {
 },
 
 metric = CodeStringMatch()
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

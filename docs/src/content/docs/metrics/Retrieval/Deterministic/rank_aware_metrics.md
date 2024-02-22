@@ -50,7 +50,7 @@ datum = {
 }
 
 metric = RankedRetrievalMetrics(RougeChunkMatch())
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

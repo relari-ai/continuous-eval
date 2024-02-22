@@ -43,7 +43,7 @@ datum = {
 }
 
 metric = LLMBasedContextPrecision(LLMFactory("gpt-4-1106-preview"), log_relevance_by_context=True)
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 Note: optional variable `log_relevance_by_context` outputs `LLM_based_context_relevance_by_context` - the LLM judgement of relevance to answer the question per context retrieved.
