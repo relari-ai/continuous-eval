@@ -6,12 +6,12 @@ sidebar:
     variant: tip
 ---
 
-## Adding Evaluators and Tests to a Pipeline
+## Definitions
 
 You can optionally add `eval` and `tests` to the modules you want to measure the performance of.
 
 
-`eval` field to select relevant evaluation metrics
+#### `eval`: select relevant evaluation metrics
 - Select the metrics and specify the input according to the data fields required for each metric. `MetricName().use(data_fields)`.
 - Metric inputs can be referenced using items from two sources:
     -   **From `dataset`**: e.g. `ground_truth_context = dataset.ground_truth_context`
@@ -20,15 +20,16 @@ You can optionally add `eval` and `tests` to the modules you want to measure the
         `DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])` to select specific items from the prior module's output
 
 
-`tests` field to define specific performance criteria
+#### `tests`: define specific performance criteria
 - Select testing class `GreaterOrEqualThan` or `MeanGreaterOrEqualThan` to run test over each datapoint or the mean of the aggregate dataset
 - Define `test_name`, `metric_name` (must be part of the metric_name that `eval` calculates), and `min_value`.
 
 
+## Example
 
 Below is a full example of a two-step pipeline.
 
-```python
+```python title="pipeline.py"
 from continuous_eval.eval import Module, Pipeline, Dataset, ModuleOutput
 from continuous_eval.metrics.retrieval import PrecisionRecallF1 # Deterministic metric
 from continuous_eval.metrics.generation.text import (

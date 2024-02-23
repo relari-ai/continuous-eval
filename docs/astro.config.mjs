@@ -42,7 +42,14 @@ export default defineConfig({
 				},
         {
 					label: 'Pipeline',
-          autogenerate: { directory: 'pipeline' }
+					items: [
+						// Each item here is one entry in the navigation menu.
+						{ label: 'Overview', link: '/pipeline/pipeline'},
+						{ label: 'Evaluators and Tests', link: '/pipeline/eval_and_tests'},
+						{ label: 'Eval Manager', link: '/pipeline/eval_manager' },
+						{ label: 'Dataset', link: '/pipeline/dataset' },
+					],
+
         },
 				{
 					label: 'Metrics',
@@ -53,7 +60,7 @@ export default defineConfig({
 							autogenerate: { directory: '/metrics/Retrieval/' }
 						},
 						{
-							label: 'Generation',
+							label: 'Text Generation',
 							items: [
 								{
 									label: 'Deterministic',
@@ -74,7 +81,7 @@ export default defineConfig({
 							]
 						},
 						{
-							label: 'Code',
+							label: 'Code Generation',
 							autogenerate: {directory: '/metrics/Code/'}
 						},
 						{

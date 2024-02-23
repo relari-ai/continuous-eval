@@ -1,18 +1,20 @@
 ---
-title: Pipeline
+title: Pipeline Overview
 sidebar:
   badge:
     text: new
     variant: tip
 ---
 
-## Evaluation Pipeline
+## Definition
 
-In order to evaluate your pipeline, you first need to define it.
+In order to evaluate your AI application pipeline, you first need to define it.
 A pipeline is a sequence of steps that transform data from one format to another.
 
 The basic component of a pipeline is a `Module`.
 A module is a named component with specific inputs and outputs.
+
+## Example
 
 Consider the following example:
 
@@ -23,7 +25,7 @@ Retriever -> Reranker -> Generator
 
 In the example above, the pipeline consists of three simple modules: a retriever and an LLM generator.
 
-```python
+```python title="pipeline.py"
 from continuous_eval.eval import Module, Pipeline, Dataset
 from typing import List, Dict
 

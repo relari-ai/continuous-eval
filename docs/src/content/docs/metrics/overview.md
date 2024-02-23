@@ -7,23 +7,24 @@ sidebar:
     variant: tip
 ---
 
-## What the Metrics Measure
-
-:::note
-In Retrieval-augmented Generation (RAG) pipelines, we seperate the evaluation process for Retrieval and Generation because they have **distinct functionality and requirements**.
-:::
+## What the metrics measure
 
 **For Retrieval, we care how well the system can fetch the relevent documents to answer the question.** Specifically, we try to measure:
 
 - **Context Recall:** how completely has the system retrieved all the necessary documents
 - **Context Precision:** how much signal (vs. noise) did the system retrieve?
 
-**For Generation, we care about how well the LLM answers the question based on the retrieved contexts.** Specifically, we try to measure:
+**For Text Generation, we care about how well the LLM answers the question based on the retrieved contexts.** Specifically, we try to measure:
 
 - **Overall Correctness:** how closely the answer match with an ideal reference answer?
 - **Faithfulness:** how well is the answer grounded on context retrieved?
 - **Relevance:** is the answer a direct response to the question?
 - **Style:** is the answer in a style consistent with design (reference answer)?
+- **Many more aspects**
+
+**For Code Generation, we care about how well the LLM answers the question based on the retrieved contexts.** Specifically, we try to measure:
+
+- **Overall Correctness:** how closely the answer match with an ideal reference answer?
 - **Many more aspects**
 
 <br>
@@ -82,7 +83,6 @@ Below is the list of metrics available:
 - `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
 - `LLMBasedAnswerRelevance`: Relevance of the Generated Answer w.r.t the Question
 - `LLMBasedStyleConsistency`: Consistency of style bwtween the Generated Answer and the Ground Truth Answer(s)
-
 
 ## Data Dependencies
 
