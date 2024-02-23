@@ -6,10 +6,6 @@ import pandas as pd
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
 
-# from continuous_eval.eval.manager import eval_manager
-# from continuous_eval.eval.dataset import DatasetField
-
-
 # class MetricDecoratorMeta(ABCMeta, type):
 #     def __new__(cls, name, bases, dct):
 #         for attr, value in dct.items():

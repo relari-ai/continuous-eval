@@ -1,6 +1,6 @@
 import warnings
 from enum import Enum
-from typing import Any, List, Optional, get_origin
+from typing import Any, List, Optional
 
 from loguru import logger
 
@@ -101,11 +101,6 @@ class EvaluationManager:
         # Make sure everything looks good
         if self._pipeline is None:
             raise ValueError("Pipeline not set")
-        # assert type(value) == get_origin(
-        #     self._pipeline.module_by_name(module).output
-        # ) or isinstance(
-        #     value, self._pipeline.module_by_name(module).output
-        # ), f"Value {value} does not match expected type in the pipeline"
         if not self._is_running:
             raise ValueError("Cannot log when not running")
         if module not in self._eval_results.results[self._idx]:

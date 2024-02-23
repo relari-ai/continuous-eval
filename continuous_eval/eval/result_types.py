@@ -64,6 +64,19 @@ class MetricsResults:
             for module_name, eval_res in self.samples.items()
         }
 
+    def to_pandas(self):
+        import pandas as pd
+
+        if len(self.results) > 1:
+            flatten = [
+                {f"{outer_key}_{key}": value for key, value in inner_dict.items()}
+                for outer_key, dict_list in self.results.items()
+                for inner_dict in dict_list
+            ]
+        else:
+            flatten = list(*self.results.values())
+        return pd.DataFrame(flatten)
+
     @lru_cache(maxsize=1)
     def aggregate(self):
         if self.pipeline is None:

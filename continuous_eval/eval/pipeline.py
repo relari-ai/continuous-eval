@@ -2,8 +2,10 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional, Set, Tuple
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
-from continuous_eval.eval.modules import Module
+from continuous_eval.eval.modules import Module, SingleModule
+from continuous_eval.eval.tests import Test
 from continuous_eval.eval.utils import type_hint_to_str
+from continuous_eval.metrics import Metric
 
 
 @dataclass
@@ -73,14 +75,16 @@ class Pipeline:
         edges = set()
         dataset_edges = set()
         for module in self._modules:
-            if isinstance(module.input, Module):
+            if module.input is None:
+                continue
+            elif isinstance(module.input, Module):
                 assert module in self._modules, f"Module {module.input.name} not found"
                 edges.add((module.input.name, module.name))
             elif isinstance(module.input, DatasetField):
                 assert module.input in self._dataset.fields, f"Field {module.input.name} not found"
                 dataset_edges.add((module.input, module.name))
-            elif isinstance(module.input, tuple):
-                for x in module.input:
+            elif isinstance(module.input, (list, tuple)):
+                for x in module.input:  # type: ignore
                     if isinstance(x, Module):
                         assert x in self._modules, f"Module {x.name} not found"
                         edges.add((x.name, module.name))
@@ -98,7 +102,7 @@ class Pipeline:
         for edge in self._graph.edges:
             start, end = edge
             if with_type_hints:
-                type_hint = type_hint_to_str(self.module_by_name(start).output)
+                type_hint = type_hint_to_str(self.module_by_name(start).output.type)
                 repr_str += f'    {start}-->|"{type_hint}"|{end};\n'
             else:
                 repr_str += f"    {start} --> {end};\n"
@@ -107,3 +111,14 @@ class Pipeline:
             # Adding the dataset edge with label
             repr_str += f'    {dataset_node_label} -. "{dataset_field_name}" .-> {end_node};\n'
         return repr_str
+
+
+def SingleModulePipeline(
+    dataset: Dataset,
+    eval: Optional[List[Metric]] = None,
+    tests: Optional[List[Test]] = None,
+    name: str = "eval",
+    description: Optional[str] = "",
+) -> Pipeline:
+    m = SingleModule(eval=eval, tests=tests, name=name, description=description)
+    return Pipeline([m], dataset)

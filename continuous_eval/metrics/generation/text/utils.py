@@ -4,7 +4,7 @@ import warnings
 import nltk
 from rouge import Rouge
 
-from continuous_eval.metrics.utils.simple_tokenizer import SimpleTokenizer
+from continuous_eval.metrics._utils.simple_tokenizer import SimpleTokenizer
 
 
 class TokenOverlap:

@@ -91,9 +91,15 @@ class FleschKincaidReadability(Metric):
         num_sentences = len(nltk.sent_tokenize(answer))
         num_words = len(words)
         # Flesch Reading-Ease score
-        fre_score = 206.835 - 1.015 * (num_words / num_sentences) - 84.6 * (num_syllables / num_words)
+        try:
+            fre_score = 206.835 - 1.015 * (num_words / num_sentences) - 84.6 * (num_syllables / num_words)
+        except ZeroDivisionError:
+            fre_score = 121.22
         # Flesch–Kincaid Grade Level
-        fk_grade = 0.39 * (num_words / num_sentences) + 11.8 * (num_syllables / num_words) - 15.59
+        try:
+            fk_grade = 0.39 * (num_words / num_sentences) + 11.8 * (num_syllables / num_words) - 15.59
+        except ZeroDivisionError:
+            fk_grade = 0.0
         return {
             "flesch_reading_ease": fre_score,
             "flesch_kincaid_grade_level": fk_grade,
