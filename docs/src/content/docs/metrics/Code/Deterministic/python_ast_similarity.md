@@ -1,9 +1,7 @@
 ---
 title: Python AST Similarity
 sidebar:
-  badge:
-    text: new
-    variant: note
+  order: 1
 ---
 
 ### Definitions

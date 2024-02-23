@@ -7,28 +7,6 @@ sidebar:
     variant: tip
 ---
 
-## What the metrics measure
-
-**For Retrieval, we care how well the system can fetch the relevent documents to answer the question.** Specifically, we try to measure:
-
-- **Context Recall:** how completely has the system retrieved all the necessary documents
-- **Context Precision:** how much signal (vs. noise) did the system retrieve?
-
-**For Text Generation, we care about how well the LLM answers the question based on the retrieved contexts.** Specifically, we try to measure:
-
-- **Overall Correctness:** how closely the answer match with an ideal reference answer?
-- **Faithfulness:** how well is the answer grounded on context retrieved?
-- **Relevance:** is the answer a direct response to the question?
-- **Style:** is the answer in a style consistent with design (reference answer)?
-- **Many more aspects**
-
-**For Code Generation, we care about how well the LLM answers the question based on the retrieved contexts.** Specifically, we try to measure:
-
-- **Overall Correctness:** how closely the answer match with an ideal reference answer?
-- **Many more aspects**
-
-<br>
-
 ## Metric Categories
 
 The `continuous-eval` package offers three categories of metrics based on how they are computed:
@@ -39,246 +17,176 @@ The `continuous-eval` package offers three categories of metrics based on how th
 
 All the metrics comes with pros and cons and there's not a one-size-fits-all evaluation pipeline that's optimal for every use case. We aim to provide a wide range of metrics for you to choose from.
 
-The package also offers a way to **Ensemble Metrics** of different metrics to improve performance on quality and effeciency.
+The package also offers a way to [**Ensemble Metrics**](/v0.3/metrics/ensembling_classifier/) of different metrics to improve performance on quality and effeciency.
 
-:::tip
-Check out our blog post that dives deeper into the pros and cons of different types of metrics:
-**A Practical Guide to RAG Pipeline Evaluation:** [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893), [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
-:::
 
 <br>
 
 ### `Metric` Class 
 
 Below is the list of metrics available:
+
+<table>
+    <tr>
+        <th>Module</th>
+        <th>Category</th>
+        <th>Metrics</th>
+    </tr>
+    <tr>
+        <td rowspan="2">Retrieval</td>
+        <td>Deterministic</td>
+        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
+    </tr>
+    <tr>
+        <td rowspan="3">Text Generation</td>
+        <td>Deterministic</td>
+        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
+    </tr>
+    <tr>
+        <td>Semantic</td>
+        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
+    </tr>
+    <tr>
+        <td rowspan="1">Classification</td>
+        <td>Deterministic</td>
+        <td>ClassificationAccuracy</td>
+    </tr>
+    <tr>
+        <td rowspan="2">Code Generation</td>
+        <td>Deterministic</td>
+        <td>CodeStringMatch, PythonASTSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedCodeGeneration</td>
+    </tr>
+    <tr>
+        <td>Agent Tools</td>
+        <td>Deterministic</td>
+        <td>ToolSelectionAccuracy</td>
+    </tr>
+    <tr>
+        <td>Custom</td>
+        <td></td>
+        <td>Define your own metrics</td>
+    </tr>
+</table>
+
+
 #### Retrieval metrics
 
 ##### Deterministic
 
-- `PrecisionRecallF1`: Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
-- `RankedRetrievalMetrics`: Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
+**`PrecisionRecallF1`**
+- **Definition:** Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
+- **Inputs:** `retrieved_contexts`, `ground_truth_contexts`
+
+**`RankedRetrievalMetrics`**
+- **Definition:** Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
+- **Inputs:** `retrieved_contexts`, `ground_truth_contexts`
 
 ##### LLM-based
 
-- `LLMBasedContextPrecision`: Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
-- `LLMBasedContextCoverage`: Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calcualted by LLM
+**`LLMBasedContextPrecision`**
+- **Definition:** Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
+- **Inputs:** `question`, `retrieved_contexts`
 
-#### Generation metrics
+**`LLMBasedContextCoverage`**
+- **Definition:** Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calculated by LLM
+- **Inputs:** `question`, `retrieved_contexts`, `ground_truth_answers`
+
+#### Text Generation metrics
 
 ##### Deterministic
 
-- `DeterministicAnswerRelevance`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
-- `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
-- `FleschKincaidReadability`: how easy or difficult it is to understand the LLM generated answer.
+**`DeterministicAnswerRelevance`**
+- **Definition:** Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
+- **Inputs:** `question`, `generated_answer`
+
+**`DeterministicFaithfulness`**
+- **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
+- **Inputs:** `retrieved_contexts`, `generated_answer`
+
+**`FleschKincaidReadability`**
+- **Definition:** How easy or difficult it is to understand the LLM generated answer.
+- **Inputs:** `generated_answer`
 
 ##### Semantic
 
-- `DebertaAnswerScores`: Entailment and contradiction scores between the Generated Answer and Ground Truth Answer
-- `BertAnswerRelevance`: Similarity score based on the BERT model between the Generated Answer and Question
-- `BertAnswerSimilarity`: Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
+**`DebertaAnswerScores`**
+- **Definition:** Entailment and contradiction scores between the Generated Answer and Ground Truth Answer
+- **Inputs:** `generated_answer`, `ground_truth_answers`
+
+**`BertAnswerRelevance`**
+- **Definition:** Similarity score based on the BERT model between the Generated Answer and Question
+- **Inputs:** `question`, `generated_answer`
+
+**`BertAnswerSimilarity`**
+- **Definition:** Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
+- **Inputs:** `generated_answer`, `ground_truth_answers`
 
 ##### LLM-based
 
-- `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
-- `LLMBasedAnswerCorrectness`: Score (1-5) of the Generated Answer based on the Question and Ground Truth Answer calcualted by LLM
-- `LLMBasedAnswerRelevance`: Relevance of the Generated Answer w.r.t the Question
-- `LLMBasedStyleConsistency`: Consistency of style bwtween the Generated Answer and the Ground Truth Answer(s)
+**`LLMBasedFaithfulness`**
+- **Definition:** Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
+- **Inputs:** `question`, `retrieved_contexts`, `generated_answer`
 
-## Data Dependencies
+**`LLMBasedAnswerCorrectness`**
+- **Definition:** Overall correctness of the Generated Answer based on the Question and Ground Truth Answer calculated by LLM
+- **Inputs:** `question`, `generated_answer`, `ground_truth_answers`
 
-<style>
-  table {
-    border-collapse: collapse;
-    font-size: 14px;
-    width: 100%; /* Optional: Adjust width as needed */
-    table-layout: fixed; /* Optional: For equal column width */
-  }
+**`LLMBasedAnswerRelevance`**
+- **Definition:** Relevance of the Generated Answer with respect to the Question
+- **Inputs:** `question`, `generated_answer`
 
-  th, td {
-    padding: 10px;
-    border: 1px solid #333; /* Darker border color */
-  }
+**`LLMBasedStyleConsistency`**
+- **Definition:** Consistency of style between the Generated Answer and the Ground Truth Answer(s)
+- **Inputs:** `generated_answer`, `ground_truth_answers`
 
-  th {
-    background-color: #37474F; /* Soft dark blue-grey for headers */
-    color: white; /* White text for contrast */
-    font-weight: bold;
-  }
+#### Code Generation metrics
 
-  tr {
-    background-color: transparent
-  }
+##### Deterministic
 
-  .header-row {
-    background-color: #007BFF; /* Deep blue for main headers */
-    color: white;
-    text-align: center;
-  }
+**`DeterministicAnswerRelevance`**
+- **Definition:** Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
+- **Inputs:** `question`, `generated_answer`
 
-  .sub-header {
-    background-color: #6c757d; /* Darker grey for sub-headers */
-    color: white; /* White text for sub-headers */
-    font-style: italic;
-  }
+**`DeterministicFaithfulness`**
+- **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
+- **Inputs:** `retrieved_contexts`, `generated_answer`
 
-  .check {
-    text-align: center; /* Centering checkmark */
-  }
-  
-  .check::before {
-    content: '\2713'; /* Unicode for checkmark */
-    color: green; /* Checkmark color */
-  }
+#### Classification metrics
 
-  .grey {
-    text-align: center;
-  }
+##### Deterministic
 
-  .grey::before {
-    content: '-'; /* Unicode for checkmark */
-    color: grey; /* Checkmark color */
-  }
+**`ClassificationAccuracy`**
+- **Definition:** Proportion of correctly identified items out of the total items
+- **Inputs:** `predictions`, `ground_truth_labels`
 
-</style>
+#### Code Generation metrics
 
-#### Input data for retrieval metrics
+##### Deterministic
 
-<table>
+**`CodeStringMatch`**
+- **Definition:** Exact and fuzzy match scores between generated code strings and the ground truth code strings
+- **Inputs:** `answer`, `ground_truths`
 
-  <tr class="sub-header">
-    <th colspan="2">Retrieval Metrics</th>
-    <th>Question</th>
-    <th>*Retrieved Contexts*</th>
-    <th>Ground Truth Contexts</th>
-    <th>Generated Answer</th>
-    <th>Ground Truth Answers</th>
-  </tr>
-    <tr>
-    <th rowspan="2">Deterministic</th>
-    <td>Context Precision & Recall</td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-    <td>Rank-Aware Metrics</td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-    <th rowspan="2">LLM-Based</th>
-    <td>Context Precision</td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-    <td>Context Coverage</td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-  </tr>
-</table>
+**`PythonASTSimilarity`**
+- **Definition:** Similarity of Abstract Syntax Trees (ASTs) for Python code, comparing the generated code to the ground truth code
+- **Inputs:** `answer`, `ground_truths`
 
-#### Input data for generation metrics
+#### Agent Tools metrics
 
+##### Deterministic
 
-<table>
-  <tr class="sub-header">
-    <th colspan="2">Generation Metrics</th>
-    <th>Question</th>
-    <th>Retrieved Contexts</th>
-    <th>Ground Truth Contexts</th>
-    <th>*Generated Answer*</th>
-    <th>Ground Truth Answers</th>
-  </tr>
-  <tr>
-    <tr>
-    <th rowspan="2">Deterministic</th>
-    <td>Faithfulness</td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-    <td>Answer Relevance</td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-  <th rowspan="3">Semantic</th>
-    <td>Bert Answer Similarity</td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-  </tr>
-    <tr>
-  <td>Bert Answer Relevance</td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-  </tr>
-  <tr>
-    <td>Deberta Answer Scores (Entailment & Contradiction)</td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-  </tr>
-  <tr>
-    <th rowspan="4">LLM-Based</th>
-    <td>Correctness</td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-  </tr>
-  <tr>
-    <td>Faithfulness</td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-  </tr>
-    <tr>
-    <td>Relevance</td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "grey"></td>
-  </tr>
-    <tr>
-    <td>Style Consistency</td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "grey"></td>
-    <td class = "check"></td>
-    <td class = "check"></td>
-  </tr>
-
-
-</table>
-
-\*variable being evaluated\*
+**`ToolSelectionAccuracy`**
+- **Definition:** Accuracy of selecting the correct tool(s) for a given task by the agent
+- **Inputs:** `tools`, `ground_truths`

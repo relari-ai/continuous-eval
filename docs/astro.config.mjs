@@ -57,10 +57,21 @@ export default defineConfig({
 						{ label: 'Overview', link: '/metrics/overview/' },
 						{
 							label: 'Retrieval',
-							autogenerate: { directory: '/metrics/Retrieval/' }
+							collapsed: true,
+							items: [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Retrieval/Deterministic/' }
+								},
+								{
+									label: 'LLM-Based',
+									autogenerate: { directory: '/metrics/Retrieval/LLM-Based/' }
+								},
+							]
 						},
 						{
 							label: 'Text Generation',
+							collapsed: true,
 							items: [
 								{
 									label: 'Deterministic',
@@ -82,13 +93,41 @@ export default defineConfig({
 						},
 						{
 							label: 'Code Generation',
-							autogenerate: {directory: '/metrics/Code/'}
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Code/Deterministic/' }
+								},
+								{
+									label: 'LLM-Based',
+									autogenerate: { directory: '/metrics/Code/LLM-Based/' }
+								}
+							]
 						},
 						{
-							label: 'Metric Ensembling',
-							autogenerate: { directory: '/metrics/ensembling/' },
+							label: 'Agent Tool Use',
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Tools/Deterministic/' }
+								},
+							]
 						},
-					],
+						{
+							label: 'Classification',
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Classification/Deterministic/' }
+								},
+							]
+						},
+						{label: 'Custom Metrics', link: '/metrics/custom_metrics/'},
+						{label: 'Metric Ensembling', link: '/metrics/ensembling_classifier/'},
+						],
 				},
 				{
 					label: 'Datasets',

@@ -1,0 +1,35 @@
+---
+title: Complex RAG evaluation
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+In this example, we will walk through a complex RAG application and evaluate it's performance.
+
+```d2
+direction: right
+Query -> Base Retriever
+Query -> HyDE Generator
+Query -> BM25 Retriever
+Base Retriever -> Reranker
+HyDE Generator -> HyDE Retriever
+HyDE Retriever -> Reranker
+BM25 Retriever -> Reranker
+Reranker -> Gererator
+```
+
+
+<Tabs>
+<TabItem label="1) Define Pipeline">
+```python title="pipeline.py"
+```
+</TabItem>
+<TabItem label="2) Run Complex RAG App">
+```python title="complex_rag_app.py"
+```
+</TabItem>
+<TabItem label="3) Run Eval">
+```python title="eval.py"
+```
+</TabItem>
+</Tabs>
