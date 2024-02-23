@@ -89,7 +89,7 @@ print(metric(**datum))
 <table border="0">
     <tr>
         <th>Module</th>
-        <th>Subcategory</th>
+        <th>Category</th>
         <th>Metrics</th>
     </tr>
     <tr>

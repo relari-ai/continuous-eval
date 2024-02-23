@@ -27,7 +27,22 @@ You can optionally add `eval` and `tests` to the modules you want to measure the
 
 ## Example
 
-Below is a full example of a two-step pipeline.
+Below is a full example of a two-step pipeline, where we added some metrics and tests to the pipeline.
+
+Evaluation Metrics:
+-   `PrecisionRecallF1` is added to evaluate the Retriever
+-   `FleschKincaidReadability`, `DebertaAnswerScores`, and `LLMBasedFaithfulness` are added to evaluate the Generator
+
+Tests:
+-   `context_recall`, a metric calculated by `PrecisionRecallF1` needs to be >= 0.9 to pass
+-   `deberta_entailment`, a metric calculated by `DebertaAnswerScores` needs to be >= 0.8 to pass
+
+
+```d2
+direction: right
+Retriever -> Generator
+```
+
 
 ```python title="pipeline.py"
 from continuous_eval.eval import Module, Pipeline, Dataset, ModuleOutput
@@ -44,8 +59,8 @@ dataset = Dataset("data/eval_golden_dataset")
 Documents = List[Dict[str, str]]
 DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])
 
-base_retriever = Module(
-    name="base_retriever",
+retriever = Module(
+    name="retriever",
     input=dataset.question,
     output=Documents,
     eval=[
@@ -63,7 +78,7 @@ base_retriever = Module(
 
 llm = Module(
     name="answer_generator",
-    input=reranker,
+    input=retriever,
     output=str,
     eval=[
         FleschKincaidReadability().use( # Reference-free metric that only uses the output of the module
@@ -74,16 +89,13 @@ llm = Module(
         ),
         LLMBasedFaithfulness().use( # Reference-free metric that uses output from a prior module (Retrieved Context) to evaluate the answer
             answer=ModuleOutput(),
-            retrieved_context=ModuleOutput(DocumentsContent, module=reranker), # DocumentsContent from the reranker module
+            retrieved_context=ModuleOutput(DocumentsContent, module=retriever), # DocumentsContent from the reranker module
             question=dataset.question,
         ),
     ],
     tests=[
-        MeanGreaterOrEqualThan( # Compares the aggregate result over the dataset against the min_value
-            test_name="Readability", metric_name="flesch_reading_ease", min_value=20.0
-        ),
         GreaterOrEqualThan( # Compares each result in the dataset against the min_value, and outputs the mean
-            test_name="Deberta Entailment", metric_name="deberta_entailment", min_value=0.8
+            test_name="Deberta Entailment", metric_name="deberta_answer_entailment", min_value=0.8
         ),
     ],
 )

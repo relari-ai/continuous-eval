@@ -46,8 +46,8 @@ export default defineConfig({
 						// Each item here is one entry in the navigation menu.
 						{ label: 'Overview', link: '/pipeline/pipeline'},
 						{ label: 'Evaluators and Tests', link: '/pipeline/eval_and_tests'},
-						{ label: 'Eval Manager', link: '/pipeline/eval_manager' },
-						{ label: 'Dataset', link: '/pipeline/dataset' },
+						{ label: 'Evaluation Manager', link: '/pipeline/eval_manager' },
+						{ label: 'Evaluation Dataset', link: '/pipeline/eval_dataset' },
 					],
 
         },

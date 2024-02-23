@@ -8,32 +8,33 @@ sidebar:
 
 ## Definition
 
-In order to evaluate your AI application pipeline, you first need to define it.
-A pipeline is a sequence of steps that transform data from one format to another.
+To evaluate your custom AI application pipeline, you first need to define it in using the `Pipeline` classes.
+<br>
 
-The basic component of a pipeline is a `Module`.
-A module is a named component with specific inputs and outputs.
+A pipeline is a sequence of steps that transform data from one format to another. In a typical AI application, it usually starts with a user instruction, then goes through a series of steps (`Module`) to return an answer.
+
+The basic component of a pipeline is a `Module`. A module is a named component with specific inputs and outputs.
 
 ## Example
 
-Consider the following example:
+Consider the following pipeline example:
 
 ```d2
 direction: right
 Retriever -> Reranker -> Generator
 ```
 
-In the example above, the pipeline consists of three simple modules: a retriever and an LLM generator.
+This Retrieval-Augmented Generation (RAG) pipeline consists of three simple modules. A Retriever that fetches the relevant documents, a Reranker that reorders and filters the documents, and a Generator that uses LLM to generate a response based on information in the documents.
 
 ```python title="pipeline.py"
 from continuous_eval.eval import Module, Pipeline, Dataset
 from typing import List, Dict
 
-dataset = Dataset("dataset_folder") # This is the dataset you will use you evaluate the pipeline module.
+dataset = Dataset("dataset_folder") # Evaluation dataset that contains all the questions and optionall the expected module outputs
 
 retriever = Module(
     name="Retriever",
-    input=dataset.question,
+    input=dataset.question, 
     output=List[Dict[str, str]],
 )
 

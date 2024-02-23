@@ -29,7 +29,6 @@ from continuous_eval.eval.manager import eval_manager
 from examples.langchain.simple_rag.pipeline import pipeline
 load_dotenv()
 
-# Example Retrieval - Reranker - Generation pipeline
 def retrieve(q):
     db = Chroma(
         persist_directory=str("/Users/yisz/Downloads/208_219_chroma_db"),
@@ -80,10 +79,38 @@ if __name__ == "__main__":
         print(f"Q: {q}\nA: {response}\n")
         eval_manager.next_sample()
 
-    eval_manager.save_results(Path("results.jsonl"))
+    eval_manager.evaluation.save(Path("results.jsonl"))
 ```
 
-PRINT ONE RESULT
+Peek at one sample in `results.jsonl`:
+```json
+{
+  "retriever": [
+    {
+      "page_content": "The reason this is mistaken is that people do sometimes change what they want. People who don't want to want something -- drug addicts, for example -- can sometimes make themselves stop wanting it. And people who want to want something -- who want to like classical music, or broccoli -- sometimes succeed.\n\nSo we modify our initial statement: You can do what you want, but you can't want to want what you want.",
+      "metadata": {
+        "source": "../data/graham_essays/215_what_you_want_to_want.txt",
+        "relevance_score": 0.49873924
+      },
+      "type": "Document"
+    },
+    ... (9 chunks)
+  ],
+  "reranker": [
+    {
+      "page_content": "That's still not quite true. It's possible to change what you want to want. I can imagine someone saying \"I decided to stop wanting to like classical music.\" But we're getting closer to the truth. It's rare for people to change what they want to want, and the more \"want to\"s we add, the rarer it gets.",
+      "metadata": {
+        "source": "../data/graham_essays/215_what_you_want_to_want.txt",
+        "relevance_score": 0.66115755
+      },
+      "type": "Document"
+    },
+    ... (3 chunks)
+  ],
+  "llm": "Yes, people can change their desires.\n\nThe passage states that \"people do sometimes change what they want\" and that \"people who want to want something -- who want to like classical music, or broccoli -- sometimes succeed.\" It also acknowledges that \"it's possible to change what you want to want,\" though it notes that this is rare."
+}
+```
+
 
 ### Run evaluators and tests on results
 
@@ -96,14 +123,24 @@ from examples.langchain.simple_rag.pipeline import pipeline
 if __name__ == "__main__":
     eval_manager.set_pipeline(pipeline)
 
-    # Evaluation
-    eval_manager.load_results(Path("results.jsonl"))
-    eval_manager.run_eval()
-    eval_manager.save_eval_results(Path("eval_results.json"))
+    # #Evaluation
+    # eval_manager.evaluation.load(Path("results.jsonl"))
+    # eval_manager.run_metrics()
+    # eval_manager.metrics.save(Path("metrics_results.json"))
 
     # Tests
+    eval_manager.metrics.load(Path("metrics_results.json"))
+    agg = eval_manager.metrics.aggregate()
+    print(agg)
     eval_manager.run_tests()
-    eval_manager.save_test_results(Path("test_results.json"))
+    eval_manager.tests.save(Path("test_results.json"))
+
+    # eval_manager.tests.load(Path("test_results.json"))
+    for module_name, test_results in eval_manager.tests.results.items():
+        print(f"{module_name}")
+        for test_name in test_results:
+            print(f" - {test_name}: {test_results[test_name]}")
+    print("Done")
 ```
 
-PRINT ONE RESULT
+PRINT results

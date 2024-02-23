@@ -4,7 +4,7 @@ from continuous_eval.eval.types import ToolCall
 from continuous_eval.metrics.base import Metric
 
 
-class ToolDeterministicMatch(Metric):
+class ToolSelectionAccuracy(Metric):
     def __init__(self, order_sensitive: bool = False) -> None:
         super().__init__()
         self._order_sensitive = order_sensitive
