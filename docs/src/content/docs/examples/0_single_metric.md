@@ -11,11 +11,11 @@ from continuous_eval.metrics import PrecisionRecallF1
 # A dataset is just a list of dictionaries containing the relevant information
 q = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the capital of France and its largest city.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }

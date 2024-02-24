@@ -80,17 +80,17 @@ Given that the ground truth contexts can be defined differently from the exact c
 
 ### Example Usage
 
-Required data items: `retrieved_contexts`, `ground_truth_contexts`
+Required data items: `retrieved_context`, `ground_truth_context`
 
 ```python
 from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
 
 datum = {
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the capital of France and also the largest city in the country.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
 }
 
 metric = PrecisionRecallF1(RougeChunkMatch())

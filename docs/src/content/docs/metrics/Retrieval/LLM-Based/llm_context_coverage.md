@@ -29,7 +29,7 @@ from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "question": "What is the largest and second city in France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Lyon is a major city in France.",
         "Paris is the capital of France and also the largest city in the country.",
     ],

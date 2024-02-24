@@ -1,21 +1,21 @@
 CAPITAL_OF_FRANCE = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the largest city in France.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
 
 ROMEO_AND_JULIET = {
     "question": "Who wrote Romeo and Juliet?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Shakespeare was a playwright.",
         "Romeo and Juliet is a play by Shakespeare.",
     ],
-    "ground_truth_contexts": [
+    "ground_truth_context": [
         "Shakespeare was a playwright.",
         "Romeo and Juliet is a play by William Shakespeare.",
     ],
@@ -26,7 +26,7 @@ ROMEO_AND_JULIET = {
 
 IMPLICATIONS_GLOBAL_WARMING = {
     "question": "What are the implications of global warming?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         (
             "Global warming refers to the long-term rise in the average temperature of the Earth's climate system. "
             "It is a major aspect of climate change, and has been demonstrated by direct temperature measurements "
@@ -63,7 +63,7 @@ IMPLICATIONS_GLOBAL_WARMING = {
             "is 'extremely likely' that the majority of global warming since 1950 has been caused by human activities."
         ),
     ],
-    "ground_truth_contexts": [
+    "ground_truth_context": [
         (
             "Climate change threatens to diminish the supply of fresh water. A warming atmosphere "
             "can hold, and more frequently does hold, larger quantities of water vapor, which can lead to more intense "
@@ -82,12 +82,12 @@ IMPLICATIONS_GLOBAL_WARMING = {
 
 FARGO = {
     "question": "Did Fargo win the golden globe nominations for both seasons?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Fargo is an American black comedy crime drama television series created and primarily written by Noah Hawley. The show is inspired by the 1996 film of the same name, which was written and directed by the Coen brothers, and takes place within the same fictional universe. The Coens were impressed by Hawley's script and agreed to be named as executive producers.[3] The series premiered on April 15, 2014, on FX,[3] and follows an anthology format, with each season set in a different era and location, with a different story and mostly new characters and cast, although there is minor overlap. Each season is heavily influenced by various Coen brothers films, with each containing numerous references to them.[4]",
         "The first season, set primarily in Minnesota and North Dakota from January 2006 to February 2007 and starring Billy Bob Thornton, Allison Tolman, Colin Hanks, and Martin Freeman, received wide acclaim from critics.[5] It won the Primetime Emmy Awards for Outstanding Miniseries, Outstanding Directing, and Outstanding Casting, and received 15 additional nominations including Outstanding Writing, another Outstanding Directing nomination, and acting nominations for all four leads. It also won the Golden Globe Awards for Best Miniseries or Television Film and Best Actor – Miniseries or Television Film for Thornton.",
         "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
     ],
-    "ground_truth_contexts": [
+    "ground_truth_context": [
         "The first season, set primarily in Minnesota and North Dakota from January 2006 to February 2007 and starring Billy Bob Thornton, Allison Tolman, Colin Hanks, and Martin Freeman, received wide acclaim from critics.[5] It won the Primetime Emmy Awards for Outstanding Miniseries, Outstanding Directing, and Outstanding Casting, and received 15 additional nominations including Outstanding Writing, another Outstanding Directing nomination, and acting nominations for all four leads. It also won the Golden Globe Awards for Best Miniseries or Television Film and Best Actor – Miniseries or Television Film for Thornton.",
         "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
     ],

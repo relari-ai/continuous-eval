@@ -23,8 +23,8 @@ from continuous_eval.metrics import BertAnswerSimilarity
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
-    "retrieved_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
-    "ground_truth_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
+    "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
+    "ground_truth_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
     "ground_truths": [
         "William Shakespeare wrote 'Romeo and Juliet", 

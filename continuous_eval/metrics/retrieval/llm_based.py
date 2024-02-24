@@ -86,14 +86,14 @@ class LLMBasedContextCoverage(LLMBasedMetric):
     def __str__(self):
         return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
 
-    def __call__(self, question, retrieved_contexts, ground_truth_answers, **kwargs):
+    def __call__(self, question, retrieved_context, ground_truth_answers, **kwargs):
         """
         Calculate the context coverage score for the given datapoint.
         """
         """
         Calculate the context coverage score for the given datapoint.
         """
-        context = "\n".join(retrieved_contexts)
+        context = "\n".join(retrieved_context)
 
         few_shot_prompt = (
             """Example:

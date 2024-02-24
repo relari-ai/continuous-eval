@@ -66,7 +66,7 @@ retriever = Module(
     eval=[
         PrecisionRecallF1().use( # Reference-based metric that compares the Retrieved Context with the Ground Truths
             retrieved_context=DocumentsContent,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
     ],
     tests=[

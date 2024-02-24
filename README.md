@@ -163,7 +163,7 @@ retriever = Module(
     eval=[
         PrecisionRecallF1().use(
             retrieved_context=ModuleOutput(),
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
     ],
 )
@@ -175,7 +175,7 @@ reranker = Module(
     eval=[
         RankedRetrievalMetrics().use(
             retrieved_context=ModuleOutput(),
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
     ],
 )

@@ -87,21 +87,21 @@ Below is the list of metrics available:
 
 **`PrecisionRecallF1`**
 - **Definition:** Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
-- **Inputs:** `retrieved_contexts`, `ground_truth_contexts`
+- **Inputs:** `retrieved_context`, `ground_truth_context`
 
 **`RankedRetrievalMetrics`**
 - **Definition:** Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
-- **Inputs:** `retrieved_contexts`, `ground_truth_contexts`
+- **Inputs:** `retrieved_context`, `ground_truth_context`
 
 ##### LLM-based
 
 **`LLMBasedContextPrecision`**
 - **Definition:** Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
-- **Inputs:** `question`, `retrieved_contexts`
+- **Inputs:** `question`, `retrieved_context`
 
 **`LLMBasedContextCoverage`**
 - **Definition:** Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calculated by LLM
-- **Inputs:** `question`, `retrieved_contexts`, `ground_truth_answers`
+- **Inputs:** `question`, `retrieved_context`, `ground_truth_answers`
 
 #### Text Generation metrics
 
@@ -113,7 +113,7 @@ Below is the list of metrics available:
 
 **`DeterministicFaithfulness`**
 - **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
-- **Inputs:** `retrieved_contexts`, `generated_answer`
+- **Inputs:** `retrieved_context`, `generated_answer`
 
 **`FleschKincaidReadability`**
 - **Definition:** How easy or difficult it is to understand the LLM generated answer.
@@ -137,7 +137,7 @@ Below is the list of metrics available:
 
 **`LLMBasedFaithfulness`**
 - **Definition:** Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
-- **Inputs:** `question`, `retrieved_contexts`, `generated_answer`
+- **Inputs:** `question`, `retrieved_context`, `generated_answer`
 
 **`LLMBasedAnswerCorrectness`**
 - **Definition:** Overall correctness of the Generated Answer based on the Question and Ground Truth Answer calculated by LLM
@@ -161,7 +161,7 @@ Below is the list of metrics available:
 
 **`DeterministicFaithfulness`**
 - **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
-- **Inputs:** `retrieved_contexts`, `generated_answer`
+- **Inputs:** `retrieved_context`, `generated_answer`
 
 #### Classification metrics
 

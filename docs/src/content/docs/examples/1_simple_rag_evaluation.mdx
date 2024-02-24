@@ -54,18 +54,18 @@ retriever = Module(
     eval=[
         PrecisionRecallF1().use(
             retrieved_context=DocumentsContent,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
         RankedRetrievalMetrics().use(
             retrieved_context=DocumentsContent,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
         # LLMBasedContextPrecision().use(
         #     retrieved_context=DocumentsContent, question=dataset.question,
         # ),
         # LLMBasedContextCoverage().use(
         #     question=dataset.question,
-        #     retrieved_contexts=DocumentsContent,
+        #     retrieved_context=DocumentsContent,
         #     ground_truth_answers=dataset.ground_truths,
         # ),
     ],
@@ -83,11 +83,11 @@ reranker = Module(
     eval=[
         PrecisionRecallF1().use(
             retrieved_context=DocumentsContent,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
         RankedRetrievalMetrics().use(
             retrieved_context=DocumentsContent,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
     ],
     tests=[
@@ -108,7 +108,7 @@ llm = Module(
         ),
         DeterministicFaithfulness().use(
             answer=ModuleOutput(),
-            retrieved_contexts=ModuleOutput(DocumentsContent, module=reranker),
+            retrieved_context=ModuleOutput(DocumentsContent, module=reranker),
         ),
         # BertAnswerRelevance().use(answer=ModuleOutput(), question=dataset.question),
         # BertAnswerSimilarity().use(

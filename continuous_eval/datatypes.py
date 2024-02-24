@@ -109,7 +109,7 @@ class DatumField(Enum):
     """
 
     QUESTION = "question"  # user question
-    RETRIEVED_CONTEXTS = "retrieved_contexts"
-    GROUND_TRUTH_CONTEXTS = "ground_truth_contexts"
+    retrieved_context = "retrieved_context"
+    ground_truth_context = "ground_truth_context"
     ANSWER = "answer"  # generated answer
     GROUND_TRUTH_ANSWER = "ground_truths"  # ground truth answers

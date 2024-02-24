@@ -23,9 +23,9 @@ class DeterministicFaithfulness(Metric):
         super().__init__()
         self.cfg = thresholds
 
-    def __call__(self, answer: str, retrieved_contexts: List[str], **kwargs):
+    def __call__(self, answer: str, retrieved_context: List[str], **kwargs):
         """Computes the faithfulness of the answer with respect to the retrieved contexts."""
-        context = "\n".join(retrieved_contexts)
+        context = "\n".join(retrieved_context)
         sentences = nltk.sent_tokenize(answer)
 
         rouge_scores = [RougeScore().calculate(sentence, context)["rouge_l_precision"] for sentence in sentences]

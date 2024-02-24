@@ -14,11 +14,11 @@ pipeline = SingleModulePipeline(
     eval=[
         PrecisionRecallF1().use(
             retrieved_context=dataset.retrieved_context,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
         RankedRetrievalMetrics().use(
             retrieved_context=dataset.retrieved_context,
-            ground_truth_context=dataset.ground_truth_contexts,
+            ground_truth_context=dataset.ground_truth_context,
         ),
     ],
 )

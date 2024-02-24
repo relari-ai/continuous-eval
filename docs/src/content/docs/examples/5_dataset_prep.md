@@ -10,27 +10,27 @@ from continuous_eval import Dataset
 # A dataset is a list of dictionaries, each representing, retrieved context etc...
 # Common fields are:
 # - "question"  # user question
-# - "retrieved_contexts"
-# - "ground_truth_contexts"
+# - "retrieved_context"
+# - "ground_truth_context"
 # - "answer"  # generated answer
 # - "ground_truths"  # ground truth answers
 
 q_1 = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the largest city in France.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
 q_2 = {
     "question": "What's the Ultimate Question of Life, the Universe, and Everything?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Energy equals mass times the speed of light squared.",
     ],
-    "ground_truth_contexts": ["42"],
+    "ground_truth_context": ["42"],
     "answer": "I don't know",
     "ground_truths": ["42"],
 }
