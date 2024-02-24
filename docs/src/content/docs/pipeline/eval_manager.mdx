@@ -8,57 +8,39 @@ sidebar:
 
 
 ## Definition
-`eval_manager` class managers
+`eval_manager` manages the evaluation process for a pipeline. Add `eval_manager` to your application and log the module outputs for evaluation.
 
-Leveraging the pipeline defined in
+## Logging data in evaluation runs
 
 
-## Example
+In your application, you can leverage the following functions to log your data in the evaluation runs.
+- `eval_manager.set_pipeline(pipeline)` to select the previously defined pipeline.
+- `eval_manager.start_run()` to begin the evaluation run.
+- `eval_manager.log("module_name", data)` to log specific outputs of a given module.
+- `eval_manager.is_running()` to check if the evaluation run is still running.
+- `eval_manager.curr_sample` to access the current sample in the dataset
+- `eval_manager.next_sample()` to move to the next sample in the dataset
+- `eval_manager.evaluation.save(Path("results.jsonl"))` to save the run results.
 
-### Logging data in evaluation runs
+See complete examples in Examples folder.
 
 ```python title="example_app.py"
 import os
 from pathlib import Path
-from langchain.retrievers.document_compressors import CohereRerank
-from langchain_community.vectorstores import Chroma
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import OpenAIEmbeddings
-from dotenv import load_dotenv
 from continuous_eval.eval.manager import eval_manager
 from examples.langchain.simple_rag.pipeline import pipeline
-load_dotenv()
 
 def retrieve(q):
-    db = Chroma(
-        persist_directory=str("/Users/yisz/Downloads/208_219_chroma_db"),
-        embedding_function=OpenAIEmbeddings(),
-    )
-    retriever = db.as_retriever(
-        search_type="similarity", search_kwargs={"k": 10}
-    )
-    return retriever.invoke(q)
+    ...
+    return retrieved_docs
 
 def rerank(q, retrieved_docs):
-    compressor = CohereRerank(cohere_api_key=os.getenv("COHERE_API_KEY"))
-    return compressor.compress_documents(retrieved_docs, q)
+    ...
+    return reranked_docs
 
-def ask(q, retrieved_docs):
-    model = ChatGoogleGenerativeAI(model="gemini-pro")
-    system_prompt = (
-        "You are and expert of the life of Paul Graham.\n"
-        "Answer the question below based on the context provided."
-    )
-    user_prompt = f"Question: {q}\n\n"
-    user_prompt += "Contexts:\n" + "\n".join(
-        [doc.page_content for doc in retrieved_docs]
-    )
-    try:
-        result = model.invoke(system_prompt + user_prompt).content
-    except Exception as e:
-        print(e)
-        result = "Sorry, I cannot answer this question."
-    return result
+def ask(q, reranked_docs):
+    ...
+    return response
 
 if __name__ == "__main__":
     eval_manager.set_pipeline(pipeline)
@@ -74,7 +56,7 @@ if __name__ == "__main__":
         reranked_docs = rerank(q, retrieved_docs)
         eval_manager.log("reranker", [doc.__dict__ for doc in reranked_docs])
         # Run and log Generator results
-        response = ask(q, retrieved_docs)
+        response = ask(q, reranked_docs)
         eval_manager.log("llm", response)
         print(f"Q: {q}\nA: {response}\n")
         eval_manager.next_sample()
@@ -82,7 +64,7 @@ if __name__ == "__main__":
     eval_manager.evaluation.save(Path("results.jsonl"))
 ```
 
-Peek at one sample in `results.jsonl`:
+#### Example Logged results (one sample):
 ```json
 {
   "retriever": [
@@ -112,7 +94,15 @@ Peek at one sample in `results.jsonl`:
 ```
 
 
-### Run evaluators and tests on results
+## Run evaluators and tests on results
+
+- `eval_manager.set_pipeline(pipeline)` to select the previously defined pipeline (and corresponding metrics / tests).
+- `eval_manager.evaluation.load(Path("results.jsonl"))` to load the run results from your applications
+- `eval_manager.run_metrics()` to calculate the metrics per module in your pipeline
+- `eval_manager.metrics.save(Path("metrics_results.json"))` to save the metric results
+- `eval_manager.metrics.aggregate()` to calculate the aggregate results across dataset
+- `eval_manager.run_tests()` to run the tests
+- `eval_manager.tests.save(Path("test_results.json"))` to save the test results
 
 ```python title="eval.py"
 from pathlib import Path
@@ -123,24 +113,52 @@ from examples.langchain.simple_rag.pipeline import pipeline
 if __name__ == "__main__":
     eval_manager.set_pipeline(pipeline)
 
-    # #Evaluation
-    # eval_manager.evaluation.load(Path("results.jsonl"))
-    # eval_manager.run_metrics()
-    # eval_manager.metrics.save(Path("metrics_results.json"))
+    # Evaluation
+    eval_manager.evaluation.load(Path("results.jsonl"))
+    eval_manager.run_metrics()
+    eval_manager.metrics.save(Path("metrics_results.json"))
 
     # Tests
-    eval_manager.metrics.load(Path("metrics_results.json"))
     agg = eval_manager.metrics.aggregate()
     print(agg)
     eval_manager.run_tests()
     eval_manager.tests.save(Path("test_results.json"))
 
-    # eval_manager.tests.load(Path("test_results.json"))
     for module_name, test_results in eval_manager.tests.results.items():
         print(f"{module_name}")
         for test_name in test_results:
             print(f" - {test_name}: {test_results[test_name]}")
-    print("Done")
 ```
 
-PRINT results
+#### Aggregate metric results:
+```json
+{
+  'retriever': {
+    'context_precision': 0.11000000000000003,
+    'context_recall': 0.9,
+    'context_f1': 0.19160839160839163
+  },
+  'reranker': {
+    'average_precision': 0.9,
+    'reciprocal_rank': 0.9,
+    'ndcg': 0.9
+  },
+  'llm': {
+    'LLM_based_faithfulness': 0.6,
+    'deberta_answer_entailment': 0.19980023323787463,
+    'deberta_answer_contradiction': 0.0013673592702616588,
+    'flesch_reading_ease': 34.73568247020485,
+    'flesch_kincaid_grade_level': 12.84469401321808
+  }
+}
+```
+
+#### Test results:
+```json
+retriever
+ - Average Precision: True
+reranker
+ - Context Recall: True
+llm
+ - Deberta Entailment: False
+```

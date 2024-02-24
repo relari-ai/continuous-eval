@@ -21,8 +21,13 @@ Consider the following pipeline example:
 
 ```d2
 direction: right
+Dataset: Eval Dataset
+Dataset.shape: oval
+Dataset -> Retriever
 Retriever -> Reranker -> Generator
 ```
+
+
 
 This Retrieval-Augmented Generation (RAG) pipeline consists of three simple modules. A Retriever that fetches the relevant documents, a Reranker that reorders and filters the documents, and a Generator that uses LLM to generate a response based on information in the documents.
 

@@ -73,18 +73,3 @@ class RankedRetrievalMetrics(Metric):
             idcg += 1 / log(i + 2, 2)
 
         return dcg / idcg
-
-
-datum = {
-    "retrieved_context": [
-        "Paris is the largest city.",
-        "Lyon is a major city in France.",
-        "Paris is the capital of France.",
-        "Paris is the capital of France.",
-    ],
-    "ground_truth_context": ["Paris is the capital of France."],
-}
-
-metric = RankedRetrievalMetrics()
-
-print(metric(**datum))

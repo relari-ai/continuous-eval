@@ -5,11 +5,9 @@ title: Single Metric
 In this example, we show how to calculate a metric on a sinle data point.
 
 ```python
-from continuous_eval import Dataset
-from continuous_eval.metrics import PrecisionRecallF1
+from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
-# A dataset is just a list of dictionaries containing the relevant information
-q = {
+datum = {
     "question": "What is the capital of France?",
     "retrieved_context": [
         "Paris is the capital of France and its largest city.",
@@ -19,11 +17,8 @@ q = {
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
-dataset = Dataset([q])
 
-# Let's initialize the metric
 metric = PrecisionRecallF1()
 
-# Let's calculate the metric for the first datum
-print(metric(**dataset.datum(0)))  # alternatively `metric.calculate(**q)`
+print(metric(**datum))
 ```
