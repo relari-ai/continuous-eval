@@ -135,7 +135,20 @@ export default defineConfig({
 				},
         		{
 					label: 'Examples',
-					autogenerate: { directory: 'examples' },
+					items : [
+						{
+							label: 'Basic',
+							autogenerate: { directory: '/examples/Basics/' }
+						},
+						{
+							label: 'Advanced',
+							autogenerate: { directory: '/examples/Advanced/' }
+						},
+						{
+							label: 'End-to-End',
+							autogenerate: { directory: '/examples/Case Studies/' }
+						},
+					],
 				},
 			],
 		}),

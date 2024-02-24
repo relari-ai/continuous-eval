@@ -2,7 +2,7 @@
 title: Single Metric
 ---
 
-In this example, we show how to calculate a metric on a sinle data point.
+In this example, we show how to calculate a metric on a single data point.
 
 ```python
 from continuous_eval.metrics.retrieval import PrecisionRecallF1

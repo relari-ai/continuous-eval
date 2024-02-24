@@ -55,76 +55,88 @@ When these two metrics alone are not sufficient to produce a confident predictio
 As first thing we compute the deterministic and semantic metrics:
 
 ```python
-from time import perf_counter
+from pathlib import Path
 
 import numpy as np
-import pandas as pd
 
 from continuous_eval.classifiers import EnsembleMetric
 from continuous_eval.classifiers.utils import eval_prediction
 from continuous_eval.data_downloader import example_data_downloader
 from continuous_eval.datatypes import DataSplit, SplitRatios
-from continuous_eval.evaluators import GenerationEvaluator
-from continuous_eval.metrics import DebertaAnswerScores, DeterministicAnswerCorrectness
+from continuous_eval.eval import Dataset, SingleModulePipeline
+from continuous_eval.eval.manager import eval_manager
+from continuous_eval.llm_factory import LLMFactory
+from continuous_eval.metrics.generation.text import (
+    DebertaAnswerScores,
+    DeterministicAnswerCorrectness,
+    FleschKincaidReadability,
+    LLMBasedAnswerCorrectness,
+)
+
 
 # Download the correctness dataset and remove examples where the LLL refused to answer (i.e., said "I don't know")
-dataset = example_data_downloader("correctness")
-dataset = dataset[dataset["annotation"] != "refuse-to-answer"]
+dataset_jsonl = example_data_downloader("correctness")
+dataset = Dataset(dataset_jsonl)
+dataset.filter(lambda x: x["annotation"] != "refuse-to-answer")
 
-# Setup the evaluator to compute the deterministic correctness and the DeBERTa scores
-tic = perf_counter()
-evaluator = GenerationEvaluator(
+# Let's define the system under evaluation
+# We use a single module pipeline to evaluate the correctness of the answers
+# using the DeterministicAnswerCorrectness metric, the DebertaAnswerScores metric, and the FleschKincaidReadability metric
+# Attention: the DebertaAnswerScores metric requires the DeBERTa model (slow on CPU)
+pipeline = SingleModulePipeline(
     dataset=dataset,
-    metrics=[
-        DeterministicAnswerCorrectness(),
-        DebertaAnswerScores(),
+    eval=[
+        DeterministicAnswerCorrectness().use(
+            answer=dataset.answer, ground_truth_answers=dataset.ground_truths  # type: ignore
+        ),
+        DebertaAnswerScores().use(answer=dataset.answer, ground_truth_answers=dataset.ground_truths),  # type: ignore
+        FleschKincaidReadability().use(answer=dataset.answer),  # type: ignore
     ],
 )
-results = evaluator.run(batch_size=100)
-toc = perf_counter()
-print(f"Evaluation completed in {toc - tic:.2f}s")
-print(set(evaluator.aggregated_results))
 
-evaluator.save("det_sem.jsonl")  # Save for future use...
+# We start the evaluation manager and run the metrics
+eval_manager.set_pipeline(pipeline)
+eval_manager.evaluation.results = dataset.data
+eval_manager.run_metrics()
+eval_manager.metrics.save(Path("metrics_results.json"))
 ```
 
 We now split the samples in train, test, and calibration sets and train the classifier.
 Note that we are using only the `"token_overlap_recall"`,`"deberta_answer_entailment"`, and `"deberta_answer_contradiction"` to train the classifier. 
 
 ```python
+# Now we building the data for the ensemble classifier
+# X is the input the classifier can use
+# y is the target the classifier should predict (1 for correct, 0 for incorrect)
+X = eval_manager.metrics.to_pandas()
+y = map(lambda x: 1 if x == "correct" else 0, dataset["annotation"])
 
-# X is the set of metrics we want to use to predict the correctness of the answer
-X = pd.DataFrame(results)
-
-# y is the ground truth label
-y = dataset["annotation"].map({"correct": 1, "incorrect": 0}).astype(int).to_numpy()
-
-# We split the dataset into train, test, and calibration sets
+# We split the data into train, test, and calibration sets
+# We also specify the features we want to use for the classifier
+# We also oversample the train set to balance the classes
 datasplit = DataSplit(
     X=X,
     y=y,
-    dataset=dataset,
     split_ratios=SplitRatios(train=0.6, test=0.2, calibration=0.2),
     features=[
         "token_overlap_recall",
         "deberta_answer_entailment",
         "deberta_answer_contradiction",
+        "flesch_reading_ease",
     ],
     oversample=True,
 )
 
-clf = EnsembleMetric(training=datasplit.train, calibration=datasplit.calibration)
+# We use the train and calibration sets to train the classifier
+predictor = EnsembleMetric(training=datasplit.train, calibration=datasplit.calibration)
 ```
 
 Finally we run the classifier and evaluate the results:
 
 ```python
-tic = perf_counter()
-y_hat, y_set = clf.predict(datasplit.test.X)
-toc = perf_counter()
-print(f"Prediction completed in {(toc - tic)*1000:.2f}ms")
-
-# Evaluation
+# We then use the test set to evaluate the classifier
+print("Running predictor (without judicator)")
+y_hat, y_set = predictor.predict(datasplit.test.X)
 num_undecided = np.sum(np.all(y_set, axis=1))
 print(eval_prediction(datasplit.test.y, y_hat))
 print(f"Undecided: {num_undecided} ({num_undecided/len(y_set):.2%})")
@@ -145,6 +157,7 @@ We can define a `judicator` function that takes as input the index of the sample
 
 ```python
 # We use the train and calibration sets to train the classifier
+print("\nRunning predictor (with judicator)")
 llm_metric = LLMBasedAnswerCorrectness(LLMFactory("gpt-4-1106-preview"))
 
 
@@ -152,19 +165,20 @@ def judicator(idx):
     # The judicator receives the index of the example in the test set where the classifier is undecided
     # and in this case, since we are computing the correctness of the sample,
     # it returns True if the example is correct and False otherwise
-    datum = datasplit.test_full.X.iloc[idx].to_dict()
-    return llm_metric.calculate(**datum)["LLM_based_answer_correctness"] >= 0.5
+    datum = dataset.data[idx]
+    metric_result = llm_metric(
+        question=datum["question"],
+        answer=datum["answer"],
+        ground_truth_answers=datum["ground_truths"],
+    )
+    return metric_result["LLM_based_answer_correctness"] >= 0.5
 ```
 
 To use the judicator we simply pass it to the `predict` method:
 
 ```python
-y_hat, y_set = clf.predict(datasplit.test.X, judicator=judicator)
-
-print(f"Prediction completed in {toc - tic:.2f}s")
-num_undecided = np.sum(np.all(y_set, axis=1))
+y_hat, _ = predictor.predict(datasplit.test.X, judicator=judicator)
 print(eval_prediction(datasplit.test.y, y_hat))
-print(f"Undecided: {num_undecided} ({num_undecided/len(y_set):.2%})")
 ```
 
 The output would be something like:
