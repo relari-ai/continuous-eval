@@ -1,5 +1,5 @@
 import pickle
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -32,14 +32,14 @@ class EnsembleMetric:
         self._regressor = self._make_regressor(training.X, training.y)
         self._alpha = alpha
         self._classifier = MapieClassifier(
-            estimator=self._regressor,
+            estimator=self._regressor,  # type: ignore
             cv="prefit",
             method="lac",
             random_state=random_state,
         )
         self._classifier.fit(calibration.X, calibration.y)
 
-    def _make_regressor(self, X: pd.DataFrame, y: pd.Series) -> None:
+    def _make_regressor(self, X: pd.DataFrame, y: pd.Series):
         classifier = LogisticRegression()
         parameters = {
             "penalty": ["l1", "l2"],
@@ -50,7 +50,9 @@ class EnsembleMetric:
         clf.fit(X, y)
         return clf
 
-    def predict(self, X: pd.DataFrame, judicator: Optional[Callable] = None) -> pd.DataFrame:
+    def predict(
+        self, X: pd.DataFrame, judicator: Optional[Callable] = None, quiet=False
+    ) -> Tuple[np.ndarray, np.ndarray]:
         assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
         assert set(X.columns) == self.features, "X must have the same features as the training data"
         y_pred, y_set = self._classifier.predict(X, alpha=self._alpha)
@@ -58,11 +60,16 @@ class EnsembleMetric:
             return y_pred, y_set
         y_set = y_set.squeeze()
         y_hat = np.empty(len(y_set), dtype=int)
-        for i in range(len(y_set)):
+        iterator = range(len(y_set))
+        if not quiet:
+            from tqdm import tqdm
+
+            iterator = tqdm(iterator)
+        for i in iterator:
             if np.sum(y_set[i]) == 1:
                 y_hat[i] = np.argmax(y_set[i])
             else:
-                y_hat[i] = judicator(i)
+                y_hat[i] = judicator(X.index[i])
                 y_set[i] = np.zeros(len(y_set[i]), dtype=int)
                 y_set[i][y_hat[i]] = 1
         return y_hat, y_set

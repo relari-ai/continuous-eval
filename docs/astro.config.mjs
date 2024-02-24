@@ -2,9 +2,14 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
+import astroD2 from 'astro-d2'
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://red-meadow-00dc81510.4.azurestaticapps.net',
+  base: '/v0.3',
+  outDir: './dist/v0.3',
+  trailingSlash: "always",
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeMathjax],
@@ -12,6 +17,10 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Continuous Eval',
+      components: {
+        // Override the default `SocialIcons` component.
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
 			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 4, },
 			customCss: [
 				// Relative path to your custom CSS file
@@ -31,16 +40,38 @@ export default defineConfig({
 						{ label: 'Quick Start', link: '/getting-started/quickstart/' },
 					],
 				},
+        {
+					label: 'Pipeline',
+					items: [
+						// Each item here is one entry in the navigation menu.
+						{ label: 'Overview', link: '/pipeline/pipeline'},
+						{ label: 'Evaluators and Tests', link: '/pipeline/eval_and_tests'},
+						{ label: 'Evaluation Manager', link: '/pipeline/eval_manager' },
+						{ label: 'Evaluation Dataset', link: '/pipeline/eval_dataset' },
+					],
+
+        },
 				{
 					label: 'Metrics',
 					items: [
 						{ label: 'Overview', link: '/metrics/overview/' },
 						{
 							label: 'Retrieval',
-							autogenerate: { directory: '/metrics/Retrieval/' }
+							collapsed: true,
+							items: [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Retrieval/Deterministic/' }
+								},
+								{
+									label: 'LLM-Based',
+									autogenerate: { directory: '/metrics/Retrieval/LLM-Based/' }
+								},
+							]
 						},
 						{
-							label: 'Generation',
+							label: 'Text Generation',
+							collapsed: true,
 							items: [
 								{
 									label: 'Deterministic',
@@ -61,14 +92,42 @@ export default defineConfig({
 							]
 						},
 						{
-							label: 'Code',
-							autogenerate: {directory: '/metrics/Code/'}
+							label: 'Code Generation',
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Code/Deterministic/' }
+								},
+								{
+									label: 'LLM-Based',
+									autogenerate: { directory: '/metrics/Code/LLM-Based/' }
+								}
+							]
 						},
 						{
-							label: 'Metric Ensembling',
-							autogenerate: { directory: '/metrics/ensembling/' },
+							label: 'Agent Tool Use',
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Tools/Deterministic/' }
+								},
+							]
 						},
-					],
+						{
+							label: 'Classification',
+							collapsed: true,
+							items : [
+								{
+									label: 'Deterministic',
+									autogenerate: { directory: '/metrics/Classification/Deterministic/' }
+								},
+							]
+						},
+						{label: 'Custom Metrics', link: '/metrics/custom_metrics/'},
+						{label: 'Metric Ensembling', link: '/metrics/ensembling_classifier/'},
+						],
 				},
 				{
 					label: 'Datasets',
@@ -76,9 +135,23 @@ export default defineConfig({
 				},
         		{
 					label: 'Examples',
-					autogenerate: { directory: 'examples' },
+					items : [
+						{
+							label: 'Basic',
+							autogenerate: { directory: '/examples/Basics/' }
+						},
+						{
+							label: 'Advanced',
+							autogenerate: { directory: '/examples/Advanced/' }
+						},
+						{
+							label: 'End-to-End',
+							autogenerate: { directory: '/examples/Case Studies/' }
+						},
+					],
 				},
 			],
 		}),
+    astroD2({output: 'd2', basePath: '/v0.3'}),
 	],
 });

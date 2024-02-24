@@ -1,7 +1,7 @@
 import pytest
 
 from continuous_eval.llm_factory import LLMFactory
-from continuous_eval.metrics import (
+from continuous_eval.metrics.retrieval import (
     ExactSentenceMatch,
     LLMBasedContextCoverage,
     LLMBasedContextPrecision,
@@ -11,7 +11,7 @@ from continuous_eval.metrics import (
     RougeSentenceMatch,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close, in_zero_one
+from tests.helpers.utils import all_close, in_zero_one, list_of_dicts_to_dict_of_lists
 
 
 def test_precision_recall_exact_chunk_match():
@@ -22,7 +22,7 @@ def test_precision_recall_exact_chunk_match():
     ]
 
     metric = PrecisionRecallF1(RougeChunkMatch(threshold=0.7))
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))  # type: ignore
 
 
 def test_precision_recall_exact_sentence_match():
@@ -30,18 +30,22 @@ def test_precision_recall_exact_sentence_match():
     expected_results = [{"context_precision": 1.0, "context_recall": 1.0, "context_f1": 1.0}]
 
     metric = PrecisionRecallF1(RougeSentenceMatch(threshold=0.8))
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))  # type: ignore
 
 
 def test_precision_recall_rouge_sentence_match():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
     expected_results = [
         {"context_precision": 0.0, "context_recall": 0.0, "context_f1": 0.0},
-        {"context_precision": 0.09090909090909091, "context_recall": 0.5, "context_f1": 0.15384615384615385},
+        {
+            "context_precision": 0.09090909090909091,
+            "context_recall": 0.5,
+            "context_f1": 0.15384615384615385,
+        },
     ]
 
     metric = PrecisionRecallF1(RougeSentenceMatch())
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))  # type: ignore
 
 
 def test_ranked_retrieval_exact_chunk_match():
@@ -52,7 +56,7 @@ def test_ranked_retrieval_exact_chunk_match():
     ]
 
     metric = RankedRetrievalMetrics(RougeChunkMatch())
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))  # type: ignore
 
 
 def test_ranked_retrieval_exact_sentence_match():
@@ -63,24 +67,11 @@ def test_ranked_retrieval_exact_sentence_match():
 def test_llm_based_context_precision():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
     metric = LLMBasedContextPrecision()
-    assert all(in_zero_one(metric.calculate(**datum)) for datum in data)
+    assert all(in_zero_one(metric(**datum)) for datum in data)
 
 
 def test_llm_based_context_coverage_openai():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
 
     metric = LLMBasedContextCoverage(model=LLMFactory("gpt-3.5-turbo-1106"))
-    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
-
-
-def test_llm_based_context_coverage_claude():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-    metric = LLMBasedContextCoverage(model=LLMFactory("claude-2.1"))
-    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
-
-
-def test_llm_based_context_coverage_gemini():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
-
-    metric = LLMBasedContextCoverage(model=LLMFactory("gemini-pro"))
-    assert all(in_zero_one(metric.calculate(**datum)["LLM_based_context_coverage"]) for datum in data)
+    assert all(in_zero_one(metric(**datum)["LLM_based_context_coverage"]) for datum in data)

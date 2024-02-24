@@ -18,142 +18,216 @@
 </div>
 
 <h2 align="center">
-  <p>Open-Source Evaluation Framework for LLM Pipelines</p>
+  <p>Open-Source Evaluation for GenAI Application Pipelines</p>
 </h2>
+
+
 
 ## Overview
 
-`continuous-eval` is an open-source package created for the scientific and practical evaluation of LLM application pipelines. Currently, it focuses on retrieval-augmented generation (RAG) pipelines.
+`continuous-eval` is an open-source package created for granular and holistic evaluation of GenAI application pipelines. 
 
-## Why another eval package?
-
-Good LLM evaluation should help developers reliably identify weaknesses in the pipeline, inform what actions to take, and accelerate development from prototype to production. Although it is optimal to put LLM Evaluation as part of our CI/CD pipeline just like any other part of software, it remains challenging today because:
-
-**Human evaluation is trustworthy but not scalable**
-- Eyeballing can only be done on a small dataset, and it has to be repeated for any pipeline update  
-- User feedback is spotty and lacks granularity
-
-**Using LLMs to evaluate LLMs is expensive, slow and difficult to trust**
-- Can be very costly and slow to run at scale
-- Can be biased towards certain answers and often doesn’t align well with human evaluation
+<h1 align="center">
+  <img
+    src="docs/public/module-level-eval.png"
+  >
+</h1>
 
 ## How is continuous-eval different?
 
-- **Comprehensive RAG Metric Library**: mix and match Deterministic, Semantic and LLM-based metrics.
+- **Modularized Evaluation**: Measure each module in the pipeline with tailored metrics.
 
-- **Trustworthy Ensemble Metrics**: easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
+- **Comprehensive Metric Library**: Covers Retrieval-Augmented Generation (RAG), Code Generation, Agent Tool Use, Classification and a variety of other LLM use cases. Mix and match Deterministic, Semantic and LLM-based metrics.
 
-- **Cheaper and Faster Evaluation**: our hybrid pipeline slashes cost by up to 15x compared to pure LLM-based metrics, and reduces eval time on large datasets from hours to minutes.
+- **Leverage User Feedback in Evaluation**: Easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
 
-## Installation
+- **Synthetic Dataset Generation**: Generate large-scale synthetic dataset to test your pipeline.
 
-This code is provided as a Python package. To install it, run the following command:
+## Getting Started
+
+This code is provided as a PyPi package. To install it, run the following command:
 
 ```bash
 python3 -m pip install continuous-eval
 ```
 
-if you want to install from source
+if you want to install from source:
 
 ```bash
 git clone https://github.com/relari-ai/continuous-eval.git && cd continuous-eval
 poetry install --all-extras
 ```
 
-## Getting Started
+To run LLM-based metrics, the code requires at least one of the LLM API keys in `.env`. Take a look at the example env file `.env.example`.
 
-### Prerequisites
+## Run a single metric
 
-The code requires the `OPENAI_API_KEY` (optionally `ANTHROPIC_API_KEY` and/or `GEMINI_API_KEY` and/or `AZURE_OPENAI_API_KEY` with deployment details) in .env to run the LLM-based metrics. Take a look at the example env file `.env.example`.
-
-### Usage
+Here's how you run a single metric on a datum.
+Check all available metrics here: [link](https://docs.relari.ai/)
 
 ```python
-from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
+from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
 datum = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the capital of France and its largest city.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
 
-metric = PrecisionRecallF1(RougeChunkMatch())
-print(metric.calculate(**datum))
+metric = PrecisionRecallF1()
+
+print(metric(**datum))
 ```
 
-To run over a dataset, you can use one of the evaluator classes:
+### Off-the-shelf Metrics
+
+<table border="0">
+    <tr>
+        <th>Module</th>
+        <th>Category</th>
+        <th>Metrics</th>
+    </tr>
+    <tr>
+        <td rowspan="2">Retrieval</td>
+        <td>Deterministic</td>
+        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
+    </tr>
+    <tr>
+        <td rowspan="3">Text Generation</td>
+        <td>Deterministic</td>
+        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
+    </tr>
+    <tr>
+        <td>Semantic</td>
+        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
+    </tr>
+    <tr>
+        <td rowspan="1">Classification</td>
+        <td>Deterministic</td>
+        <td>ClassificationAccuracy</td>
+    </tr>
+    <tr>
+        <td rowspan="2">Code Generation</td>
+        <td>Deterministic</td>
+        <td>CodeStringMatch, PythonASTSimilarity</td>
+    </tr>
+    <tr>
+        <td>LLM-based</td>
+        <td>LLMBasedCodeGeneration</td>
+    </tr>
+    <tr>
+        <td>Agent Tools</td>
+        <td>Deterministic</td>
+        <td>ToolSelectionAccuracy</td>
+    </tr>
+    <tr>
+        <td>Custom</td>
+        <td></td>
+        <td>Define your own metrics</td>
+    </tr>
+</table>
+
+To define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#L23C7-L23C13) class implementing the `__call__` method.
+Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
+
+## Run evaluation on pipeline modules
+
+Define modules in your pipeline and select corresponding metrics.
 
 ```python
-from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.evaluators import RetrievalEvaluator
-from continuous_eval.metrics import PrecisionRecallF1, RankedRetrievalMetrics
+from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset
+from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
+from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
+from typing import List, Dict
 
-# Build a dataset: create a dataset from a list of dictionaries containing question/answer/context/etc.
-# Or download one of the of the examples... 
-dataset = example_data_downloader("retrieval")
-# Setup the evaluator
-evaluator = RetrievalEvaluator(
-    dataset=dataset,
-    metrics=[
-        PrecisionRecallF1(),
-        RankedRetrievalMetrics(),
+dataset = Dataset("dataset_folder")
+
+# Simple 3-step RAG pipeline with Retriever->Reranker->Generation
+retriever = Module(
+    name="Retriever",
+    input=dataset.question,
+    output=List[str],
+    eval=[
+        PrecisionRecallF1().use(
+            retrieved_context=ModuleOutput(),
+            ground_truth_context=dataset.ground_truth_context,
+        ),
     ],
 )
-# Run the eval!
-evaluator.run(k=2, batch_size=1)
-# Peaking at the results
-print(evaluator.aggregated_results)
-# Saving the results for future use
-evaluator.save("retrieval_evaluator_results.jsonl")
+
+reranker = Module(
+    name="reranker",
+    input=retriever,
+    output=List[Dict[str, str]],
+    eval=[
+        RankedRetrievalMetrics().use(
+            retrieved_context=ModuleOutput(),
+            ground_truth_context=dataset.ground_truth_context,
+        ),
+    ],
+)
+
+llm = Module(
+    name="answer_generator",
+    input=reranker,
+    output=str,
+    eval=[
+        FleschKincaidReadability().use(answer=ModuleOutput()),
+        DeterministicAnswerCorrectness().use(
+            answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
+        ),
+    ],
+)
+
+pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
+print(pipeline.graph_repr()) # optional: visualize the pipeline
 ```
 
-For generation you can instead use the `GenerationEvaluator`.
+Now you can run the evaluation on your pipeline
 
-## Metrics
+```python
+eval_manager.start_run()
+  while eval_manager.is_running():
+    if eval_manager.curr_sample is None:
+      break
+    q = eval_manager.curr_sample["question"] # get the question or any other field
+    # run your pipeline ...
+    eval_manager.next_sample()
+```
 
-### Retrieval-based metrics
+To **log** the results you just need to call the `eval_manager.log` method with the module name and the output, for example:
 
-#### Deterministic
+```python
+eval_manager.log("answer_generator", response)
+```
 
-- `PrecisionRecallF1`: Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
-- `RankedRetrievalMetrics`: Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
+The evaluator manager also offers
 
-#### LLM-based
-
-- `LLMBasedContextPrecision`: Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
-- `LLMBasedContextCoverage`: Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calcualted by LLM
-
-### Generation metrics
-
-#### Deterministic
-
-- `DeterministicAnswerCorrectness`: Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
-- `DeterministicFaithfulness`: Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision and BLEU score
-- `FleschKincaidReadability`: how easy or difficult it is to understand the LLM generated answer.
-
-#### Semantic
-
-- `DebertaAnswerScores`: Entailment and contradiction scores between the Generated Answer and Ground Truth Answer
-- `BertAnswerRelevance`: Similarity score based on the BERT model between the Generated Answer and Question
-- `BertAnswerSimilarity`: Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
-
-#### LLM-based
-
-- `LLMBasedFaithfulness`: Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts
-- `LLMBasedAnswerCorrectness`: Overall correctness of the Generated Answer based on the Question and Ground Truth Answer(s)
-- `LLMBasedAnswerRelevance`: Relevance of the Generated Answer w.r.t the Question
-- `LLMBasedStyleConsistency`: Consistency of style bwtween the Generated Answer and the Ground Truth Answer(s)
-
+- `eval_manager.run_metrics()` to run all the metrics defined in the pipeline
+- `eval_manager.run_tests()` to run the tests defined in the pipeline (see the documentation [docs](docs.relari.ai) for more details)
 
 ## Resources
 
 - **Docs:** [link](https://docs.relari.ai/)
-- **Blog Post: Practical Guide to RAG Pipeline Evaluation:** [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893), [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
+- **Blog Posts:**
+  - Practical Guide to RAG Pipeline Evaluation: [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893)
+  - Practical Guide to RAG Pipeline Evaluation: [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
+  - How important is a Golden Dataset for LLM evaluation?
+ [link](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
+
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
 - **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/yizhang/continuous-eval)
 

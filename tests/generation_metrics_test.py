@@ -1,6 +1,6 @@
 import pytest
 
-from continuous_eval.metrics import (
+from continuous_eval.metrics.generation.text import (
     DeterministicAnswerCorrectness,
     DeterministicFaithfulness,
     FleschKincaidReadability,
@@ -36,7 +36,7 @@ def test_deterministic_answer_relevance():
         },
     ]
     metric = DeterministicAnswerCorrectness()
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_rouge_sentence_faithfulness():
@@ -53,14 +53,14 @@ def test_rouge_sentence_faithfulness():
     ]
 
     metric = DeterministicFaithfulness()
-    assert all(all_close(metric.calculate(**datum), expected) for datum, expected in zip(data, expected_results))
+    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))
 
 
 def test_llm_based_faithfulness():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
 
     metric = LLMBasedFaithfulness()
-    results = [metric.calculate(**datum) for datum in data]
+    results = [metric(**datum) for datum in data]
     for result in results:
         assert isinstance(result["LLM_based_faithfulness"], bool)
 
@@ -69,7 +69,7 @@ def test_llm_based_answer_correctness():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
 
     metric = LLMBasedAnswerCorrectness()
-    results = [metric.calculate(**datum) for datum in data]
+    results = [metric(**datum) for datum in data]
     for result in results:
         assert 0.0 <= result["LLM_based_answer_correctness"] <= 1.0
 
@@ -78,7 +78,7 @@ def test_llm_based_answer_relevance():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
 
     metric = LLMBasedAnswerRelevance()
-    results = [metric.calculate(**datum) for datum in data]
+    results = [metric(**datum) for datum in data]
     for result in results:
         assert 0.0 <= result["LLM_based_answer_relevance"] <= 1.0
 
@@ -87,7 +87,7 @@ def test_llm_based_style_consistency():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
 
     metric = LLMBasedStyleConsistency()
-    results = [metric.calculate(**datum) for datum in data]
+    results = [metric(**datum) for datum in data]
     for result in results:
         assert 0.0 <= result["LLM_based_style_consistency"] <= 1.0
 
@@ -97,5 +97,5 @@ def test_flesch_kincaid():
         "flesch_reading_ease": 116.14500000000001,
         "flesch_kincaid_grade_level": -1.4499999999999993,
     }
-    result = FleschKincaidReadability().calculate(answer="The cat sat on the mat.")
+    result = FleschKincaidReadability()(answer="The cat sat on the mat.")
     assert all_close(result, expected)

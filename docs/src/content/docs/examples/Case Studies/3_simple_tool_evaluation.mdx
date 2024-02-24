@@ -1,0 +1,206 @@
+---
+title: Simple Tool evaluation
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+In this example, we will walk through a Simple Tool application and evaluate it's performance.
+
+```d2
+direction: right
+Dataset: Eval Dataset
+Dataset.shape: oval
+direction: right
+Dataset -> llm
+```
+
+Note that this Simple Tool application is built using llama_index.
+
+
+
+<Tabs>
+<TabItem label="1) Define Pipeline">
+```python title="pipeline.py"
+from continuous_eval.eval import (
+    Tool,
+    AgentModule,
+    Pipeline,
+    Dataset,
+    ModuleOutput,
+    CalledTools,
+)
+from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
+from continuous_eval.metrics.tools.match import ToolSelectionAccuracy
+from continuous_eval.eval.tests import GreaterOrEqualThan
+
+dataset = Dataset("examples/llama_index/simple_tools/data")
+
+add = Tool(
+    name="add",
+    args={"a": int, "b": int},
+    out_type=int,
+    description="Add two integers and returns the result integer",
+)
+
+multiply = Tool(
+    name="multiply",
+    args={"a": int, "b": int},
+    out_type=int,
+    description="Multiply two integers and returns the result integer",
+)
+
+useless = Tool(
+    name="useless",
+    args={"a": int, "b": int},
+    out_type=int,
+    description="Toy useless function.",
+)
+
+llm = AgentModule(
+    name="llm",
+    input=dataset.question,
+    output=str,
+    tools=[add, multiply, useless],
+    eval=[
+        DeterministicAnswerCorrectness().use(
+            answer=ModuleOutput(), ground_truth_answers=dataset.answers
+        ),
+        ToolSelectionAccuracy().use(
+            tools=CalledTools(), ground_truths=dataset.tools
+        ),
+    ],
+    tests=[
+        # GreaterOrEqualThan(
+        #     test_name="Readability", metric_name="flesch_reading_ease", min_value=20.0
+        # ),
+        # GreaterOrEqualThan(
+        #     test_name="Answer Correctness", metric_name="rouge_l_f1", min_value=0.8
+        # ),
+    ],
+)
+
+pipeline = Pipeline([llm], dataset=dataset)
+
+print(pipeline.graph_repr())
+
+```
+</TabItem>
+<TabItem label="2) Define Dataset">
+```yaml title="manifest.yaml"
+name: Simple Math Tools
+description: This dataset contains simple math questions and their answers
+format: jsonl
+license: CC0
+fields:
+    question:
+    description: The question asked by the user
+    type: str
+    ground_truth: false
+    answers:
+    description: The answer(s) to the question
+    type: List[str]
+    ground_truth: true
+    tools:
+    description: Valid tool calls
+    type: List[ToolCall]
+    ground_truth: true
+```
+</TabItem>
+<TabItem label="3) Run Simple Tool App">
+```python title="simple_tool_app.py"
+from pathlib import Path
+
+from continuous_eval.eval.manager import eval_manager
+from llama_index.agent.openai_legacy import FnRetrieverOpenAIAgent
+from llama_index.core import VectorStoreIndex
+from llama_index.core.objects import ObjectIndex, SimpleToolNodeMapping
+from llama_index.core.tools import FunctionTool
+
+from examples.llama_index.simple_tools.pipeline import pipeline
+
+eval_manager.set_pipeline(pipeline)
+
+
+def multiply(a: int, b: int) -> int:
+    """Multiply two integers and returns the result integer"""
+    eval_manager.log("llm", "multiply", tool_args={"a": a, "b": b})
+    return a * b
+
+
+def add(a: int, b: int) -> int:
+    """Add two integers and returns the result integer"""
+    eval_manager.log("llm", "multiply", tool_args={"a": a, "b": b})
+    return a + b
+
+
+def useless(a: int, b: int) -> int:
+    """Toy useless function."""
+    eval_manager.log("llm", "multiply", tool_args={"a": a, "b": b})
+    return a
+
+
+def ask(query, verbose: bool = True):
+    tools = [
+        FunctionTool.from_defaults(fn=useless, name=f"useless"),
+        FunctionTool.from_defaults(fn=multiply, name="multiply"),
+        FunctionTool.from_defaults(fn=add, name="add"),
+    ]
+    obj_index = ObjectIndex.from_objects(
+        tools,
+        SimpleToolNodeMapping.from_objects(tools),
+        VectorStoreIndex,
+    )
+    agent = FnRetrieverOpenAIAgent.from_retriever(
+        obj_index.as_retriever(), verbose=verbose
+    )
+    response = agent.chat(query)
+    return response.response
+
+
+if __name__ == "__main__":
+    eval_manager.start_run()
+    while eval_manager.is_running():
+        if eval_manager.curr_sample is None:
+            break
+        question = eval_manager.curr_sample["question"]
+        # Retriever
+        response = ask(question)
+        eval_manager.log("llm", response)
+        print(f"Q: {question}\nA: {response}\n")
+        eval_manager.next_sample()
+
+    eval_manager.evaluation.save(Path("results.jsonl"))
+
+```
+</TabItem>
+<TabItem label="4) Run Eval">
+```python title="eval.py"
+from pathlib import Path
+
+from continuous_eval.eval.manager import eval_manager
+from examples.llama_index.simple_tools.pipeline import pipeline
+
+if __name__ == "__main__":
+    eval_manager.set_pipeline(pipeline)
+
+    # Evaluation
+    eval_manager.evaluation.load(Path("results.jsonl"))
+    eval_manager.run_metrics()
+    eval_manager.metrics.save(Path("metrics_results.json"))
+
+    # Tests
+    # eval_manager.metrics.load(Path("metrics_results.json"))
+    # agg = eval_manager.metrics.aggregate()
+    # print(agg)
+    # eval_manager.run_tests()
+    # eval_manager.tests.save(Path("test_results.json"))
+
+    # eval_manager.tests.load(Path("test_results.json"))
+    # for module_name, test_results in eval_manager.tests.results.items():
+    #     print(f"{module_name}")
+    #     for test_name in test_results:
+    #         print(f" - {test_name}: {test_results[test_name]}")
+    # print("Done")
+```
+</TabItem>
+</Tabs>

@@ -1,0 +1,219 @@
+---
+title: Simple RAG evaluation
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+In this example, we will walk through a simple RAG application and evaluate it's performance.
+
+```d2
+direction: right
+Dataset: Eval Dataset
+Dataset.shape: oval
+Dataset -> Retriever
+Retriever -> Reranker -> Generator
+```
+
+
+<Tabs>
+  <TabItem label="1) Define Pipeline">
+```python title="pipeline.py"
+from continuous_eval.eval import Module, Pipeline, Dataset, ModuleOutput
+from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics # Deterministic metrics
+from continuous_eval.metrics.generation.text import (
+    FleschKincaidReadability, # Deterministic metric
+    DebertaAnswerScores, # Semantic metric
+    LLMBasedFaithfulness, # LLM-based metric
+)
+from typing import List, Dict
+from continuous_eval.eval.tests import MeanGreaterOrEqualThan
+
+dataset = Dataset("data/eval_golden_dataset")
+
+Documents = List[Dict[str, str]]
+DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])
+
+retriever = Module(
+    name="retriever",
+    input=dataset.question,
+    output=Documents,
+    eval=[
+        PrecisionRecallF1().use(
+            retrieved_context=DocumentsContent,
+            ground_truth_context=dataset.ground_truth_context,
+        ),
+    ],
+    tests=[
+        MeanGreaterOrEqualThan(
+            test_name="Average Precision", metric_name="context_recall", min_value=0.8
+        ),
+    ],
+)
+
+reranker = Module(
+    name="reranker",
+    input=retriever,
+    output=Documents,
+    eval=[
+        RankedRetrievalMetrics().use(
+            retrieved_context=DocumentsContent,
+            ground_truth_context=dataset.ground_truth_context,
+        ),
+    ],
+    tests=[
+        MeanGreaterOrEqualThan(
+            test_name="Context Recall", metric_name="average_precision", min_value=0.7
+        ),
+    ],
+)
+
+llm = Module(
+    name="llm",
+    input=reranker,
+    output=str,
+    eval=[
+        FleschKincaidReadability().use(answer=ModuleOutput()),
+        DebertaAnswerScores().use(
+            answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
+        ),
+        LLMBasedFaithfulness().use(
+            answer=ModuleOutput(),
+            retrieved_context=ModuleOutput(DocumentsContent, module=reranker),
+            question=dataset.question,
+        ),
+    ],
+    tests=[
+        MeanGreaterOrEqualThan(
+            test_name="Deberta Entailment", metric_name="deberta_answer_entailment", min_value=0.5
+        ),
+    ],
+)
+
+pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
+
+print(pipeline.graph_repr())
+```
+  </TabItem>
+  <TabItem label="2) Define Dataset">
+    ```yaml title = "eval_golden_dataset/manifest.yaml"
+    name: Paul Graham's Essays
+    description: Paul Graham's Essays Q&A
+    format: jsonl
+    license: CC0
+    fields:
+    question:
+        description: The question asked by the user
+        type: str
+        ground_truth: false
+    ground_truths:
+        description: The answer(s) to the question
+        type: List[str]
+        ground_truth: true
+    ground_truth_context:
+        description: Ground truth contexts
+        type: List[str]
+        ground_truth: true
+    metadata:
+        description: Info about the question
+        type: List[Dict[str,str]]
+        ground_truth: false
+    question_type:
+        description: The type of question
+        type: str
+        ground_truth: false
+    ```
+    </TabItem>
+  <TabItem label="3) Run Simple RAG App">
+    ```python title="simple_rag_app.py"
+    import os
+    from pathlib import Path
+    from langchain.retrievers.document_compressors import CohereRerank
+    from langchain_community.vectorstores import Chroma
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    from langchain_openai import OpenAIEmbeddings
+    from dotenv import load_dotenv
+    from continuous_eval.eval.manager import eval_manager
+    from examples.langchain.simple_rag.pipeline import pipeline
+    load_dotenv()
+
+    def retrieve(q):
+        db = Chroma(
+            persist_directory=str("/data/vectorstore/208_219_chroma_db"),
+            embedding_function=OpenAIEmbeddings(),
+        )
+        retriever = db.as_retriever(
+            search_type="similarity", search_kwargs={"k": 10}
+        )
+        return retriever.invoke(q)
+
+    def rerank(q, retrieved_docs):
+        compressor = CohereRerank(cohere_api_key=os.getenv("COHERE_API_KEY"))
+        return compressor.compress_documents(retrieved_docs, q)
+
+    def ask(q, retrieved_docs):
+        model = ChatGoogleGenerativeAI(model="gemini-pro")
+        system_prompt = (
+            "You are and expert of the life of Paul Graham.\n"
+            "Answer the question below based on the context provided."
+        )
+        user_prompt = f"Question: {q}\n\n"
+        user_prompt += "Contexts:\n" + "\n".join(
+            [doc.page_content for doc in retrieved_docs]
+        )
+        try:
+            result = model.invoke(system_prompt + user_prompt).content
+        except Exception as e:
+            print(e)
+            result = "Sorry, I cannot answer this question."
+        return result
+
+    if __name__ == "__main__":
+        eval_manager.set_pipeline(pipeline)
+        eval_manager.start_run()
+        while eval_manager.is_running():
+            if eval_manager.curr_sample is None:
+                break
+            q = eval_manager.curr_sample["question"]
+            # Run and log Retriever results
+            retrieved_docs = retrieve(q)
+            eval_manager.log("retriever", [doc.__dict__ for doc in retrieved_docs])
+            # Run and log Reranker results
+            reranked_docs = rerank(q, retrieved_docs)
+            eval_manager.log("reranker", [doc.__dict__ for doc in reranked_docs])
+            # Run and log Generator results
+            response = ask(q, reranked_docs)
+            eval_manager.log("llm", response)
+            print(f"Q: {q}\nA: {response}\n")
+            eval_manager.next_sample()
+
+        eval_manager.evaluation.save(Path("results.jsonl"))
+        ```
+  </TabItem>
+  <TabItem label="4) Run Eval">
+    ```python title="eval.py"
+    from pathlib import Path
+
+    from continuous_eval.eval.manager import eval_manager
+    from examples.langchain.simple_rag.pipeline import pipeline
+
+    if __name__ == "__main__":
+        eval_manager.set_pipeline(pipeline)
+
+        # Evaluation
+        eval_manager.evaluation.load(Path("results.jsonl"))
+        eval_manager.run_metrics()
+        eval_manager.metrics.save(Path("metrics_results.json"))
+
+        # Tests
+        agg = eval_manager.metrics.aggregate()
+        print(agg)
+        eval_manager.run_tests()
+        eval_manager.tests.save(Path("test_results.json"))
+
+        for module_name, test_results in eval_manager.tests.results.items():
+            print(f"{module_name}")
+            for test_name in test_results:
+                print(f" - {test_name}: {test_results[test_name]}")
+    ```
+  </TabItem>
+</Tabs>

@@ -3,66 +3,79 @@ title: Quick Start
 description: Quick Start
 ---
 
-If you haven't installed continuous-eval, go <a href="/getting-started/installation">here</a>.
+If you haven't installed continuous-eval, go [here](../installation/).
 
 ## Run a single metric
 
-Import the metric of your choice (<a href="/metrics/overview">see all metrics</a>) and get the results.
+Import the metric of your choice ([see all metrics](../../metrics/overview/)) and get the results.
 
 ```python
-from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
+from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
+# A dataset is just a list of dictionaries containing the relevant information
 datum = {
     "question": "What is the capital of France?",
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Paris is the capital of France and its largest city.",
         "Lyon is a major city in France.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
     "ground_truths": ["Paris"],
 }
 
-metric = PrecisionRecallF1(RougeChunkMatch())
-print(metric.calculate(**datum))
+# Let's initialize the metric
+metric = PrecisionRecallF1()
+
+# Let's calculate the metric for the first datum
+print(metric(**datum))
 ```
 
 ## Run evalulation over a dataset
 
-In the following code example, we load an example evaluation dataset `retrieval`, create an `RetrievalEvaluator`, and selected two metric groups `PrecisionRecallF1`, `RankedRetrievalMetrics`. 
+In the following code example, we load an example evaluation dataset `retrieval`, create a pipeline with one module, and selected two metric groups `PrecisionRecallF1`, `RankedRetrievalMetrics`. 
 
-The aggregated results are printed in the terminal and the results per datum is saved at `retrieval_evaluator_results.jsonl`.
+The aggregated results are printed in the terminal and the results per datum is saved at `metrics_results_retr.jsonl`.
 
 ```python
-from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.evaluators import RetrievalEvaluator
-from continuous_eval.metrics import PrecisionRecallF1, RankedRetrievalMetrics
+from pathlib import Path
 
-# Build a dataset: create a dataset from a list of dictionaries containing question/answer/context/etc.
-# Or download one of the of the examples... 
-dataset = example_data_downloader("retrieval")
-# Setup the evaluator
-evaluator = RetrievalEvaluator(
+from continuous_eval.data_downloader import example_data_downloader
+from continuous_eval.eval import Dataset, SingleModulePipeline
+from continuous_eval.eval.manager import eval_manager
+from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
+
+# Let's download the retrieval dataset example
+dataset_jsonl = example_data_downloader("retrieval")
+dataset = Dataset(dataset_jsonl)
+
+pipeline = SingleModulePipeline(
     dataset=dataset,
-    metrics=[
-        PrecisionRecallF1(),
-        RankedRetrievalMetrics(),
+    eval=[
+        PrecisionRecallF1().use(
+            retrieved_context=dataset.retrieved_contexts,
+            ground_truth_context=dataset.ground_truth_contexts,
+        ),
+        RankedRetrievalMetrics().use(
+            retrieved_context=dataset.retrieved_contexts,
+            ground_truth_context=dataset.ground_truth_contexts,
+        ),
     ],
 )
-# Run the eval!
-evaluator.run()
-# Peaking at the results
-print(evaluator.aggregated_results)
-# Saving the results for future use
-evaluator.save("retrieval_evaluator_results.jsonl")
+
+# We start the evaluation manager and run the metrics
+eval_manager.set_pipeline(pipeline)
+eval_manager.evaluation.results = dataset.data
+eval_manager.run_metrics()
+eval_manager.metrics.save(Path("metrics_results_retr.json"))
+
+print(eval_manager.metrics.aggregate())
 ```
 
-Learn more about the <a href="/dataset/dataset">dataset</a> class and the <a href="/dataset/evaluator">`Evaluator`</a> class.
+## Curate a golden dataset
 
-## Curate the dataset
-
-**We recommend AI teams invest in manually curating a high-quality golden dataset** (curated domain experts and checked against user data) to properly evaluate and improve the LLM pipeline. The evaluation golden dataset should be diverse enough to capture unique design requirements in each LLM pipeline.
+**We recommend AI teams invest in curating a high-quality golden dataset** (curated domain experts and checked against user data) to properly evaluate and improve the LLM pipeline. The evaluation golden dataset should be diverse enough to capture unique design requirements in each LLM pipeline.
 
 **If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a "silver dataset" as a starting point, upon which you can modify and improve.**
 
-Checkout the guide to create a "silver dataset" using <a href="/dataset/simple_dataset_genetator">`SimpleDatasetGenerator`</a>.
+**Relari offers more custom synthetic dataset generation / augmentation as a service.** We have generated granular pipeline-level datasets for SEC Filing, Company Transcript, Coding Agents, Dynamic Tool Use, Enterprise Search, Sales Contracts, Company Wiki, Slack Conversation, Customer Support Tickets, Product Docs, etc. [Contact us](mailto:founders@relari.ai) if you are interested.

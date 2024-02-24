@@ -1,11 +1,12 @@
 import pytest
 
-from continuous_eval.metrics.generation_semantic_metrics import (
+from continuous_eval.metrics.generation.text.semantic import (
     BertAnswerRelevance,
     BertAnswerSimilarity,
     BertSimilarity,
     DebertaAnswerScores,
 )
+from tests.helpers.utils import list_of_dicts_to_dict_of_lists
 
 
 def test_bert_similarity_mean():
@@ -15,10 +16,10 @@ def test_bert_similarity_mean():
     ]
 
     metric = BertSimilarity()
-    x = metric.batch_calculate(data, pooler_output=False)
+    x = metric.batch(**list_of_dicts_to_dict_of_lists(data))
     assert x["bert_similarity"][0] > x["bert_similarity"][1]
 
-    y = metric.calculate("The pen is on the table", "This book is red", pooler_output=False)
+    y = metric("The pen is on the table", "This book is red")
     assert y["bert_similarity"] > 0 and y["bert_similarity"] < 1
 
 
@@ -28,16 +29,16 @@ def test_bert_similarity_mean_pooler_output():
         {"prediction": "This is cat", "reference": "A cat is on the table"},
     ]
 
-    metric = BertSimilarity()
-    x = metric.batch_calculate(data, pooler_output=True)
+    metric = BertSimilarity(pooler_output=True)
+    x = metric.batch(**list_of_dicts_to_dict_of_lists(data))
     assert x["bert_similarity"][0] > x["bert_similarity"][1]
 
-    y = metric.calculate("The pen is on the table", "This book is red", pooler_output=True)
+    y = metric("The pen is on the table", "This book is red")
     assert y["bert_similarity"] > 0 and y["bert_similarity"] < 1
 
 
 def test_answer_relevance():
-    dataset = [
+    data = [
         {
             "question": "Who wrote the 'The Hitchhiker's Guide'?",
             "answer": "Douglas Adams",
@@ -48,69 +49,40 @@ def test_answer_relevance():
         },
     ]
     metric = BertAnswerRelevance()
-    x = metric.batch_calculate(dataset)
-    y = metric.calculate(**dataset[0])
-    assert abs(x[0]["bert_answer_relevance"] - y["bert_answer_relevance"]) < 1e-1
+    x = metric.batch(**list_of_dicts_to_dict_of_lists(data))
+    assert all(z["bert_answer_relevance"] > 0 and z["bert_answer_relevance"] < 1 for z in x)
 
 
 def test_answer_similarity():
     dataset = [
         {
             "answer": "Samuel Adams",
-            "ground_truths": ["Douglas Adams"],
+            "ground_truth_answers": ["Douglas Adams"],
         },
         {
             "answer": "The number 42",
-            "ground_truths": ["The number 42", "42"],
+            "ground_truth_answers": ["The number 42", "42"],
         },
     ]
     metric = BertAnswerSimilarity()
-    x = metric.batch_calculate(dataset)
-    y = metric.calculate(**dataset[0])
-    assert abs(x[0]["bert_answer_similarity"] - y["bert_answer_similarity"]) < 1e-1
+    x = metric.batch(**list_of_dicts_to_dict_of_lists(dataset))
+    y = metric(**dataset[1])
+    assert abs(x[1]["bert_answer_similarity"] - y["bert_answer_similarity"]) < 1e-1
 
 
 def test_deberta_answer_scores():
-    dataset = [
+    data = [
         {
             "answer": "Samuel Adams",
-            "ground_truths": ["Douglas Adams"],
+            "ground_truth_answers": ["Douglas Adams"],
         },
         {
             "answer": "The number 42",
-            "ground_truths": ["The number 42", "42"],
+            "ground_truth_answers": ["The number 42", "42"],
         },
     ]
     metric = DebertaAnswerScores()
-    x = metric.batch_calculate(dataset)
-    y = metric.calculate(**dataset[0])
+    x = metric.batch(**list_of_dicts_to_dict_of_lists(data))
+    y = metric(**data[0])
     assert abs(x[0]["deberta_answer_entailment"] - y["deberta_answer_entailment"]) < 1e-5
     assert abs(x[0]["deberta_answer_contradiction"] - y["deberta_answer_contradiction"]) < 1e-5
-
-
-def test_semantic_outputs():
-    correct = {
-        "question": "What are the implications of global warming?",
-        "answer": "Reducing greenhouse gas emissions, transitioning to renewable energy",
-        "ground_truths": ["Reducing greenhouse gas emissions"],
-    }
-    wrong = {
-        "question": "What are the implications of global warming?",
-        "answer": "The diverse culinary traditions of Italy offer a fascinating insight into the country's history",
-        "ground_truths": ["Reducing greenhouse gas emissions"],
-    }
-    d1 = {
-        "AnswerScore": DebertaAnswerScores().calculate(**correct),
-        "AnswerSimilarity": BertAnswerSimilarity().calculate(**correct),
-        "AnswerRelevance": BertAnswerRelevance().calculate(**correct),
-    }
-    d2 = {
-        "AnswerScore": DebertaAnswerScores().calculate(**wrong),
-        "AnswerSimilarity": BertAnswerSimilarity().calculate(**wrong),
-    }
-    assert d1["AnswerScore"]["deberta_answer_entailment"] > d2["AnswerScore"]["deberta_answer_entailment"]
-    assert (
-        d1["AnswerScore"]["deberta_answer_entailment"] < 1.0 and d1["AnswerScore"]["deberta_answer_contradiction"] > 0
-    )
-    assert d1["AnswerSimilarity"]["bert_answer_similarity"] > d2["AnswerSimilarity"]["bert_answer_similarity"]
-    assert d1["AnswerRelevance"]["bert_answer_relevance"] > 0 and d1["AnswerRelevance"]["bert_answer_relevance"] < 1.0

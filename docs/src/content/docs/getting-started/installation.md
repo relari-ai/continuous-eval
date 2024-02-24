@@ -37,3 +37,4 @@ If you want to run LLM-based metrics, continuous-eval supports OpenAI, Anthropic
 - `OPENAI_API_KEY`
 - `ANTHROPIC_API_KEY` (optional)
 - `GEMINI_API_KEY` (optional)
+- Azure OpenAI API key (optional: `AZURE_ENDPOINT`, `AZURE_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`, `AZURE_OPENAI_API_KEY`)

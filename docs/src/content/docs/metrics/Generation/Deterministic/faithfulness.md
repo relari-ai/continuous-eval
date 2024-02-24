@@ -49,18 +49,18 @@ $$
 
 ### Example Usage
 
-Required data items: `retrieved_contexts`, `answer`
+Required data items: `retrieved_context`, `answer`
 
 ```python
 from continuous_eval.metrics import DeterministicFaithfulness
 
 datum = {
-    "retrieved_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
+    "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "William Shakespeare wrote 'Romeo and Juliet'. He is born in Ireland",
 }
 
 metric = DeterministicFaithfulness()
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

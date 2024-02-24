@@ -36,7 +36,7 @@ datum = {
 }
 
 metric = LLMBasedAnswerCorrectness(LLMFactory("gpt-4-1106-preview"))
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Sample Output

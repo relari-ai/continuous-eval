@@ -1,9 +1,7 @@
 ---
 title: Python AST Similarity
 sidebar:
-  badge:
-    text: new
-    variant: note
+  order: 1
 ---
 
 ### Definitions
@@ -34,7 +32,7 @@ datum = {
 },
 
 metric = PythonASTSimilarity()
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

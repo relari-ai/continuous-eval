@@ -1,6 +1,6 @@
 import math
 from numbers import Number
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 
 def is_close(ret: Number, expected: Number, rel_tol: float = 1e-4, abs_tol: float = 0.0):
@@ -30,3 +30,16 @@ def in_zero_one(ret: Union[Number, Dict[str, Number]]):
         return ret >= 0 and ret <= 1
     else:
         return all(v >= 0 and v <= 1 for v in ret.values())
+
+
+def list_of_dicts_to_dict_of_lists(data: List[Dict[str, Any]]):
+    # Initialize the result dictionary
+    result = {}
+    for item in data:
+        for key, value in item.items():
+            # If the key doesn't exist in the result dictionary, initialize it with a list
+            if key not in result:
+                result[key] = []
+            # Append the value to the list associated with the key
+            result[key].append(value)
+    return result

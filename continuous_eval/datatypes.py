@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Iterable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -48,14 +48,15 @@ class DataSplit:
     def __init__(
         self,
         X: pd.DataFrame,
-        y: np.ndarray,
+        y: Union[np.ndarray, pd.Series, Iterable],
         features: List[str],
         split_ratios: SplitRatios,
-        dataset: Optional[pd.DataFrame] = None,
         oversample: bool = False,
         random_state: Optional[int] = None,
     ):
-        if isinstance(y, pd.Series):
+        if isinstance(y, Iterable):
+            y = np.array(list(y))
+        elif isinstance(y, pd.Series):
             y = y.to_numpy()
 
         assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
@@ -65,14 +66,6 @@ class DataSplit:
         assert len(y.shape) == 1, "y must be a 1-dimensional array"
 
         self.features = features
-
-        if dataset is not None:
-            # Merge the dataset with the features in a single DataFrame
-            assert isinstance(dataset, pd.DataFrame), "dataset must be a Dataset or a DataFrame object"
-            assert len(dataset) == len(X), "X and dataset must have the same number of rows"
-            X = dataset.reset_index(drop=True).merge(
-                X.reset_index(drop=True), left_index=True, right_index=True, copy=True
-            )
 
         # Split the data into training, testing and calibration sets
         X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=split_ratios.test, random_state=random_state)
@@ -89,12 +82,11 @@ class DataSplit:
         if oversample:
             self.X_train_unbalanced = self.X_train.copy()
             self.y_train_unbalanced = self.y_train.copy()
-            self.X_train, self.y_train = SMOTE().fit_resample(self.X_train, self.y_train)
+            self.X_train, self.y_train = SMOTE().fit_resample(self.X_train, self.y_train)  # type: ignore
 
         self.X_cal = X_cal[self.features]
         self.y_cal = y_cal.astype(int)
 
-        self.X_test_full = X_test.copy()
         self.X_test = X_test[self.features]
         self.y_test = y_test.astype(int)
 
@@ -107,10 +99,6 @@ class DataSplit:
         return XYData(self.X_test, self.y_test)
 
     @property
-    def test_full(self) -> XYData:
-        return XYData(self.X_test_full, self.y_test)
-
-    @property
     def calibration(self) -> XYData:
         return XYData(self.X_cal, self.y_cal)
 
@@ -121,7 +109,7 @@ class DatumField(Enum):
     """
 
     QUESTION = "question"  # user question
-    RETRIEVED_CONTEXTS = "retrieved_contexts"
-    GROUND_TRUTH_CONTEXTS = "ground_truth_contexts"
+    retrieved_context = "retrieved_context"
+    ground_truth_context = "ground_truth_context"
     ANSWER = "answer"  # generated answer
     GROUND_TRUTH_ANSWER = "ground_truths"  # ground truth answers

@@ -1,0 +1,164 @@
+---
+title: Eval Manager
+sidebar:
+  badge:
+    text: new
+    variant: tip
+---
+
+
+## Definition
+`eval_manager` manages the evaluation process for a pipeline. Add `eval_manager` to your application and log the module outputs for evaluation.
+
+## Logging data in evaluation runs
+
+
+In your application, you can leverage the following functions to log your data in the evaluation runs.
+- `eval_manager.set_pipeline(pipeline)` to select the previously defined pipeline.
+- `eval_manager.start_run()` to begin the evaluation run.
+- `eval_manager.log("module_name", data)` to log specific outputs of a given module.
+- `eval_manager.is_running()` to check if the evaluation run is still running.
+- `eval_manager.curr_sample` to access the current sample in the dataset
+- `eval_manager.next_sample()` to move to the next sample in the dataset
+- `eval_manager.evaluation.save(Path("results.jsonl"))` to save the run results.
+
+See complete examples in Examples folder.
+
+```python title="example_app.py"
+import os
+from pathlib import Path
+from continuous_eval.eval.manager import eval_manager
+from examples.langchain.simple_rag.pipeline import pipeline
+
+def retrieve(q):
+    ...
+    return retrieved_docs
+
+def rerank(q, retrieved_docs):
+    ...
+    return reranked_docs
+
+def ask(q, reranked_docs):
+    ...
+    return response
+
+if __name__ == "__main__":
+    eval_manager.set_pipeline(pipeline)
+    eval_manager.start_run()
+    while eval_manager.is_running():
+        if eval_manager.curr_sample is None:
+            break
+        q = eval_manager.curr_sample["question"]
+        # Run and log Retriever results
+        retrieved_docs = retrieve(q)
+        eval_manager.log("retriever", [doc.__dict__ for doc in retrieved_docs])
+        # Run and log Reranker results
+        reranked_docs = rerank(q, retrieved_docs)
+        eval_manager.log("reranker", [doc.__dict__ for doc in reranked_docs])
+        # Run and log Generator results
+        response = ask(q, reranked_docs)
+        eval_manager.log("llm", response)
+        print(f"Q: {q}\nA: {response}\n")
+        eval_manager.next_sample()
+
+    eval_manager.evaluation.save(Path("results.jsonl"))
+```
+
+#### Example Logged results (one sample):
+```json
+{
+  "retriever": [
+    {
+      "page_content": "The reason this is mistaken is that people do sometimes change what they want. People who don't want to want something -- drug addicts, for example -- can sometimes make themselves stop wanting it. And people who want to want something -- who want to like classical music, or broccoli -- sometimes succeed.\n\nSo we modify our initial statement: You can do what you want, but you can't want to want what you want.",
+      "metadata": {
+        "source": "../data/graham_essays/215_what_you_want_to_want.txt",
+        "relevance_score": 0.49873924
+      },
+      "type": "Document"
+    },
+    ... (9 chunks)
+  ],
+  "reranker": [
+    {
+      "page_content": "That's still not quite true. It's possible to change what you want to want. I can imagine someone saying \"I decided to stop wanting to like classical music.\" But we're getting closer to the truth. It's rare for people to change what they want to want, and the more \"want to\"s we add, the rarer it gets.",
+      "metadata": {
+        "source": "../data/graham_essays/215_what_you_want_to_want.txt",
+        "relevance_score": 0.66115755
+      },
+      "type": "Document"
+    },
+    ... (3 chunks)
+  ],
+  "llm": "Yes, people can change their desires.\n\nThe passage states that \"people do sometimes change what they want\" and that \"people who want to want something -- who want to like classical music, or broccoli -- sometimes succeed.\" It also acknowledges that \"it's possible to change what you want to want,\" though it notes that this is rare."
+}
+```
+
+
+## Run evaluators and tests on results
+
+- `eval_manager.set_pipeline(pipeline)` to select the previously defined pipeline (and corresponding metrics / tests).
+- `eval_manager.evaluation.load(Path("results.jsonl"))` to load the run results from your applications
+- `eval_manager.run_metrics()` to calculate the metrics per module in your pipeline
+- `eval_manager.metrics.save(Path("metrics_results.json"))` to save the metric results
+- `eval_manager.metrics.aggregate()` to calculate the aggregate results across dataset
+- `eval_manager.run_tests()` to run the tests
+- `eval_manager.tests.save(Path("test_results.json"))` to save the test results
+
+```python title="eval.py"
+from pathlib import Path
+
+from continuous_eval.eval.manager import eval_manager
+from examples.langchain.simple_rag.pipeline import pipeline
+
+if __name__ == "__main__":
+    eval_manager.set_pipeline(pipeline)
+
+    # Evaluation
+    eval_manager.evaluation.load(Path("results.jsonl"))
+    eval_manager.run_metrics()
+    eval_manager.metrics.save(Path("metrics_results.json"))
+
+    # Tests
+    agg = eval_manager.metrics.aggregate()
+    print(agg)
+    eval_manager.run_tests()
+    eval_manager.tests.save(Path("test_results.json"))
+
+    for module_name, test_results in eval_manager.tests.results.items():
+        print(f"{module_name}")
+        for test_name in test_results:
+            print(f" - {test_name}: {test_results[test_name]}")
+```
+
+#### Aggregate metric results:
+```json
+{
+  'retriever': {
+    'context_precision': 0.11000000000000003,
+    'context_recall': 0.9,
+    'context_f1': 0.19160839160839163
+  },
+  'reranker': {
+    'average_precision': 0.9,
+    'reciprocal_rank': 0.9,
+    'ndcg': 0.9
+  },
+  'llm': {
+    'LLM_based_faithfulness': 0.6,
+    'deberta_answer_entailment': 0.19980023323787463,
+    'deberta_answer_contradiction': 0.0013673592702616588,
+    'flesch_reading_ease': 34.73568247020485,
+    'flesch_kincaid_grade_level': 12.84469401321808
+  }
+}
+```
+
+#### Test results:
+```json
+retriever
+ - Average Precision: True
+reranker
+ - Context Recall: True
+llm
+ - Deberta Entailment: False
+```

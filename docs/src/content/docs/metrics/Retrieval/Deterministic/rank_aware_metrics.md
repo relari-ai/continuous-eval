@@ -36,21 +36,21 @@ Please checkout explanation for Matching strategy in [Matching Strategy](/../pre
 
 ### Example Usage
 
-Required data items: `retrieved_contexts`, `ground_truth_contexts`
+Required data items: `retrieved_context`, `ground_truth_context`
 
 ```python
 from continuous_eval.metrics import RankedRetrievalMetrics, RougeChunkMatch
 
 datum = {
-    "retrieved_contexts": [
+    "retrieved_context": [
         "Lyon is a major city in France.",
         "Paris is the capital of France and also the largest city in the country.",
     ],
-    "ground_truth_contexts": ["Paris is the capital of France."],
+    "ground_truth_context": ["Paris is the capital of France."],
 }
 
 metric = RankedRetrievalMetrics(RougeChunkMatch())
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Example Output

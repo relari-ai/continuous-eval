@@ -54,11 +54,11 @@ from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
-    "retrieved_contexts": ["William Shakespeare is the author of 'Romeo and Juliet'."],
+    "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
 }
 metric = LLMBasedAnswerCorrectness(LLMFactory("gpt-4-1106-preview"))
-print(metric.calculate(**datum))
+print(metric(**datum))
 ```
 
 ### Sample Output

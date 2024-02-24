@@ -1,10 +1,10 @@
 import io
 from pathlib import Path
+from typing import Union
 from zipfile import ZipFile
 
 import requests
 
-from continuous_eval.dataset import Dataset
 from continuous_eval.utils.telemetry import telemetry
 
 EXAMPLES_DATA_URL = "https://ceevaldata.blob.core.windows.net/examples/"
@@ -37,7 +37,7 @@ def _download_file(url, destination_filename, force_download=False):
         raise RuntimeError(f"Could not download {url.split('/')[-1]}")
 
 
-def _download_and_extract_zip(url, destination_dir, force_download=False):
+def _download_and_extract_zip(url, destination_dir, force_download=False) -> Path:
     if not force_download and destination_dir.exists() and any(destination_dir.iterdir()):
         return destination_dir
 
@@ -45,12 +45,14 @@ def _download_and_extract_zip(url, destination_dir, force_download=False):
         if response.status_code == 200:
             with ZipFile(io.BytesIO(response.content)) as zip_file:
                 zip_file.extractall(destination_dir)
-            return destination_dir
+            return Path(destination_dir)
         else:
             raise RuntimeError(f"Could not download {url.split('/')[-1]}")
 
 
-def example_data_downloader(resource: str, destination_dir: Path = Path("data"), force_download: bool = False):
+def example_data_downloader(
+    resource: str, destination_dir: Path = Path("data"), force_download: bool = False
+) -> Union[Path, "Chroma"]:  # type: ignore
     assert resource in _DATA_RESOURCES, f"Resource {resource} not found"
     destination_dir.mkdir(parents=True, exist_ok=True)
     res = _DATA_RESOURCES[resource]
@@ -62,7 +64,7 @@ def example_data_downloader(resource: str, destination_dir: Path = Path("data"),
             out_fname,
             force_download=force_download,
         )
-        return Dataset.from_jsonl(file)
+        return file
     elif res["type"] == "txt":
         out_dir = destination_dir / resource
         return _download_and_extract_zip(EXAMPLES_DATA_URL + res["filename"], out_dir, force_download=force_download)
