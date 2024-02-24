@@ -39,7 +39,8 @@ def test_llm_based_metric():
         metric = DummyLLMMetric(LLMFactory(mdl))
         response = metric.calculate()
         assert (
-            response.lower()  # make sure the response is lowercased
+            response is not None
+            and response.lower()  # make sure the response is lowercased
             .strip()  # remove leading and trailing whitespaces
             .translate(str.maketrans("", "", string.punctuation))  # remove all punctuations
             == "yes"

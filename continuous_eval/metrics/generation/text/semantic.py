@@ -9,14 +9,13 @@ from continuous_eval.metrics.generation.text.bert import BertSimilarity, Deberta
 
 
 class BertAnswerRelevance(Metric):
-    def batch(self, answer: List[str], question: List[str]):
-        data = [{"prediction": pred, "reference": ref} for pred, ref in zip(answer, question)]
-        score = BertSimilarity().batch_calculate(data)
+    def batch(self, answer: List[str], question: List[str]) -> List[Dict[str, float]]:
+        score = BertSimilarity().batch(prediction=answer, reference=question)
         return [{"bert_answer_relevance": x} for x in score["bert_similarity"]]
 
-    def __call__(self, answer: str, question: str):
+    def __call__(self, answer: str, question: str) -> Dict[str, float]:
         """Measures the semantic similarity between the Generated Answer and the Question"""
-        return {"bert_answer_relevance": BertSimilarity().calculate(answer, question)["bert_similarity"]}
+        return {"bert_answer_relevance": BertSimilarity()(answer, question)["bert_similarity"]}
 
 
 class BertAnswerSimilarity(Metric):
@@ -27,21 +26,23 @@ class BertAnswerSimilarity(Metric):
             answer (str): the generated answer
             ground_truth_answers (List[str]): the ground truth answers
         """
-        bert_similarity_scores = [BertSimilarity().calculate(answer, gt_answer) for gt_answer in ground_truth_answers]
+        bert_similarity_scores = [BertSimilarity()(answer, gt_answer) for gt_answer in ground_truth_answers]
         return {"bert_answer_similarity": max(score["bert_similarity"] for score in bert_similarity_scores)}
 
     def _preprocess_dataset(self, answer: List[str], ground_truth_answers: List[List[str]]):
-        data = list()
+        prediction = list()
+        reference = list()
         ids = list()
         for i, (val, ref) in enumerate(zip(answer, ground_truth_answers)):
             for gt_answer in ref:
-                data.append({"prediction": val, "reference": gt_answer})
+                prediction.append(val)
+                reference.append(gt_answer)
                 ids.append(i)
-        return data, ids
+        return prediction, reference, ids
 
     def batch(self, answer: List[str], ground_truth_answers: List[List[str]]):
-        data, ids = self._preprocess_dataset(answer, ground_truth_answers)
-        score = BertSimilarity().batch_calculate(data)
+        prediction, reference, ids = self._preprocess_dataset(answer, ground_truth_answers)
+        score = BertSimilarity().batch(prediction=prediction, reference=reference)
         df = pd.DataFrame({"bert_answer_similarity": score["bert_similarity"], "ids": ids})
         ret = df.groupby("ids").max()
         return [{"bert_answer_similarity": x} for x in ret["bert_answer_similarity"]]
@@ -73,7 +74,7 @@ class DebertaAnswerScores(Metric):
                     sentence_pairs.append((val, gt_answer))
                 ids.append(i)
 
-        logits = DebertaScores().calculate(sentence_pairs)
+        logits = DebertaScores()(sentence_pairs)
         probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
 
         # Group by 'ids' and get the score for the pair with the highest entailment
@@ -112,9 +113,9 @@ class DebertaAnswerScores(Metric):
                 # premise=answer => hypothesis=ground truth
                 sentence_pairs.append((answer, gt_answer))
 
-        logits = DebertaScores().calculate(sentence_pairs)
+        logits = DebertaScores()(sentence_pairs)
         # Get the score for the pair with the highest entailment
-        logits_with_max_entailment = max(logits, key=lambda sublist: sublist[1])
+        logits_with_max_entailment = max(logits, key=lambda sublist: sublist[1])  # type: ignore
 
         # convert logits into normalized probabilities
         probs = torch.nn.functional.softmax(torch.tensor(logits_with_max_entailment), dim=0)

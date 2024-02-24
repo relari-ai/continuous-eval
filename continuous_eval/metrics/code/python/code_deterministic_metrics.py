@@ -1,4 +1,5 @@
 import ast
+from typing import List
 
 from munkres import Munkres
 from thefuzz import fuzz
@@ -7,7 +8,7 @@ from continuous_eval.metrics.base import Metric
 
 
 class CodeStringMatch(Metric):
-    def __call__(self, answer, ground_truth_answers):
+    def __call__(self, answer: str, ground_truth_answers: List[str]):
         max_exact_match = 0
         max_similarity_score = 0
         for gt in ground_truth_answers:

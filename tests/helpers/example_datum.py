@@ -6,7 +6,7 @@ CAPITAL_OF_FRANCE = {
     ],
     "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
-    "ground_truths": ["Paris"],
+    "ground_truth_answers": ["Paris"],
 }
 
 ROMEO_AND_JULIET = {
@@ -20,7 +20,7 @@ ROMEO_AND_JULIET = {
         "Romeo and Juliet is a play by William Shakespeare.",
     ],
     "answer": "William Shakespeare",
-    "ground_truths": ["William Shakespeare"],
+    "ground_truth_answers": ["William Shakespeare"],
 }
 
 
@@ -74,7 +74,7 @@ IMPLICATIONS_GLOBAL_WARMING = {
         )
     ],
     "answer": "Reducing greenhouse gas emissions, transitioning to renewable energy",
-    "ground_truths": [
+    "ground_truth_answers": [
         "Reducing greenhouse gas emissions",
         "Transitioning to renewable energy",
     ],
@@ -92,7 +92,7 @@ FARGO = {
         "The second season, set in Minnesota, North Dakota, and South Dakota in March 1979 and starring Kirsten Dunst, Patrick Wilson, Jesse Plemons, Jean Smart, Allison Tolman, and Ted Danson, received widespread critical acclaim.[6] It received three Golden Globe nominations, along with several Emmy nominations including Outstanding Miniseries, and acting nominations for Dunst, Plemons, Smart, and Bokeem Woodbine.",
     ],
     "answer": "Berlin",
-    "ground_truths": [
+    "ground_truth_answers": [
         "Yes, they did get a nomination in season 1 and 2.",
         "Not really, they didn't win for season three.",
     ],

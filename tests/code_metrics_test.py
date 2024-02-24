@@ -1,6 +1,6 @@
 import pytest
 
-from continuous_eval.metrics import CodeStringMatch, PythonASTSimilarity
+from continuous_eval.metrics.code.python.code_deterministic_metrics import CodeStringMatch, PythonASTSimilarity
 from tests.helpers import example_datum
 from tests.helpers.utils import all_close
 
@@ -16,7 +16,10 @@ def test_code_string_match():
     ]
     metric = CodeStringMatch()
     assert all(
-        all_close(metric.calculate(**datum), expected)
+        all_close(
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),  # type: ignore
+            expected,
+        )
         for datum, expected in zip(example_datum.PYTHON_CODE_EXAMPLES, expected_results)
     )
 
@@ -32,6 +35,9 @@ def test_python_ast_similarity():
     ]
     metric = PythonASTSimilarity()
     assert all(
-        all_close(metric.calculate(**datum), expected)
+        all_close(
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),  # type: ignore
+            expected,  # type: ignore
+        )
         for datum, expected in zip(example_datum.PYTHON_CODE_EXAMPLES, expected_results)
     )
