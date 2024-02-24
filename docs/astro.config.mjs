@@ -5,6 +5,9 @@ import rehypeMathjax from 'rehype-mathjax';
 
 // https://astro.build/config
 export default defineConfig({
+  base: '/v0.2',
+  outDir: './dist/v0.2',
+  trailingSlash: "always",
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeMathjax],
@@ -12,6 +15,10 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Continuous Eval',
+      components: {
+        // Override the default `SocialIcons` component.
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
 			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 4, },
 			customCss: [
 				// Relative path to your custom CSS file
