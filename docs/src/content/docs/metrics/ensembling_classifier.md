@@ -189,5 +189,5 @@ The output would be something like:
        [ 24, 159]])}
 ```
 
-Here the `predict` function called the LLM in the _25.96%_ of the cases where the classifier was undecided.
-The classifier is no longer undecided and the performance improved but the prediction time increased from _2.36ms_ to _245.73s_.
+Here the `predict` function called the LLM in the _15.74%_ of the cases where the classifier was undecided.
+The classifier is no longer undecided and the performance improved.
