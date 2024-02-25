@@ -145,9 +145,9 @@ print(f"Undecided: {num_undecided} ({num_undecided/len(y_set):.2%})")
 The output would be something like:
 
 ```text
-Prediction completed in 2.36ms
-{'precision': 0.9627329192546584, 'recall': 0.824468085106383, 'f1': 0.8882521489971348, 'accuracy': 0.8340425531914893}
-Undecided: 61 (25.96%)
+{'precision': 0.9382716049382716, 'recall': 0.8306010928961749, 'f1': 0.881159420289855, 'accuracy': 0.825531914893617, 'confusion_matrix': array([[ 42,  10],
+       [ 31, 152]])}
+Undecided: 37 (15.74%)
 ```
 
 #### Using a judicator
@@ -184,9 +184,9 @@ print(eval_prediction(datasplit.test.y, y_hat))
 The output would be something like:
 
 ```text
-Prediction completed in 245.73s
-{'precision': 0.9818181818181818, 'recall': 0.8617021276595744, 'f1': 0.9178470254957507, 'accuracy': 0.8765957446808511}
-Undecided: 0 (0.00%)
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 235/235 [01:59<00:00,  1.96it/s]
+{'precision': 0.9464285714285714, 'recall': 0.8688524590163934, 'f1': 0.9059829059829059, 'accuracy': 0.8595744680851064, 'confusion_matrix': array([[ 43,   9],
+       [ 24, 159]])}
 ```
 
 Here the `predict` function called the LLM in the _25.96%_ of the cases where the classifier was undecided.
