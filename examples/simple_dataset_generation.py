@@ -45,10 +45,17 @@ def main():
         output_directory / f"G_{generator_llm}_Q_{num_questions}_MH%_{multi_hop_precentage}_{current_datetime}.jsonl"
     )
     print(f"Saving dataset to {fname}")
+    if not dataset:
+        print('Dataset is empty. Exiting function.')
+        return
     with open(fname, 'w', encoding='utf-8') as file:
         for item in dataset:
-            json_string = json.dumps(item)
-            file.write(json_string + '\n')
+            try:
+                json_string = json.dumps(item)
+                file.write(json_string + '\n')
+            except TypeError:
+                print('Item is not JSON serializable. Skipping item.')
+                continue
     print(f"Done.")
 
 
