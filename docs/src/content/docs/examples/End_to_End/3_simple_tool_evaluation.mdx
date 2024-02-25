@@ -4,7 +4,7 @@ title: Simple Tool evaluation
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-In this example, we will walk through a Simple Tool application and evaluate it's performance.
+In this example, we will walk through a Simple Math Tool application and evaluate it's performance.
 
 ```d2
 direction: right
@@ -14,8 +14,7 @@ direction: right
 Dataset -> llm
 ```
 
-Note that this Simple Tool application is built using llama_index.
-
+**Try out full example at [example repo](https://github.com/relari-ai/examples).**
 
 
 <Tabs>
@@ -70,19 +69,15 @@ llm = AgentModule(
         ),
     ],
     tests=[
-        # GreaterOrEqualThan(
-        #     test_name="Readability", metric_name="flesch_reading_ease", min_value=20.0
-        # ),
-        # GreaterOrEqualThan(
-        #     test_name="Answer Correctness", metric_name="rouge_l_f1", min_value=0.8
-        # ),
+        GreaterOrEqualThan(
+            test_name="Answer Correctness", metric_name="rouge_l_recall", min_value=0.8
+        ),
     ],
 )
 
 pipeline = Pipeline([llm], dataset=dataset)
 
 print(pipeline.graph_repr())
-
 ```
 </TabItem>
 <TabItem label="2) Define Dataset">
@@ -170,7 +165,6 @@ if __name__ == "__main__":
         eval_manager.next_sample()
 
     eval_manager.evaluation.save(Path("results.jsonl"))
-
 ```
 </TabItem>
 <TabItem label="4) Run Eval">
@@ -189,18 +183,18 @@ if __name__ == "__main__":
     eval_manager.metrics.save(Path("metrics_results.json"))
 
     # Tests
-    # eval_manager.metrics.load(Path("metrics_results.json"))
-    # agg = eval_manager.metrics.aggregate()
-    # print(agg)
-    # eval_manager.run_tests()
-    # eval_manager.tests.save(Path("test_results.json"))
+    eval_manager.metrics.load(Path("metrics_results.json"))
+    agg = eval_manager.metrics.aggregate()
+    print(agg)
+    eval_manager.run_tests()
+    eval_manager.tests.save(Path("test_results.json"))
 
-    # eval_manager.tests.load(Path("test_results.json"))
-    # for module_name, test_results in eval_manager.tests.results.items():
-    #     print(f"{module_name}")
-    #     for test_name in test_results:
-    #         print(f" - {test_name}: {test_results[test_name]}")
-    # print("Done")
+    eval_manager.tests.load(Path("test_results.json"))
+    for module_name, test_results in eval_manager.tests.results.items():
+        print(f"{module_name}")
+        for test_name in test_results:
+            print(f" - {test_name}: {test_results[test_name]}")
+    print("Done")
 ```
 </TabItem>
 </Tabs>

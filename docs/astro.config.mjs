@@ -146,7 +146,7 @@ export default defineConfig({
 						},
 						{
 							label: 'End-to-End',
-							autogenerate: { directory: '/examples/Case Studies/' }
+							autogenerate: { directory: '/examples/End_to_End/' }
 						},
 					],
 				},

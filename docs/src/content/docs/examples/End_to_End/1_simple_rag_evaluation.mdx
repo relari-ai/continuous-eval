@@ -14,6 +14,7 @@ Dataset -> Retriever
 Retriever -> Reranker -> Generator
 ```
 
+**Try out full example at [example repo](https://github.com/relari-ai/examples).**
 
 <Tabs>
   <TabItem label="1) Define Pipeline">
@@ -28,7 +29,7 @@ from continuous_eval.metrics.generation.text import (
 from typing import List, Dict
 from continuous_eval.eval.tests import MeanGreaterOrEqualThan
 
-dataset = Dataset("data/eval_golden_dataset")
+dataset = Dataset("examples/langchain/rag_data/eval_golden_dataset")
 
 Documents = List[Dict[str, str]]
 DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])
@@ -136,11 +137,12 @@ print(pipeline.graph_repr())
     from examples.langchain.simple_rag.pipeline import pipeline
     load_dotenv()
 
+    db = Chroma(
+        persist_directory=str("examples/langchain/rag_data/vectorstore/208_219_chroma_db"),
+        embedding_function=OpenAIEmbeddings(),
+    )
+
     def retrieve(q):
-        db = Chroma(
-            persist_directory=str("/data/vectorstore/208_219_chroma_db"),
-            embedding_function=OpenAIEmbeddings(),
-        )
         retriever = db.as_retriever(
             search_type="similarity", search_kwargs={"k": 10}
         )
@@ -213,7 +215,6 @@ print(pipeline.graph_repr())
         for module_name, test_results in eval_manager.tests.results.items():
             print(f"{module_name}")
             for test_name in test_results:
-                print(f" - {test_name}: {test_results[test_name]}")
-    ```
+                print(f" - {test_name}: {test_results[test_name]}")    ```
   </TabItem>
 </Tabs>

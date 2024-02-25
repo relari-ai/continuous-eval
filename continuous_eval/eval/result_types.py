@@ -23,7 +23,7 @@ class EvaluationResults:
         return len(self.results)
 
     def is_empty(self) -> bool:
-        return bool(self.results)
+        return not bool(self.results)
 
     def _build_empty_samples(self, pipeline: Pipeline):
         if pipeline is None:

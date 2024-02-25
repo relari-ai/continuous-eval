@@ -70,18 +70,16 @@ class LLMFactory(LLMInterface):
                 "You can get one at https://portal.azure.com."
             )
             assert os.getenv("AZURE_ENDPOINT") is not None, (
-                "Please set the environment variable AZURE_ENDPOINT. "
-                "You can get one at https://portal.azure.com."
+                "Please set the environment variable AZURE_ENDPOINT. " "You can get one at https://portal.azure.com."
             )
             assert os.getenv("AZURE_DEPLOYMENT") is not None, (
-                "Please set the environment variable AZURE_DEPLOYMENT. "
-                "You can get one at https://portal.azure.com."
+                "Please set the environment variable AZURE_DEPLOYMENT. " "You can get one at https://portal.azure.com."
             )
             self.client = AzureChatOpenAI(
                 azure_endpoint=os.getenv("AZURE_ENDPOINT"),
                 azure_deployment=os.getenv("AZURE_DEPLOYMENT"),
                 openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-                openai_api_key=os.getenv("AZURE_OPENAI_API_KEY")
+                openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
             )
         else:
             raise ValueError(
@@ -167,13 +165,10 @@ class LLMFactory(LLMInterface):
             content = response.text
         elif AZURE_OPENAI_AVAILABLE and isinstance(self.client, AzureChatOpenAI):
             response = self.client.invoke(
-                input=[
-                    SystemMessage(content=prompt['system_prompt']),
-                    HumanMessage(content=prompt['user_prompt'])
-                ],
+                input=[SystemMessage(content=prompt['system_prompt']), HumanMessage(content=prompt['user_prompt'])],
                 temperature=temperature,
                 max_tokens=1024,
-                top_p=1
+                top_p=1,
             )
             content = response.dict()['content']
         else:
@@ -190,4 +185,4 @@ class LLMFactory(LLMInterface):
         return content
 
 
-DefaultLLM = lambda: LLMFactory(model=os.getenv("EVAL_LLM", "gpt-3.5-turbo-1106"))
+DefaultLLM = lambda: LLMFactory(model=os.getenv("EVAL_LLM", "gpt-3.5-turbo-0125"))
