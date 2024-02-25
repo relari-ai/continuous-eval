@@ -8,16 +8,23 @@ description: Making LLM development a science rather than an art.
 import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 import { Icon } from '@astrojs/starlight/components';
 
-
 <br></br>
-
-### Navigate this Documentation
 
 <CardGrid>
   <LinkCard
     title="🚀 Getting Started"
     description="Install the package and learn how to get started quickly."
     href="/getting-started/introduction/"
+  />
+</CardGrid>
+
+### Navigate this Documentation
+
+<CardGrid>
+  <LinkCard
+  title="🚰 Pipeline"
+  description="Define your GenAI application pipeline and run evaluation over a tailored dataset."
+  href="/pipeline/pipeline/"
   />
   <LinkCard
     title="📊 Metrics"
@@ -26,13 +33,13 @@ import { Icon } from '@astrojs/starlight/components';
   />
   <LinkCard
     title="🔍 Datasets"
-    description="Perform evaluations on your datasets, or generate synthetic datasets from your vectorDB."
-    href="/dataset/dataset/"
+    description="Explore sample datasets and try generating a synthetic evaluation dataset from documents."
+    href="/dataset/example_datasets/"
   />
   <LinkCard
     title="💡 Examples"
     description="Discover code snippets and examples to help you understand and implement different evaluation pipelines."
-    href="/examples/0_single_metric/"
+    href="/examples/basics/0_single_metric/"
   />
 </CardGrid>
 
