@@ -20,7 +20,7 @@ BM25 Retriever -> Reranker
 Reranker -> Gererator
 ```
 
-Note that this RAG pipeline is built using Langchain.
+**Try out full example at [example repo](https://github.com/relari-ai/examples).**
 
 <Tabs>
 <TabItem label="1) Define Pipeline">
@@ -52,7 +52,7 @@ from continuous_eval.metrics.generation.text import (
 from typing import List, Dict
 from continuous_eval.eval.tests import GreaterOrEqualThan, MeanGreaterOrEqualThan
 
-dataset = Dataset("data/eval_golden_dataset")
+dataset = Dataset("examples/langchain/rag_data/eval_golden_dataset")
 
 Documents = List[Dict[str, str]]
 DocumentsContent = ModuleOutput(lambda x: [z["page_content"] for z in x])
@@ -168,23 +168,23 @@ llm = Module(
         DebertaAnswerScores().use(
             answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
         ),
-        LLMBasedFaithfulness().use(
-            answer=ModuleOutput(),
-            retrieved_context=ModuleOutput(DocumentsContent, module=reranker),
-            question=dataset.question,
-        ),
-        LLMBasedAnswerCorrectness().use(
-            question=dataset.question,
-            answer=ModuleOutput(),
-            ground_truth_answers=dataset.ground_truths,
-        ),
-        LLMBasedAnswerRelevance().use(
-            question=dataset.question,
-            answer=ModuleOutput(),
-        ),
-        LLMBasedStyleConsistency().use(
-            answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
-        ),
+        # LLMBasedFaithfulness().use(
+        #     answer=ModuleOutput(),
+        #     retrieved_context=ModuleOutput(DocumentsContent, module=reranker),
+        #     question=dataset.question,
+        # ),
+        # LLMBasedAnswerCorrectness().use(
+        #     question=dataset.question,
+        #     answer=ModuleOutput(),
+        #     ground_truth_answers=dataset.ground_truths,
+        # ),
+        # LLMBasedAnswerRelevance().use(
+        #     question=dataset.question,
+        #     answer=ModuleOutput(),
+        # ),
+        # LLMBasedStyleConsistency().use(
+        #     answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
+        # ),
     ],
     tests=[
         GreaterOrEqualThan(
@@ -198,8 +198,7 @@ llm = Module(
 
 pipeline = Pipeline([base_retriever, hyde_generator, hyde_retriever, bm25_retriever, reranker, llm], dataset=dataset)
 
-print(pipeline.graph_repr())
-```
+print(pipeline.graph_repr())```
 </TabItem>
 <TabItem label="2) Define Dataset">
 ```yaml title="manifest.yaml"
@@ -251,14 +250,14 @@ load_dotenv()
 eval_manager.set_pipeline(pipeline)
 
 # Load documents and split
-loader = DirectoryLoader("data/documents/208_219_graham_essays")
+loader = DirectoryLoader("examples/langchain/rag_data/documents/208_219_graham_essays")
 docs = loader.load()
 TextSplitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
 split_docs = TextSplitter.split_documents(docs)
 
-# Set up Ve
+# Set up Vectorstore
 db = Chroma(
-    persist_directory=str("data/vectorstore/208_219_chroma_db"),
+    persist_directory=str("examples/langchain/rag_data/vectorstore/208_219_chroma_db"),
     embedding_function=OpenAIEmbeddings(),
 )
 
@@ -268,14 +267,14 @@ model = ChatGoogleGenerativeAI(model="gemini-pro")
 def base_retrieve(q):
     # Basic retriever
     basic_retriever = db.as_retriever(
-        search_type="similarity", search_kwargs={"k": 8}
+        search_type="similarity", search_kwargs={"k": 4}
     )
     return basic_retriever.invoke(q)
 
 def bm25_retrieve(q):
     # bm25 retriever
     bm25_retriever = BM25Retriever.from_documents(documents=docs)
-    bm25_retriever.k = 10
+    bm25_retriever.k = 2
     return bm25_retriever.invoke(q)
 
 def hyde_generator(q):
@@ -294,7 +293,7 @@ def hyde_generator(q):
 def hyde_retrieve(hypothetical_doc):
     # HyDE retriever
     hyde_retriever = db.as_retriever(
-        search_type="similarity", search_kwargs={"k": 4}
+        search_type="similarity", search_kwargs={"k": 3}
     )
     return hyde_retriever.invoke(hypothetical_doc)
 
@@ -357,6 +356,12 @@ if __name__ == "__main__":
 </TabItem>
 <TabItem label="4) Run Eval">
 ```python title="eval.py"
+from pathlib import Path
+
+from continuous_eval.eval.manager import eval_manager
+from examples.langchain.complex_rag.pipeline import pipeline
+
+if __name__ == "__main__":
     eval_manager.set_pipeline(pipeline)
 
     # Evaluation
@@ -365,18 +370,16 @@ if __name__ == "__main__":
     eval_manager.metrics.save(Path("metrics_results.json"))
 
     # Tests
-    # eval_manager.metrics.load(Path("metrics_results.json"))
-    # agg = eval_manager.metrics.aggregate()
-    # print(agg)
-    # eval_manager.run_tests()
-    # eval_manager.tests.save(Path("test_results.json"))
+    eval_manager.metrics.load(Path("metrics_results.json"))
+    agg = eval_manager.metrics.aggregate() # optional
+    print(agg)
+    eval_manager.run_tests()
+    eval_manager.tests.save(Path("test_results.json"))
 
     # eval_manager.tests.load(Path("test_results.json"))
-    # for module_name, test_results in eval_manager.tests.results.items():
-    #     print(f"{module_name}")
-    #     for test_name in test_results:
-    #         print(f" - {test_name}: {test_results[test_name]}")
-    # print("Done")
-```
+    for module_name, test_results in eval_manager.tests.results.items():
+        print(f"{module_name}")
+        for test_name in test_results:
+            print(f" - {test_name}: {test_results[test_name]}")```
 </TabItem>
 </Tabs>

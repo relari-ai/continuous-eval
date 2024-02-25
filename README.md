@@ -222,6 +222,7 @@ The evaluator manager also offers
 ## Resources
 
 - **Docs:** [link](https://docs.relari.ai/)
+- **Examples Repo**: [end-to-end example repo](https://docs.relari.ai/v0.3/examples/case-studies/1_simple_rag_evaluation/)
 - **Blog Posts:**
   - Practical Guide to RAG Pipeline Evaluation: [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893)
   - Practical Guide to RAG Pipeline Evaluation: [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
