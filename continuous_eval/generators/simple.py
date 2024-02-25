@@ -5,7 +5,6 @@ import random
 import numpy as np
 from langchain.vectorstores import VectorStore
 
-from continuous_eval import Dataset
 from continuous_eval.llm_factory import LLMFactory, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
 
@@ -203,7 +202,7 @@ class SimpleDatasetGenerator:
         multi_hop_percentage: float = 0.2,
         max_try_ratio: int = 3,
         num_seed_vectors: int = 1,
-    ) -> Dataset:
+    ):
         assert embedding_vector_size > 0, "embedding_vector_size must be positive"
         assert num_questions > 0, "num_questions must be positive"
         assert multi_hop_percentage >= 0 and multi_hop_percentage <= 1, "multi_hop_percentage must be in [0, 1]"
@@ -265,7 +264,7 @@ class SimpleDatasetGenerator:
                 num_single_hop_tries += 1
                 continue
 
-        dataset = Dataset(single_hop_questions + multi_hop_questions)
+        dataset = single_hop_questions + multi_hop_questions
         if len(dataset) < num_questions:
             raise Warning(f"Could not generate enough questions. Generated {len(dataset)} questions.")
 

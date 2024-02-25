@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 from pathlib import Path
 from time import perf_counter
@@ -15,9 +16,9 @@ load_dotenv()
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    generator_llm = "gpt-4-1106-preview"
+    generator_llm = "gpt-4-0125-preview"
     num_questions = 10
-    multi_hop_precentage = 0.25
+    multi_hop_precentage = 0.2
     max_try_ratio = 3
 
     print(f"Generating a {num_questions}-questions dataset with {generator_llm}...")
@@ -44,7 +45,17 @@ def main():
         output_directory / f"G_{generator_llm}_Q_{num_questions}_MH%_{multi_hop_precentage}_{current_datetime}.jsonl"
     )
     print(f"Saving dataset to {fname}")
-    dataset.to_jsonl(fname)
+    if not dataset:
+        print('Dataset is empty. Exiting function.')
+        return
+    with open(fname, 'w', encoding='utf-8') as file:
+        for item in dataset:
+            try:
+                json_string = json.dumps(item)
+                file.write(json_string + '\n')
+            except TypeError:
+                print('Item is not JSON serializable. Skipping item.')
+                continue
     print(f"Done.")
 
 
