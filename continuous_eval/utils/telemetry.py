@@ -10,10 +10,8 @@ from pathlib import Path
 import requests
 from appdirs import user_data_dir
 
-# _TELEMETRY_ENDPOINT = "http://telemetry.relari.ai/"
-_TELEMETRY_ENDPOINT = "http://localhost/"
+_TELEMETRY_ENDPOINT = "http://telemetry.relari.ai/"
 _TELEMETRY_ENDPOINT_METRIC = _TELEMETRY_ENDPOINT + "metric"
-_TELEMETRY_ENDPOINT_EVALUATOR = _TELEMETRY_ENDPOINT + "evaluator"
 _TELEMETRY_ENDPOINT_EVENT = _TELEMETRY_ENDPOINT + "event"
 _USAGE_REQUESTS_TIMEOUT_SEC = 1
 _USER_DATA_DIR_NAME = "continuous_eval"
