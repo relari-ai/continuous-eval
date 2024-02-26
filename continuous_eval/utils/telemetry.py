@@ -1,8 +1,8 @@
 import contextlib
+import functools
 import json
 import logging
 import os
-import threading
 import uuid
 from functools import lru_cache, wraps
 from pathlib import Path
@@ -10,7 +10,8 @@ from pathlib import Path
 import requests
 from appdirs import user_data_dir
 
-_TELEMETRY_ENDPOINT = "http://telemetry.relari.ai/"
+# _TELEMETRY_ENDPOINT = "http://telemetry.relari.ai/"
+_TELEMETRY_ENDPOINT = "http://localhost/"
 _TELEMETRY_ENDPOINT_METRIC = _TELEMETRY_ENDPOINT + "metric"
 _TELEMETRY_ENDPOINT_EVALUATOR = _TELEMETRY_ENDPOINT + "evaluator"
 _TELEMETRY_ENDPOINT_EVENT = _TELEMETRY_ENDPOINT + "event"
@@ -88,18 +89,6 @@ class AnonymousTelemetry:
 
         return wrapper
 
-    def evaluator_telemetry(self, fcn):
-        @wraps(fcn)
-        def wrapper(*args, **kwargs):
-            evaluator_type = args[0].__class__.__name__
-            self.log_evaluator_call(evaluator_type=evaluator_type, dataset_size=len(args[0].dataset))
-            for metric in args[0].metrics:
-                self.log_metric_call(metric.__class__.__name__)
-            with self.batch():
-                return fcn(*args, **kwargs)
-
-        return wrapper
-
     @contextlib.contextmanager
     def batch(self):
         old_state = self._batch_mode
@@ -113,16 +102,6 @@ class AnonymousTelemetry:
         self._track(
             endpoint=_TELEMETRY_ENDPOINT_METRIC,
             payload={"classname": metric, "uid": self.uid},
-        )
-
-    def log_evaluator_call(self, evaluator_type: str, dataset_size):
-        self._track(
-            endpoint=_TELEMETRY_ENDPOINT_EVALUATOR,
-            payload={
-                "type": evaluator_type,
-                "dataset_size": dataset_size,
-                "uid": self.uid,
-            },
         )
 
     def log_event(self, tag: str, info: str):
@@ -152,3 +131,15 @@ class AnonymousTelemetry:
 
 
 telemetry = AnonymousTelemetry()
+
+
+def telemetry_event(tag="Unknown"):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            telemetry.log_event(tag, info=func.__qualname__)
+            result = func(*args, **kwargs)
+            return result
+
+        return wrapper
+
+    return decorator

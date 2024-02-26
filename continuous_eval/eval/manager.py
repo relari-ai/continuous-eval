@@ -7,6 +7,7 @@ from loguru import logger
 from continuous_eval.eval.dataset import Dataset, DatasetField
 from continuous_eval.eval.pipeline import CalledTools, ModuleOutput, Pipeline
 from continuous_eval.eval.result_types import TOOL_PREFIX, EvaluationResults, MetricsResults, TestResults
+from continuous_eval.utils.telemetry import telemetry_event
 
 
 class LogMode(Enum):
@@ -67,6 +68,7 @@ class EvaluationManager:
     def is_running(self) -> bool:
         return self._is_running
 
+    @telemetry_event("eval_manager")
     def start_run(self):
         self._idx = 0
         self._is_running = True
@@ -140,6 +142,7 @@ class EvaluationManager:
                     raise ValueError(f"Invalid promised parameter {key}={val}")
         return kwargs
 
+    @telemetry_event("eval_manager")
     def run_metrics(self):
         logger.info("Running evaluation")
         assert self._pipeline is not None, "Pipeline not set"
@@ -162,7 +165,7 @@ class EvaluationManager:
         return self._metrics_results.results
 
     # Tests
-
+    @telemetry_event("eval_manager")
     def run_tests(self):
         logger.info("Running tests")
         assert self._pipeline is not None, "Pipeline not set"

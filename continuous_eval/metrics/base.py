@@ -6,17 +6,19 @@ import pandas as pd
 from continuous_eval.llm_factory import DefaultLLM, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
 
-# class MetricDecoratorMeta(ABCMeta, type):
-#     def __new__(cls, name, bases, dct):
-#         for attr, value in dct.items():
-#             if callable(value) and attr == 'calculate':
-#                 dct[attr] = telemetry.metric_telemetry(value)
-#             elif callable(value) and attr == 'batch_calculate':
-#                 dct[attr] = telemetry.batch_metric_telemetry(value)
-#         return type.__new__(cls, name, bases, dct)
+
+class MetricDecoratorMeta(ABCMeta, type):
+    def __new__(cls, name, bases, dct):
+        for attr, value in dct.items():
+            if callable(value) and attr == '__call__':
+                dct[attr] = telemetry.metric_telemetry(value)
+            elif callable(value) and attr == 'batch':
+                pass
+                # dct[attr] = telemetry.batch_metric_telemetry(value)
+        return type.__new__(cls, name, bases, dct)
 
 
-class Metric(ABC):  # , metaclass=MetricDecoratorMeta):
+class Metric(ABC, metaclass=MetricDecoratorMeta):
     def __init__(self) -> None:
         super().__init__()
         self._overloaded_params = None
