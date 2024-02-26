@@ -191,6 +191,7 @@ print(pipeline.graph_repr())
         eval_manager.evaluation.save(Path("results.jsonl"))
         ```
   </TabItem>
+
   <TabItem label="4) Run Eval">
     ```python title="eval.py"
     from pathlib import Path
@@ -215,6 +216,8 @@ print(pipeline.graph_repr())
         for module_name, test_results in eval_manager.tests.results.items():
             print(f"{module_name}")
             for test_name in test_results:
-                print(f" - {test_name}: {test_results[test_name]}")    ```
-  </TabItem>
+                print(f" - {test_name}: {test_results[test_name]}")
+    ```
+</TabItem>
+
 </Tabs>

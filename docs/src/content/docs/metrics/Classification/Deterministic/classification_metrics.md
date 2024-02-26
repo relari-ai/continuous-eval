@@ -6,25 +6,25 @@ sidebar:
 
 ### Definitions
 
-**Classification Metrics** measures the performance of a classification module.
+**Classification Match** measures the performance of a classification module. It measures the match of individual predictions and also calculates aggregate results over a dataset.
 
 <br>
 
 
 ### Example Usage
 
-Required data items: `class`, `ground_truths`
+Required data items: `predicted_class`, `ground_truth_class`
 
 ```python
-from continuous_eval.metrics import ClassificationMetrics
+from continuous_eval.metrics import ClassificationMatch
 
 
 datum = {
     "predicted_class": "quantitative_question",
-    "ground_truths": ["qualitative_question", "reasoning_question"],
+    "ground_truth_class": "qualitative_question",
 },
 
-metric = ClassificationMetrics()
+metric = ClassificationMatch()
 print(metric(**datum))
 ```
 
@@ -32,7 +32,9 @@ print(metric(**datum))
 
 ```JSON
 {
-    "classification_correctness": 0
+    "predicted_class": "quantitative_question",
+    "ground_truth_class":"qualitative_question",
+    "class_correct": 0
 }
 ```
 
@@ -40,9 +42,9 @@ print(metric(**datum))
 
 ```JSON
 {
-    "accuracy": 0.8,
-    "precision": 0.9,
-    "recall": 0.7,
-    "f1": 0.8,
+    "cls_accuracy": accuracy,
+    "cls_precision": precision,
+    "cls_recall": recall,
+    "cls_f1": f1,
 }
 ```
