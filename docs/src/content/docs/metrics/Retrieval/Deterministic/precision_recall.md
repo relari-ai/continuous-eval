@@ -106,9 +106,3 @@ print(metric(**datum))
     'context_f1': 0.6666666666666666
 }
 ```
-
-:::note
-
-**You can run Precision / Recall / F1 @ top K** to see retrieval performance at the top K chunks over a dataset.
-Check out <a href="/evaluators/evaluator#retrievalevaluator">Retrieval Evaluator</a> for examples
-:::

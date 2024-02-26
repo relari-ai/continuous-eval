@@ -11,7 +11,10 @@ direction: right
 Dataset: Eval Dataset
 Dataset.shape: oval
 direction: right
-Dataset -> llm
+Dataset -> Agent
+Agent <--> Tools {
+    style.stroke-dash: 3
+  }
 ```
 
 **Try out full example at [example repo](https://github.com/relari-ai/examples).**

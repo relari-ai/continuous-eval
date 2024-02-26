@@ -6,11 +6,11 @@ sidebar:
 
 ## Create your own metric
 
-To define your own metrics, you only need to extend the [Metric](https://github.com/relari-ai/continuous-eval/blob/3f90fc2f88940fcdef285056689aae9cad04848a/continuous_eval/metrics/base.py#L23C7-L23C13) class implementing the `__call__` method.
+To define your own metrics, you only need to extend the [Metric](https://github.com/relari-ai/continuous-eval/blob/main/continuous_eval/metrics/base.py) class implementing the `__call__` method.
 
 Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
 
-Check out [Metric Folder](https://github.com/relari-ai/continuous-eval/tree/3f90fc2f88940fcdef285056689aae9cad04848a/continuous_eval/metrics) for examples of how various types of metrics are implemented.
+Check out [Metric Folder](https://github.com/relari-ai/continuous-eval/tree/main/continuous_eval/metrics) for examples of how various types of metrics are implemented.
 
 ## Example
 

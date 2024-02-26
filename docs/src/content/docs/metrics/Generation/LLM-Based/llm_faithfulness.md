@@ -28,7 +28,7 @@ $$
 **Classify faithfulness by whole answer**:
 
 
-`classify_by_statement = FALSE` where LLM is prompted to evaluate the whole Generated Answer and outputs a `boolean` judgement
+`classify_by_statement = FALSE` where LLM is prompted to evaluate the whole Generated Answer and outputs a judgement of 1.0 or 0.0
 
 $$
 \text{LLM-Based Faithfulness} =
@@ -88,7 +88,7 @@ print(metric(**datum))
 `faithfulness_by_whole_answer` output:
 ```JSON
 {
-    'LLM_based_faithfulness': False, 
+    'LLM_based_faithfulness': 0.0, 
     'LLM_based_faithfulness_reasoning': "The statement that William Shakespeare wrote 'Romeo and Juliet' is supported by the context. However, the context does not provide information about his birthplace, and it is a well-known fact that William Shakespeare was born in Stratford-upon-Avon, England, not Ireland."
 }
 ```

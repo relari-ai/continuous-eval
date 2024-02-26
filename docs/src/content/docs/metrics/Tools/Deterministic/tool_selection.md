@@ -10,7 +10,7 @@ sidebar:
 
 The used tools are compared with the expected tools and the metric outputs:
 -   `num_correct`: total number of tools that are selected AND called with the correct arguments
--   `score`: `num_correct` / total number of tools in `ground_truth`
+-   `score`: `num_correct` / total number of tools in `ground_truths`
 
 <br>
 
