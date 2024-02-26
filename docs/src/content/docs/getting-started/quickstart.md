@@ -3,11 +3,11 @@ title: Quick Start
 description: Quick Start
 ---
 
-If you haven't installed continuous-eval, go <a href="/getting-started/installation">here</a>.
+If you haven't installed continuous-eval, go [here](../installation/).
 
 ## Run a single metric
 
-Import the metric of your choice (<a href="/metrics/overview">see all metrics</a>) and get the results.
+Import the metric of your choice ([see all metrics](../../metrics/overview/)) and get the results.
 
 ```python
 from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
@@ -57,7 +57,7 @@ print(evaluator.aggregated_results)
 evaluator.save("retrieval_evaluator_results.jsonl")
 ```
 
-Learn more about the <a href="/dataset/dataset">dataset</a> class and the <a href="/dataset/evaluator">`Evaluator`</a> class.
+Learn more about the [dataset](../../dataset/dataset/)  class and the [evaluator](../../dataset/evaluator/)  class.
 
 ## Curate the dataset
 
@@ -65,4 +65,5 @@ Learn more about the <a href="/dataset/dataset">dataset</a> class and the <a hre
 
 **If you don't have a golden dataset, you can use `SimpleDatasetGenerator` to create a "silver dataset" as a starting point, upon which you can modify and improve.**
 
-Checkout the guide to create a "silver dataset" using <a href="/dataset/simple_dataset_genetator">`SimpleDatasetGenerator`</a>.
+Checkout the guide to create a "silver dataset" using [SimpleDatasetGenerator](../../dataset/simple_dataset_generator/).
+
