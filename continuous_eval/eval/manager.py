@@ -22,14 +22,9 @@ class EvaluationManager:
         self._metrics_results: MetricsResults = MetricsResults()
         self._test_results: TestResults = TestResults()
         self._is_running: bool = False
+        self._metadata = dict()
 
         self._idx = 0
-
-    @property
-    def is_complete(self) -> bool:
-        if self._pipeline is None:
-            return False
-        return self._idx == len(self._pipeline.dataset.data)
 
     @property
     def samples(self) -> List[dict]:
@@ -46,6 +41,10 @@ class EvaluationManager:
     @property
     def tests(self) -> TestResults:
         return self._test_results
+
+    @property
+    def metadata(self) -> dict:
+        return self._metadata
 
     @property
     def pipeline(self) -> Pipeline:
@@ -65,14 +64,18 @@ class EvaluationManager:
         self._metrics_results.pipeline = pipeline
         self._pipeline = pipeline
 
+    def set_metadata(self, metadata: dict):
+        self._metadata = metadata
+
     def is_running(self) -> bool:
         return self._is_running
 
     @telemetry_event("eval_manager")
-    def start_run(self):
+    def start_run(self, metadata: dict = dict()):
         self._idx = 0
         self._is_running = True
         self._eval_results = EvaluationResults(self._pipeline)
+        self.set_metadata(metadata)
 
     @property
     def curr_sample(self):
@@ -90,6 +93,33 @@ class EvaluationManager:
         else:
             self._idx += 1
         return self.curr_sample
+
+    # Context manager
+    @property
+    def experiment(self):
+        class ExperimentContext:
+            def __init__(self, manager):
+                self._manager = manager
+
+            def __enter__(self):
+                # Initialize the session
+                self._manager.start_run()
+                return self  # Return the session object itself to be used as an iterator
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                # Clean up the session
+                self._manager._is_running = False
+                # Optional: Handle exceptions
+                if exc_type:
+                    print(f"An error occurred: {exc_val}")
+                return False  # Propagate exceptions
+
+            def __iter__(self):
+                while self._manager.is_running() and self._manager.curr_sample is not None:
+                    yield self._manager.curr_sample
+                    self._manager.next_sample()
+
+        return ExperimentContext(self)
 
     # Logging results
 
