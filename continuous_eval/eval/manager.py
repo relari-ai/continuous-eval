@@ -82,6 +82,7 @@ class EvaluationManager:
         if self._pipeline is None:
             raise ValueError("Pipeline not set")
         if self._idx >= len(self.dataset.data):
+            self._is_running = False
             return None
         return self.dataset.data[self._idx]
 
