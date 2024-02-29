@@ -55,6 +55,14 @@ class Dataset:
         self._manifest = self._load_or_infer_manifest(manifest_path)
         self._create_dynamic_properties()
 
+    @classmethod
+    def from_data(cls, data: typing.List[typing.Dict[str, typing.Any]]):
+        dataset = cls.__new__(cls)
+        dataset._data = data
+        dataset._manifest = dataset._infer_manifest()
+        dataset._create_dynamic_properties()
+        return dataset
+
     def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
             warnings.warn(f"Manifest file not found in {manifest_path}, it is suggested to define a manifest.")

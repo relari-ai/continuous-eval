@@ -55,7 +55,7 @@ class MetricsResults:
         self.samples: Dict = dict()
 
     def is_empty(self) -> bool:
-        return bool(self.samples)
+        return not bool(self.samples)
 
     @cached_property
     def results(self) -> Dict:
@@ -109,7 +109,7 @@ class TestResults:
         self.results = dict()
 
     def is_empty(self) -> bool:
-        return bool(self.results)
+        return not bool(self.results)
 
     def save(self, filepath: Path):
         assert filepath.suffix == ".json", "File must be a JSON file"

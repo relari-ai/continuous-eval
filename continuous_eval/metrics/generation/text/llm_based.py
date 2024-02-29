@@ -68,8 +68,12 @@ The statement is supported by the context, which states that photosynthesis conv
             }
 
             response = self._llm.run(prompt)
-            score_txt, reasoning = response.split("\n", 1)
-            score = bool("yes" in score_txt.lower())
+            try:
+                score_txt, reasoning = response.split("\n", 1)
+                score = float("yes" in score_txt.lower())
+            except ValueError:
+                score = float("yes" in score_txt.lower())
+                reasoning = response
 
         return {
             "LLM_based_faithfulness": score,
@@ -123,10 +127,15 @@ Use the following guidelines for evaluation:
             ),
         }
 
-        response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 4
+        try:
+            response = self._llm.run(prompt)
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 4
+        except ValueError:
+            score = 0
+            normalized_score = 0
+            reasoning = response
 
         return {
             "LLM_based_answer_correctness": normalized_score,
@@ -182,10 +191,15 @@ Use the following guidelines for evaluation:
             "user_prompt": ("Question: " + question + "\nAnswer: " + answer),
         }
 
-        response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 2
+        try:
+            response = self._llm.run(prompt)
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 2
+        except ValueError:
+            score = 0
+            normalized_score = 0
+            reasoning = response
 
         return {
             "LLM_based_answer_relevance": normalized_score,
@@ -243,10 +257,15 @@ Use the following guidelines for evaluation:
             "user_prompt": ("Answer: " + answer + r"\Ground truth reference answer(s): " + gt_answers),
         }
 
-        response = self._llm.run(prompt)
-        score_txt, reasoning = response.split("\n", 1)
-        score = float(score_txt.split(":")[-1].strip())
-        normalized_score = (score - 1) / 3
+        try:
+            response = self._llm.run(prompt)
+            score_txt, reasoning = response.split("\n", 1)
+            score = float(score_txt.split(":")[-1].strip())
+            normalized_score = (score - 1) / 3
+        except ValueError:
+            score = 0
+            normalized_score = 0
+            reasoning = response
 
         return {
             "LLM_based_style_consistency": normalized_score,
