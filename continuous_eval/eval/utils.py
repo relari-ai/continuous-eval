@@ -1,30 +1,5 @@
 from typing import Type, get_origin
 
-# def infer_type_hint(variable: Any) -> str:
-#     """Infers the type hint of a variable."""
-#     if isinstance(variable, list):
-#         # Infer the type of list elements
-#         if variable:
-#             element_types = {infer_type_hint(elem) for elem in variable}
-#             # Assuming all elements are of the same type for simplicity
-#             if len(element_types) == 1:
-#                 element_type = element_types.pop()
-#             else:
-#                 element_type = 'Any'
-#         else:
-#             element_type = 'Any'
-#         return f'List[{element_type}]'
-#     elif isinstance(variable, dict):
-#         # Infer the type of keys and values
-#         key_types = {infer_type_hint(key) for key in variable.keys()}
-#         value_types = {infer_type_hint(value) for value in variable.values()}
-#         key_type = key_types.pop() if len(key_types) == 1 else 'Any'
-#         value_type = value_types.pop() if len(value_types) == 1 else 'Any'
-#         return f'Dict[{key_type}, {value_type}]'
-#     else:
-#         # Direct type mapping for non-collection types
-#         return type(variable).__name__
-
 
 def type_hint_to_str(type_hint: Type):
     if hasattr(type_hint, '__origin__'):  # Check if it's a generic type

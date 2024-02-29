@@ -70,9 +70,9 @@ The statement is supported by the context, which states that photosynthesis conv
             response = self._llm.run(prompt)
             try:
                 score_txt, reasoning = response.split("\n", 1)
-                score = bool("yes" in score_txt.lower())
+                score = float("yes" in score_txt.lower())
             except ValueError:
-                score = bool("yes" in score_txt.lower())
+                score = float("yes" in score_txt.lower())
                 reasoning = response
 
         return {

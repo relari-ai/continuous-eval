@@ -1,13 +1,14 @@
+import logging
 import warnings
 from enum import Enum
 from typing import Any, List, Optional
-
-from loguru import logger
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
 from continuous_eval.eval.pipeline import CalledTools, ModuleOutput, Pipeline
 from continuous_eval.eval.result_types import TOOL_PREFIX, EvaluationResults, MetricsResults, TestResults
 from continuous_eval.utils.telemetry import telemetry_event
+
+logger = logging.getLogger("eval-manager")
 
 
 class LogMode(Enum):
