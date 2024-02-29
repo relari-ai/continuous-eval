@@ -84,7 +84,7 @@ metric = PrecisionRecallF1()
 print(metric(**datum))
 ```
 
-### Off-the-shelf Metrics
+### Available Metrics
 
 <table border="0">
     <tr>
@@ -224,11 +224,10 @@ The evaluator manager also offers
 - **Docs:** [link](https://docs.relari.ai/)
 - **Examples Repo**: [end-to-end example repo](https://github.com/relari-ai/examples)
 - **Blog Posts:**
-  - Practical Guide to RAG Pipeline Evaluation: [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893)
-  - Practical Guide to RAG Pipeline Evaluation: [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
+  - Practical Guide to RAG Pipeline Evaluation: [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893), [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
   - How important is a Golden Dataset for LLM evaluation?
- [link](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
-
+ [(link)](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
+  - How to evaluate complex GenAI Apps: a granular approach [(link)](https://medium.com/relari/how-to-evaluate-complex-genai-apps-a-granular-approach-0ab929d5b3e2)
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
 - **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/yizhang/continuous-eval)
 
