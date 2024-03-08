@@ -20,22 +20,23 @@ The used tools are compared with the expected tools and the metric outputs:
 Required data items: `tools`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import ToolSelectionAccuracy
+from continuous_eval.metrics.tools.match import ToolSelectionAccuracy
+from continuous_eval.eval.types import ToolCall
 
 tools = [
-    FunctionTool.from_defaults(fn=useless, name=f"useless"),
-    FunctionTool.from_defaults(fn=multiply, name="multiply"),
+    ToolCall(name="useless", kwargs={}),
+    ToolCall(name="multiply", kwargs={"a": 2, "b": 3}),
 ]
 
 ground_truths = [
-    FunctionTool.from_defaults(fn=multiply, name="multiply"),
-    FunctionTool.from_defaults(fn=add, name="add"),
+    ToolCall(name="useless", kwargs={}),
+    ToolCall(name="add", kwargs={"a": 2, "b": 3}),
 ]
 
 datum = {
     "tools": tools,
     "ground_truths": ground_truths,
-},
+}
 
 metric = ToolSelectionAccuracy()
 print(metric(**datum))

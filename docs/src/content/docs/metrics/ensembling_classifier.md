@@ -102,7 +102,7 @@ eval_manager.metrics.save(Path("metrics_results.json"))
 ```
 
 We now split the samples in train, test, and calibration sets and train the classifier.
-Note that we are using only the `"token_overlap_recall"`,`"deberta_answer_entailment"`, and `"deberta_answer_contradiction"` to train the classifier. 
+Note that we are using only the `"token_overlap_recall"`,`"deberta_answer_entailment"`, and `"deberta_answer_contradiction"` to train the classifier.
 
 ```python
 # Now we building the data for the ensemble classifier

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from continuous_eval.llm_factory import LLMInterface
 from continuous_eval.metrics.base import LLMBasedMetric
@@ -22,7 +22,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
         self.classify_by_statement = classify_by_statement
 
     def __str__(self):
-        return f"LLMBasedFaithfulness(model={self.model}, use_few_shot={self.use_few_shot}, classify_by_statement={self.classify_by_statement})"
+        return f"LLMBasedFaithfulness(model={self._llm}, use_few_shot={self.use_few_shot}, classify_by_statement={self.classify_by_statement})"
 
     def __call__(self, answer: str, retrieved_context: List[str], question: str, **kwargs):
         """Calculate the faithfulness score for the given datapoint.
@@ -36,7 +36,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
             # Context coverage uses the same prompt as faithfulness because it calculates how what proportion statements in the answer can be attributed to the context.
             # The difference is that faithfulness uses the generated answer, while context coverage uses ground truth answer (to evaluate context).
             context_coverage = LLMBasedContextCoverage(use_few_shot=self.use_few_shot)
-            results = context_coverage.calculate(question, retrieved_context, answer)
+            results = context_coverage(question, retrieved_context, answer)
             score = results["LLM_based_context_coverage"]
             reasoning = results["LLM_based_context_statements"]
         else:
@@ -92,12 +92,14 @@ class LLMBasedAnswerCorrectness(LLMBasedMetric):
         self.use_few_shot = use_few_shot
 
     def __str__(self):
-        return f"LLMBasedAnswerCorrectness(model={self.model}, use_few_shot={self.use_few_shot})"
+        return f"LLMBasedAnswerCorrectness(model={self._llm}, use_few_shot={self.use_few_shot})"
 
-    def __call__(self, question: str, answer: str, ground_truth_answers: List[str], **kwargs):
+    def __call__(self, question: str, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
         """
         Calculate the correctness score for the given datapoint.
         """
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
         gt_answers = "\n".join(ground_truth_answers)
         if self.use_few_shot:
             few_shot_prompt = """Example Response:
@@ -154,7 +156,7 @@ class LLMBasedAnswerRelevance(LLMBasedMetric):
         self.use_few_shot = use_few_shot
 
     def __str__(self):
-        return f"LLMBasedAnswerRelevance(model={self.model}, use_few_shot={self.use_few_shot})"
+        return f"LLMBasedAnswerRelevance(model={self._llm}, use_few_shot={self.use_few_shot})"
 
     def __call__(self, question: str, answer: str, **kwargs):
         """
@@ -218,12 +220,14 @@ class LLMBasedStyleConsistency(LLMBasedMetric):
         self.use_few_shot = use_few_shot
 
     def __str__(self):
-        return f"LLMBasedStyleConsistency(model={self.model}, use_few_shot={self.use_few_shot})"
+        return f"LLMBasedStyleConsistency(model={self._llm}, use_few_shot={self.use_few_shot})"
 
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
         """
         Calculate the style consistency score for the given datapoint.
         """
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
         gt_answers = "\n".join(ground_truth_answers)
         if self.use_few_shot:
             few_shot_prompt = """

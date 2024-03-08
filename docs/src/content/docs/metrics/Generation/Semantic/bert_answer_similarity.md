@@ -19,14 +19,14 @@ Semantic similarity between `answer` and `ground_truths` is not necessarily a go
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import BertAnswerSimilarity
+from continuous_eval.metrics.generation.text import BertAnswerSimilarity
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
     "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "ground_truth_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
-    "ground_truths": [
+    "ground_truth_answers": [
         "William Shakespeare wrote 'Romeo and Juliet", 
         "William Shakespeare", 
         "Shakespeare", 

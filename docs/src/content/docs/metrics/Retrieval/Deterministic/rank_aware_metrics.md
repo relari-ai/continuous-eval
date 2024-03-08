@@ -39,7 +39,7 @@ Please checkout explanation for Matching strategy in [Matching Strategy](/../pre
 Required data items: `retrieved_context`, `ground_truth_context`
 
 ```python
-from continuous_eval.metrics import RankedRetrievalMetrics, RougeChunkMatch
+from continuous_eval.metrics.retrieval import RankedRetrievalMetrics, RougeChunkMatch
 
 datum = {
     "retrieved_context": [

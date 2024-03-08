@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 import nltk
 from nltk import download as nltk_download
@@ -22,17 +22,23 @@ class DeterministicFaithfulness(Metric):
         nltk_download("punkt", quiet=True)
         super().__init__()
         self.cfg = thresholds
+        self._token_overlap = TokenOverlap()
+        self._rouge = RougeScore()
+        self._bleu = BleuScore()
 
-    def __call__(self, answer: str, retrieved_context: List[str], **kwargs):
+    def __call__(self, answer: str, retrieved_context: Union[List[str], str], **kwargs):
         """Computes the faithfulness of the answer with respect to the retrieved contexts."""
+        if isinstance(retrieved_context, str):
+            retrieved_context = [retrieved_context]
+
         context = "\n".join(retrieved_context)
         sentences = nltk.sent_tokenize(answer)
 
-        rouge_scores = [RougeScore().calculate(sentence, context)["rouge_l_precision"] for sentence in sentences]
+        rouge_scores = [self._rouge.calculate(sentence, context)["rouge_l_precision"] for sentence in sentences]
         token_overlap_scores = [
-            TokenOverlap().calculate(sentence, context)["token_overlap_precision"] for sentence in sentences
+            self._token_overlap.calculate(sentence, context)["token_overlap_precision"] for sentence in sentences
         ]
-        bleu_scores = [BleuScore().calculate(sentence, context)["bleu_score"] for sentence in sentences]
+        bleu_scores = [self._bleu.calculate(sentence, context)["bleu_score"] for sentence in sentences]
 
         rouge_faithfulness = sum(score >= self.cfg.rouge_precision_threshold for score in rouge_scores) / len(sentences)
         token_overlap_faithfulness = sum(
@@ -51,9 +57,11 @@ class DeterministicFaithfulness(Metric):
 
 
 class DeterministicAnswerCorrectness(Metric):
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
         """Computes the correctness of the answer with respect to the ground truth."""
         # calculate the max score across all ground truth answers
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
         token_scores = [TokenOverlap().calculate(answer, gt_answer) for gt_answer in ground_truth_answers]
         rouge_scores = [RougeScore().calculate(answer, gt_answer) for gt_answer in ground_truth_answers]
         bleu_scores = [BleuScore().calculate(answer, gt_answer) for gt_answer in ground_truth_answers]

@@ -1,5 +1,5 @@
 import ast
-from typing import List
+from typing import List, Union
 
 from munkres import Munkres
 from thefuzz import fuzz
@@ -297,8 +297,9 @@ class PythonASTSimilarity(Metric):
 
         return matrix
 
-    def __call__(self, answer, ground_truth_answers):
-
+    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
         try:
             answer_tree = ast.parse(answer, mode="exec")
             ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truth_answers]

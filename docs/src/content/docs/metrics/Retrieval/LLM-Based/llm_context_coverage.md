@@ -24,7 +24,7 @@ This metric requires the LLM evaluator to output correct and complex JSON. If th
 Required data items: `question`, `retrieved_context`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import LLMBasedContextCoverage
+from continuous_eval.metrics.retrieval import LLMBasedContextCoverage
 from continuous_eval.llm_factory import LLMFactory
 
 datum = {
@@ -33,7 +33,7 @@ datum = {
         "Lyon is a major city in France.",
         "Paris is the capital of France and also the largest city in the country.",
     ],
-    "ground_truths": ["Paris is the largest city in France and Marseille is the second largest."],
+    "ground_truth_answers": ["Paris is the largest city in France and Marseille is the second largest."],
 }
 
 metric = LLMBasedContextCoverage(LLMFactory("gpt-4-1106-preview"))

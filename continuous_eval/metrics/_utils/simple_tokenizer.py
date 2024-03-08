@@ -8,6 +8,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize.api import TokenizerI
 from nltk.tokenize.destructive import MacIntyreContractions
 
+# This is a workaround to avoid make sure that the stopwords are loaded before the tokenizer is used by a thread
+stopwords.ensure_loaded()
 
 # Modified version of NLTKWordTokenizer
 class SimpleTokenizer(TokenizerI):

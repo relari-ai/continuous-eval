@@ -10,7 +10,6 @@ We have two different ways of prompting the LLM to calculate faithfulness:
 
 **Classify faithfulness by statement**:
 
-
 `classify_by_statement = TRUE` where LLM is prompted to evaluate the faithfulness of each statement in the Generated Answer and outputs a `float` score:
 
 $$
@@ -24,9 +23,7 @@ $$
 
 <br>
 
-
 **Classify faithfulness by whole answer**:
-
 
 `classify_by_statement = FALSE` where LLM is prompted to evaluate the whole Generated Answer and outputs a judgement of 1.0 or 0.0
 
@@ -43,28 +40,28 @@ $$
 **Classify by statement provides a more granular view and is generally more reliable.** Because it asks the LLM to reason over each statement. However it requires more tokens than classifying by whole answers.
 :::
 
-
 ### Example Usage
 
-Required data items: `question`, `retrieved_context`, `answer`
+Required data items: `answer`, and `retrieved_context`
 
 ```python
-from continuous_eval.metrics import LLMBasedAnswerCorrectness
+from continuous_eval.metrics.generation.text import LLMBasedFaithfulness
 from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
     "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
+    "ground_truth_answers": "Shakespeare",
 }
-metric = LLMBasedAnswerCorrectness(LLMFactory("gpt-4-1106-preview"))
+metric = LLMBasedFaithfulness(LLMFactory("gpt-4-1106-preview"))
 print(metric(**datum))
 ```
 
 ### Sample Output
 
-
 `faithfulness_by_statement` output:
+
 ```JSON
 {
     'LLM_based_faithfulness': 0.5, 
@@ -86,6 +83,7 @@ print(metric(**datum))
 ```
 
 `faithfulness_by_whole_answer` output:
+
 ```JSON
 {
     'LLM_based_faithfulness': 0.0, 

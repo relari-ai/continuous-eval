@@ -15,7 +15,7 @@ sidebar:
 Required data items: `predicted_class`, `ground_truth_class`
 
 ```python
-from continuous_eval.metrics import SingleLabelClassification
+from continuous_eval.metrics.classification import SingleLabelClassification
 
 datum = {
     "predicted_class": "quantitative_question",

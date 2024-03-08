@@ -21,17 +21,17 @@ title: LLM-based Style Consistency
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import LLMBasedStyleConsistency
+from continuous_eval.metrics.generation.text import LLMBasedStyleConsistency
 from continuous_eval.llm_factory import LLMFactory
 
 datum = {
     "answer": "Quantum computers work by utilizing quantum mechanics principles, specifically using qubits for complex computations.",
-    "ground_truths": [
+    "ground_truth_answers": [
         "A quantum computer is like having a super magical brain that can think about lots of different things all at the same time, really fast!"
     ]
 }
 
-metric = LLMBasedAnswerRelevance(LLMFactory("gpt-4-1106-preview"))
+metric = LLMBasedStyleConsistency(LLMFactory("gpt-4-1106-preview"))
 print(metric(**datum))
 ```
 
@@ -39,7 +39,9 @@ print(metric(**datum))
 
 ```JSON
 {
-    'LLM_based_style_consistency': 0.16666666666666666, 
-    'LLM_based_style_consisntency_reasoning': 'The generated answer is formal, technical, and uses specific terminology like "quantum mechanics" and "qubits," whereas the reference answer uses a very informal, simplified, and metaphorical style to explain quantum computers.'
+{
+  "LLM_based_style_consistency": 0.0,
+  "LLM_based_style_consistency_reasoning": "The generated answer is formal, technical, and uses specific terminology (\"quantum mechanics,\" \"qubits,\" \"complex computations\"), which contrasts with the playful, simplified, and metaphorical style of the reference answer."
+}
 }
 ```

@@ -10,13 +10,28 @@ from continuous_eval.metrics.base import Metric
 class DebertaScores:
     def __init__(self):
         self._model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
+        self._batch_size = 8
 
     @property
     def device(self):
         return self._model._target_device
 
-    def __call__(self, sentence_pairs):
-        return self._model.predict(sentence_pairs)
+    def _batch_predict(self, sentence_pairs, batch_size):
+        """
+        Predicts in batches.
+        """
+        batched_predictions = []
+        for i in range(0, len(sentence_pairs), batch_size):
+            batch = sentence_pairs[i : i + batch_size]
+            predictions = self._model.predict(batch)
+            batched_predictions.extend(predictions)
+        return batched_predictions
+
+    def __call__(self, sentence_pairs, batch_size=32):
+        """
+        Splits sentence_pairs into batches of size batch_size and performs prediction on each batch.
+        """
+        return self._batch_predict(sentence_pairs, batch_size)
 
 
 class BertSimilarity(Metric):

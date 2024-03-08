@@ -18,7 +18,7 @@ It outputs both the binary exact match score and the fuzzy match score in the ra
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import CodeStringMatch
+from continuous_eval.metrics.code.python import CodeStringMatch
 
 datum = {
     "answer": "def function(x, y):\n  return x + y",

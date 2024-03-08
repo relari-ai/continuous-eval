@@ -6,7 +6,6 @@ title: LLM-based Context Precision
 
 Context Precision is used to measure information density.
 
-
 $$
 \text{LLM-Based Context Precision} =
 \frac{
@@ -25,13 +24,12 @@ $$
 }
 $$
 
-
 ### Example Usage
 
 Required data items: `question`, `retrieved_context`
 
 ```python
-from continuous_eval.metrics import LLMBasedContextPrecision
+from continuous_eval.metrics.retrieval import LLMBasedContextPrecision
 from continuous_eval.llm_factory import LLMFactory
 
 datum = {

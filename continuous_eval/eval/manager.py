@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 import warnings
 from enum import Enum
@@ -186,6 +187,17 @@ class EvaluationManager:
             for module in self._pipeline.modules
             if module.eval is not None
         }
+        # metrics_results = dict()
+        # # Use ProcessPoolExecutor to parallelize computation
+        # with concurrent.futures.ProcessPoolExecutor() as executor:
+        #     # Prepare tasks for modules that have eval
+        #     tasks = [executor.submit(self.compute_metric_results, module)
+        #             for module in self._pipeline.modules if module.eval is not None]
+        #     # Wait for all tasks to complete and collect results
+        #     for future in concurrent.futures.as_completed(tasks):
+        #         module_name, results = future.result()
+        #         metrics_results[module_name] = results
+        # self._metrics_results.samples = metrics_results
         return self._metrics_results
 
     def aggregate_eval_results(self):

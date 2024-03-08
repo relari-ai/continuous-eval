@@ -3,10 +3,10 @@ from typing import Dict
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score
 
 
-def eval_prediction(y, y_hat) -> Dict:
+def eval_prediction(y, y_hat, average="binary") -> Dict:
     accuracy = accuracy_score(y, y_hat)
-    precision = precision_score(y, y_hat)
-    recall = recall_score(y, y_hat)
+    precision = precision_score(y, y_hat, average=average)
+    recall = recall_score(y, y_hat, average=average)
     try:
         f1 = 2 * (precision * recall) / (precision + recall)
     except ZeroDivisionError:

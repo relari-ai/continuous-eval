@@ -29,14 +29,14 @@ This metric leverages the [NLI DeBERTa v3 model](https://huggingface.co/cross-en
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import DebertaAnswerScores
+from continuous_eval.metrics.generation.text import DebertaAnswerScores
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
     "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "ground_truth_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
-    "ground_truths": [
+    "ground_truth_answers": [
         "William Shakespeare wrote 'Romeo and Juliet", 
         "William Shakespeare", 
         "Shakespeare", 

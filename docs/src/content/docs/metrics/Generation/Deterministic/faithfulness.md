@@ -52,7 +52,7 @@ $$
 Required data items: `retrieved_context`, `answer`
 
 ```python
-from continuous_eval.metrics import DeterministicFaithfulness
+from continuous_eval.metrics.generation.text  import DeterministicFaithfulness
 
 datum = {
     "retrieved_context": ["William Shakespeare is the author of 'Romeo and Juliet'."],

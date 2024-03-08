@@ -6,7 +6,7 @@ sidebar:
 
 ### Definitions
 
-**Python AST Similarity** compares the structure of two Python programs (generated code string vs. ground truth code string) by analyzing their Abstract Syntax Trees (ASTs). It evaluates how similar these programs are by matching nodes in the trees, considering both the types of statements and their organization. The comparison can involve reordering certain parts for a deeper match and uses a scoring system to quantify similarity. 
+**Python AST Similarity** compares the structure of two Python programs (generated code string vs. ground truth code string) by analyzing their Abstract Syntax Trees (ASTs). It evaluates how similar these programs are by matching nodes in the trees, considering both the types of statements and their organization. The comparison can involve reordering certain parts for a deeper match and uses a scoring system to quantify similarity.
 
 <br>
 
@@ -21,15 +21,15 @@ The metric depends on syntactically correct Python scripts to produce the Abstra
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import PythonASTSimilarity
+from continuous_eval.metrics.code.python import PythonASTSimilarity
 
 datum = {
     "answer": "def function(x, y):\n  return x + y",
-    "ground_truths": [
+    "ground_truth_answers": [
         "def foo(x, y):\n  return x * y",
         "def foo(x, y):\n  return x + y",
     ],
-},
+}
 
 metric = PythonASTSimilarity()
 print(metric(**datum))

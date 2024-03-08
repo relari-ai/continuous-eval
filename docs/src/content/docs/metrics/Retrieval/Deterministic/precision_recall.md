@@ -33,7 +33,6 @@ This is because a retrieval system is only acceptable for generation if there is
 
 :::
 
-
 ##### Matching Strategy
 
 Given that the ground truth contexts can be defined differently from the exact chunks retrieved. For example, a ground truth contexts can be a sentence that contains the information, while the contexts retrieved are uniform 512-token chunks. We have following matching strategies that determine relevance:
@@ -83,7 +82,7 @@ Given that the ground truth contexts can be defined differently from the exact c
 Required data items: `retrieved_context`, `ground_truth_context`
 
 ```python
-from continuous_eval.metrics import PrecisionRecallF1, RougeChunkMatch
+from continuous_eval.metrics.retrieval import PrecisionRecallF1, RougeChunkMatch
 
 datum = {
     "retrieved_context": [

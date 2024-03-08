@@ -18,7 +18,7 @@ class LLMBasedContextPrecision(LLMBasedMetric):
         self.log_relevance_by_context = log_relevance_by_context
 
     def __str__(self):
-        return f"LLMBasedContextPrecision(model={self.model}, use_few_shot={self.use_few_shot})"
+        return f"LLMBasedContextPrecision(model={self._llm}, use_few_shot={self.use_few_shot})"
 
     def __call__(self, retrieved_context, question, **kwargs):
         """
@@ -84,7 +84,7 @@ class LLMBasedContextCoverage(LLMBasedMetric):
         self.use_few_shot = use_few_shot
 
     def __str__(self):
-        return f"LLMBasedContextCoverage(model={self.model}, use_few_shot={self.use_few_shot})"
+        return f"LLMBasedContextCoverage(model={self._llm}, use_few_shot={self.use_few_shot})"
 
     def __call__(self, question, retrieved_context, ground_truth_answers, **kwargs):
         """

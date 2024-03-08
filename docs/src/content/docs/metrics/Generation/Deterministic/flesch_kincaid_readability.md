@@ -25,7 +25,7 @@ To know more about the test read [Wikipedia](https://en.wikipedia.org/wiki/Flesc
 Required data items: `answer`
 
 ```python
-from continuous_eval.metrics import FleschKincaidReadability
+from continuous_eval.metrics.generation.text  import FleschKincaidReadability
 
 datum = {
     "answer": "The cat sat on the mat.",

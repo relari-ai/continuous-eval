@@ -41,13 +41,12 @@ When there are multiple ground truth reference answers, the max score is taken.
 However, this conclusion likely varies by dataset. Test to see how close these scores align with human evaluation.
 :::
 
-
 ### Example Usage
 
 Required data items: `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics import DeterministicAnswerCorrectness
+from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
 
 datum = {
     "answer": "Shakespeare wrote 'Romeo and Juliet'",

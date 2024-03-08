@@ -63,6 +63,18 @@ class Dataset:
         dataset._create_dynamic_properties()
         return dataset
 
+    def save(self, file_path: typing.Union[str, Path], save_manifest: bool = True):
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        with open(file_path, "w") as json_file:
+            for sample in self._data:
+                json_file.write(json.dumps(sample) + "\n")
+
+        if save_manifest:
+            manifest_path = file_path.parent / "manifest.yaml"
+            with open(manifest_path, "w") as manifest_file:
+                manifest_file.write(yaml.safe_dump(self._manifest))
+
     def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
             warnings.warn(f"Manifest file not found in {manifest_path}, it is suggested to define a manifest.")

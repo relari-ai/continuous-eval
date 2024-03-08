@@ -62,7 +62,7 @@ def test_llm_based_faithfulness():
     metric = LLMBasedFaithfulness()
     results = [metric(**datum) for datum in data]
     for result in results:
-        assert isinstance(result["LLM_based_faithfulness"], bool)
+        assert isinstance(result["LLM_based_faithfulness"], float)
 
 
 def test_llm_based_answer_correctness():

@@ -15,7 +15,7 @@ datum = {
     ],
     "ground_truth_context": ["Paris is the capital of France."],
     "answer": "Paris",
-    "ground_truths": ["Paris"],
+    "ground_truth_answers": ["Paris"],
 }
 
 metric = PrecisionRecallF1()
