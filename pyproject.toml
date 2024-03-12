@@ -33,11 +33,13 @@ appdirs = "^1.4.4"
 munkres = "^1.1.4"
 thefuzz = "^0.22.1"
 sentencepiece = "^0.2.0"
+cohere = {version = "^4.54", optional = true}
 
 [tool.poetry.extras]
 anthropic = ["anthropic"]
 gemini = ["google-generativeai"]
 generators = ["unstructured", "tiktoken", "pinecone-client", "chromadb", "langchain"]
+cohere = ["cohere"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.11.0"

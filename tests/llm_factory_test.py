@@ -26,6 +26,7 @@ def test_llm_based_metric():
         "gpt-3.5-turbo-1106",
         "claude-2.1",
         "gemini-pro",
+        "cohere",
     ]
 
     for mdl in models:

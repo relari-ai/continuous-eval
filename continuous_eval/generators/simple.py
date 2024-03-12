@@ -4,9 +4,14 @@ import random
 
 import numpy as np
 from langchain.vectorstores import VectorStore
+from tqdm import tqdm
 
 from continuous_eval.llm_factory import LLMFactory, LLMInterface
 from continuous_eval.utils.telemetry import telemetry
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.WARNING)
+
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -202,6 +207,7 @@ class SimpleDatasetGenerator:
         multi_hop_percentage: float = 0.2,
         max_try_ratio: int = 3,
         num_seed_vectors: int = 1,
+        progress_bar: bool = True,
     ):
         assert embedding_vector_size > 0, "embedding_vector_size must be positive"
         assert num_questions > 0, "num_questions must be positive"
@@ -216,8 +222,11 @@ class SimpleDatasetGenerator:
         num_single_hop_tries = 0
         num_multi_hop_tries = 0
 
+        pbar = tqdm(total=num_questions, desc="Samples", disable=not progress_bar)
+
         multi_hop_target = int(num_questions * multi_hop_percentage)
         while len(multi_hop_questions) < multi_hop_target:
+            pbar.update(len(multi_hop_questions) - pbar.n)
             if num_multi_hop_tries >= multi_hop_target * max_try_ratio:
                 logging.info(
                     f"Generated {len(multi_hop_questions)} multi hop questions after {num_multi_hop_tries} tries."
@@ -243,6 +252,7 @@ class SimpleDatasetGenerator:
 
         single_hop_target = num_questions - len(multi_hop_questions)
         while len(single_hop_questions) < single_hop_target:
+            pbar.update(len(multi_hop_questions) + len(single_hop_questions) - pbar.n)
             if num_single_hop_tries >= single_hop_target * max_try_ratio:
                 print(f"Generated {len(single_hop_questions)} single hop questions after {num_single_hop_tries} tries.")
                 break
@@ -264,6 +274,7 @@ class SimpleDatasetGenerator:
                 num_single_hop_tries += 1
                 continue
 
+        pbar.close()
         dataset = single_hop_questions + multi_hop_questions
         if len(dataset) < num_questions:
             raise Warning(f"Could not generate enough questions. Generated {len(dataset)} questions.")

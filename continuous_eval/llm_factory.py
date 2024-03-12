@@ -1,5 +1,7 @@
 import os
+import warnings
 from abc import ABC, abstractmethod
+from typing import Dict
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -26,11 +28,17 @@ try:
     AZURE_OPENAI_AVAILABLE = True
 except ImportError:
     AZURE_OPENAI_AVAILABLE = False
+try:
+    from cohere import Client as CohereClient
+
+    COHERE_AVAILABLE = True
+except ImportError:
+    COHERE_AVAILABLE = False
 
 
 class LLMInterface(ABC):
     @abstractmethod
-    def run(self, prompt, temperature=0):
+    def run(self, prompt: Dict[str, str], temperature: float = 0) -> str:
         pass
 
 
@@ -59,6 +67,12 @@ class LLMFactory(LLMInterface):
             )
             google_genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
             self.client = google_genai.GenerativeModel(model_name=model)
+        elif model.startswith("cohere"):
+            assert COHERE_AVAILABLE, "Cohere is not available. Please install it."
+            assert os.getenv("COHERE_API_KEY") is not None, (
+                "Please set the environment variable COHERE_API_KEY. " "You can get one at https://cohere.ai/."
+            )
+            self.client = CohereClient(api_key=os.getenv("COHERE_API_KEY"))  # type: ignore
         elif model.startswith("azure"):
             assert AZURE_OPENAI_AVAILABLE, "Azure OpenAI is not available. Please install it."
             assert os.getenv("AZURE_OPENAI_API_KEY") is not None, (
@@ -78,8 +92,8 @@ class LLMFactory(LLMInterface):
             self.client = AzureChatOpenAI(
                 azure_endpoint=os.getenv("AZURE_ENDPOINT"),
                 azure_deployment=os.getenv("AZURE_DEPLOYMENT"),
-                openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-                openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+                openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),  # type: ignore
+                openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),  # type: ignore
             )
         else:
             raise ValueError(
@@ -125,13 +139,21 @@ class LLMFactory(LLMInterface):
                 )
             content = response.choices[0].message.content
         elif ANTHROPIC_AVAILABLE and isinstance(self.client, Anthropic):
-            response = self.client.completions.create(
+            response = self.client.completions.create(  # type: ignore
                 model="claude-2.1",
                 max_tokens_to_sample=1024,
                 temperature=temperature,
                 prompt=f"{prompt['system_prompt']}{HUMAN_PROMPT}{prompt['user_prompt']}{AI_PROMPT}",
             )
             content = response.completion
+        elif COHERE_AVAILABLE and isinstance(self.client, CohereClient):
+            prompt = f"{prompt['system_prompt']}\n{prompt['user_prompt']}"
+            response = self.client.generate(model="command", prompt=prompt, temperature=temperature, max_tokens=1024)  # type: ignore
+            try:
+                content = response.generations[0].text
+            except:
+                content = ""
+                warnings.warn(f"Failed to generate content from Cohere")
         elif GOOGLE_GENAI_AVAILABLE and isinstance(self.client, google_genai.GenerativeModel):
             generation_config = {
                 "temperature": temperature,
@@ -165,12 +187,15 @@ class LLMFactory(LLMInterface):
             content = response.text
         elif AZURE_OPENAI_AVAILABLE and isinstance(self.client, AzureChatOpenAI):
             response = self.client.invoke(
-                input=[SystemMessage(content=prompt['system_prompt']), HumanMessage(content=prompt['user_prompt'])],
+                input=[
+                    SystemMessage(content=prompt["system_prompt"]),
+                    HumanMessage(content=prompt["user_prompt"]),
+                ],
                 temperature=temperature,
                 max_tokens=1024,
                 top_p=1,
             )
-            content = response.dict()['content']
+            content = response.dict()["content"]
         else:
             raise ValueError(f"Unknown model client")
 
