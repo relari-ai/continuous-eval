@@ -1,5 +1,4 @@
 import re
-from functools import partialmethod
 from typing import Optional
 
 from continuous_eval.llm_factory import LLMInterface
@@ -53,7 +52,10 @@ Given the following question and context, verify if the information in the given
             }
 
             content = self._llm.run(prompt)
-            score = "yes" in content.lower()
+            try:
+                score = "yes" in content.lower()
+            except Exception:
+                score = False
             scores.append(score)
 
         relevant_chunks = 0
