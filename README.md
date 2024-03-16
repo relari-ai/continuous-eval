@@ -241,7 +241,7 @@ We have created a synthetic data pipeline that can custom generate user interact
  [(link)](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
   - How to evaluate complex GenAI Apps: a granular approach [(link)](https://medium.com/relari/how-to-evaluate-complex-genai-apps-a-granular-approach-0ab929d5b3e2)
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
-- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/yizhang/continuous-eval)
+- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/pasquale/continuous-eval)
 
 ## License
 

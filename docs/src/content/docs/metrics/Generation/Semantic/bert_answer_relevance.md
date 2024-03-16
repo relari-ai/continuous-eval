@@ -19,7 +19,7 @@ Semantic similarity between `answer` and `question` is not necessarily a good in
 Required data items: `question`, `answer`
 
 ```python
-from continuous_eval.metrics import BertAnswerSimilarity
+from continuous_eval.metrics.generation.text import BertAnswerSimilarity
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",

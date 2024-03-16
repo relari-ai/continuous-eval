@@ -2,7 +2,11 @@ import warnings
 from typing import Any, Dict, List
 
 import pandas as pd
-import torch
+
+try:
+    import torch
+except ImportError:
+    raise ImportError("To use BertSimilarity, please install PyTorch.")
 
 from continuous_eval.metrics.base import Metric
 from continuous_eval.metrics.generation.text.bert import BertSimilarity, DebertaScores

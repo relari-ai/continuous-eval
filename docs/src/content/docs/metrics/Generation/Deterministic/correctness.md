@@ -50,7 +50,7 @@ from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectne
 
 datum = {
     "answer": "Shakespeare wrote 'Romeo and Juliet'",
-    "ground_truths": [
+    "ground_truth_answers": [
         "William Shakespeare wrote 'Romeo and Juliet", 
         "William Shakespeare", 
         "Shakespeare", 

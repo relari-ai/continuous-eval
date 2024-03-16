@@ -6,7 +6,7 @@ import astroD2 from 'astro-d2'
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://red-meadow-00dc81510.4.azurestaticapps.net',
+  site: 'https://docs.relari.ai',
   base: '/v0.3',
   outDir: './dist/v0.3',
   trailingSlash: "always",

@@ -34,4 +34,4 @@ sidebar:
  [link](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
 
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
-- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/yizhang/continuous-eval)
+- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/pasquale/continuous-eval)

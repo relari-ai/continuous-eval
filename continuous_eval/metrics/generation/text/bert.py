@@ -1,9 +1,14 @@
 from typing import Dict, List
 
-import torch
-from sentence_transformers import CrossEncoder
-from transformers import BertModel, BertTokenizer
-
+try:
+    import torch
+except ImportError:
+    raise ImportError("To use BertSimilarity, please install PyTorch.")
+try:
+    from sentence_transformers import CrossEncoder
+    from transformers import BertModel, BertTokenizer
+except ImportError:
+    raise ImportError("To use BertSimilarity, please install sentence-transformers and transformers.")
 from continuous_eval.metrics.base import Metric
 
 
