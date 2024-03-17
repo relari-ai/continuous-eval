@@ -20,10 +20,6 @@ class ScoringFunctions:
         assert min_val < max_val, "min_val should be less than max_val"
         return lambda input_val: _numeric_matcher(input_val, min_val, max_val)
 
-    # @staticmethod
-    # def YesNo(value: str):
-    #     return value
-
     @staticmethod
     def Identity(value: str):
         return value
