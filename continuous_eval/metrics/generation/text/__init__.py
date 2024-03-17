@@ -14,3 +14,8 @@ from continuous_eval.metrics.generation.text.llm_based import (
     LLMBasedAnswerRelevance,
     LLMBasedStyleConsistency,
 )
+from continuous_eval.metrics.generation.text.custom import (
+    EvaluationExample,
+    LLMBasedCustomMetric,
+    ScoringFunctions,
+)
