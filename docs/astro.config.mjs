@@ -9,7 +9,7 @@ export default defineConfig({
   site: 'https://docs.relari.ai',
   base: '/v0.3',
   outDir: './dist/v0.3',
-  trailingSlash: "always",
+  trailingSlash: "never",
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeMathjax],

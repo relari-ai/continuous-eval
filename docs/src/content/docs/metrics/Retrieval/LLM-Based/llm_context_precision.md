@@ -9,20 +9,16 @@ Context Precision is used to measure information density.
 $$
 \text{LLM-Based Context Precision} =
 \frac{
-  \text{Number of Relevant Chunks in Retrieved Sentences}
+  \text{Number of Relevant Chunks in Retrieved Contexts}
 }{
-  \text{Total Number of Sentences in Retrieved Contexts}
+  \text{Total Number of Chunks in Retrieved Contexts}
 }
 $$
 
+$$ 
+\text{LLM-Based Average Precision (AP)} = \frac{1}{\text{Number of Relevant Chunks}} \sum_{j=1}^{\text{Number of Retrieved Context}} \text{ Precision at Rank } j 
 $$
-\text{LLM-Based Context Average Precision} =
-\frac{
-  \text{Number of Relevant Chunks in Retrieved Sentences}
-}{
-  \text{Total Number of Sentences in Retrieved Contexts}
-}
-$$
+
 
 ### Example Usage
 
