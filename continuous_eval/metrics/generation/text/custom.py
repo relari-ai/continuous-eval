@@ -7,8 +7,11 @@ from continuous_eval.metrics.base import LLMBasedMetric
 
 
 def _numeric_matcher(input_val, min_val, max_val):
-    grp = re.search(f"[{min_val}-{max_val}]", input_val)
-    return max(min_val, min(max_val, float(grp.group()))) if grp else min_val
+    pattern = r"\d+(?:\.\d+)?"  # Match any number (integer or float)
+    matches = re.findall(pattern, input_val)
+    if not matches:
+        raise ValueError(f"Could not find a number in the input: {input_val}")
+    return max(min_val, min(max_val, float(matches[0])))
 
 
 class ScoringFunctions:
