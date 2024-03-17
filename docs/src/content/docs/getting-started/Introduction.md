@@ -9,10 +9,9 @@ sidebar:
 
 ## What is continuous-eval?
 
-`continuous-eval` is an open-source package created for granular and holistic evaluation of GenAI application pipelines. 
+`continuous-eval` is an open-source package created for granular and holistic evaluation of GenAI application pipelines.
 
-<img src="../../module-level-eval.png"></img>
-
+<img src="/v0.3/module-level-eval.png"></img>
 
 ## How is continuous-eval different?
 
