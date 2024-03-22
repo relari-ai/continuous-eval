@@ -5,6 +5,7 @@ from typing import Dict
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_random_exponential  # for exponential backoff
 
 load_dotenv()
 
@@ -102,6 +103,7 @@ class LLMFactory(LLMInterface):
                 "OpenAI gpt models (e.g. gpt-4-turbo-preview, gpt-3.5-turbo-0125), Anthropic claude models (e.g. claude-2.1, claude-instant-1.2), Google Gemini models (e.g. gemini-pro), Azure OpenAI deployment (azure)"
             )
 
+    @retry(wait=wait_random_exponential(min=1, max=90), stop=stop_after_attempt(15))
     def _llm_response(self, prompt, temperature):
         """
         Send a prompt to the LLM and return the response.
