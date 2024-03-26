@@ -9,12 +9,16 @@ from nltk.tokenize.api import TokenizerI
 from nltk.tokenize.destructive import MacIntyreContractions
 
 # This is a workaround to avoid make sure that the stopwords are loaded before the tokenizer is used by a thread
-stopwords.ensure_loaded()
+try:
+    stopwords.ensure_loaded()
+except LookupError:
+    nltk_download("punkt", quiet=True)
+    nltk_download("stopwords", quiet=True)
+    stopwords.ensure_loaded()
+
 
 # Modified version of NLTKWordTokenizer
 class SimpleTokenizer(TokenizerI):
-    nltk_download("punkt", quiet=True)
-    nltk_download("stopwords", quiet=True)
 
     # List of contractions adapted from Robert MacIntyre's tokenizer.
     _contractions = MacIntyreContractions()

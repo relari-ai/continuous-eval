@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 
 from continuous_eval.eval.types import UUID, ToolCall
+from continuous_eval.eval.utils import type_hint_to_str
 
 _SAFE_DICT = {k: v for k, v in typing.__dict__.items() if not k.startswith("__")}
 _SAFE_DICT["UUID"] = UUID
@@ -20,6 +21,13 @@ class DatasetField:
     description: str
     is_ground_truth: bool = False
 
+    def to_dict(self):
+        return {
+            "type": type_hint_to_str(self.type),
+            "description": self.description,
+            "ground_truth": self.is_ground_truth,
+        }
+
 
 @dataclass(frozen=True)
 class DatasetManifest:
@@ -28,6 +36,15 @@ class DatasetManifest:
     format: str
     license: str
     fields: typing.Dict[str, DatasetField]
+
+    def to_yaml(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "format": self.format,
+            "license": self.license,
+            "fields": {field_name: field.to_dict() for field_name, field in self.fields.items()},
+        }
 
 
 class Dataset:
@@ -63,7 +80,7 @@ class Dataset:
         dataset._create_dynamic_properties()
         return dataset
 
-    def save(self, file_path: typing.Union[str, Path], save_manifest: bool = True):
+    def save(self, file_path: typing.Union[str, Path], save_manifest: bool = False):
         if isinstance(file_path, str):
             file_path = Path(file_path)
         with open(file_path, "w") as json_file:
@@ -73,7 +90,7 @@ class Dataset:
         if save_manifest:
             manifest_path = file_path.parent / "manifest.yaml"
             with open(manifest_path, "w") as manifest_file:
-                manifest_file.write(yaml.safe_dump(self._manifest))
+                manifest_file.write(yaml.dump(self._manifest.to_yaml()))
 
     def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
