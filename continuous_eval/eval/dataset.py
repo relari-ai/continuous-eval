@@ -173,6 +173,9 @@ class Dataset:
     def fields(self) -> typing.List[DatasetField]:
         return list(self._manifest.fields.values())
 
+    def get_field(self, name: str) -> DatasetField:
+        return self._manifest.fields[name]
+
     def __getitem__(self, key: str):
         return [x[key] for x in self._data]
 

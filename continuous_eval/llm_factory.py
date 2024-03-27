@@ -96,14 +96,18 @@ class LLMFactory(LLMInterface):
                 openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),  # type: ignore
                 openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),  # type: ignore
             )
+        elif model.startswith("bedrock:"):
+            from continuous_eval.llms.bedrock import Bedrock
+
+            model_name = model.split(":")
+            self.client = Bedrock(model_name[1])
+            self.model = model_name[1]
         elif model.startswith("vllm_"):
             # use with VLLM_BASE_URL=http://localhost:8000/v1/ EVAL_LLM=vllm_Qwen/Qwen1.5-14B-Chat-GPTQ-Int8 python ...
             model_name = model.split("_")[1]
             self.model = model_name
-            base_url = os.getenv("VLLM_BASE_URL")            
-            assert os.getenv("VLLM_BASE_URL") is not None, (
-                "Please set the environment variable VLLM_BASE_URL. "
-            )
+            base_url = os.getenv("VLLM_BASE_URL")
+            assert os.getenv("VLLM_BASE_URL") is not None, "Please set the environment variable VLLM_BASE_URL. "
             self.client = OpenAI(base_url=base_url, api_key="unused")
         else:
             raise ValueError(
@@ -207,6 +211,8 @@ class LLMFactory(LLMInterface):
                 top_p=1,
             )
             content = response.dict()["content"]
+        elif isinstance(self.client, LLMInterface):
+            content = self.client.run(prompt=prompt, temperature=temperature)
         else:
             raise ValueError(f"Unknown model client")
 

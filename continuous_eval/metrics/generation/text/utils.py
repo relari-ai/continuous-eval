@@ -1,10 +1,34 @@
+import re
 import string
 import warnings
+from typing import Optional, Union
 
 import nltk
 from rouge import Rouge
 
 from continuous_eval.metrics._utils.simple_tokenizer import SimpleTokenizer
+
+
+def _numeric_matcher(input_val, min_val, max_val) -> Optional[float]:
+    pattern = r"\d+(?:\.\d+)?"  # Match any number (integer or float)
+    matches = re.findall(pattern, input_val)
+    if not matches:
+        return None
+    return max(min_val, min(max_val, float(matches[0])))
+
+
+class ScoringFunctions:
+    @staticmethod
+    def Numeric(
+        min_val: Union[int, float] = 1,
+        max_val: Union[int, float] = 5,
+    ):
+        assert min_val < max_val, "min_val should be less than max_val"
+        return lambda input_val: _numeric_matcher(input_val, min_val, max_val)
+
+    @staticmethod
+    def Identity(value: str):
+        return value
 
 
 class TokenOverlap:

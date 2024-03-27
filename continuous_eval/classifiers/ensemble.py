@@ -28,7 +28,7 @@ class EnsembleMetric:
         assert (len(calibration.X.columns) > 0) and (len(calibration) > 0), "Calibration data must not be empty"
         assert (set(training.X.columns) == set(calibration.X.columns)), "Training and calibration data must have the same features"
         # fmt: on
-        self.features = set(training.X.columns)
+        self.features = training.X.columns
         self._regressor = self._make_regressor(training.X, training.y)
         self._alpha = alpha
         self._classifier = MapieClassifier(
@@ -54,7 +54,6 @@ class EnsembleMetric:
         self, X: pd.DataFrame, judicator: Optional[Callable] = None, quiet=False
     ) -> Tuple[np.ndarray, np.ndarray]:
         assert isinstance(X, pd.DataFrame), "X must be a pandas DataFrame"
-        assert set(X.columns) == self.features, "X must have the same features as the training data"
         y_pred, y_set = self._classifier.predict(X, alpha=self._alpha)
         if judicator is None:
             return y_pred, y_set

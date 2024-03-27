@@ -102,6 +102,7 @@ class MetricsResults:
         assert filepath.suffix == ".json", "File must be a JSON file"
         with open(filepath, "r") as f:
             self.samples = json.load(f)
+        return self
 
 
 class TestResults:

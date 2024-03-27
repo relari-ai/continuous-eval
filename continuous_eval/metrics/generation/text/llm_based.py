@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 
 from continuous_eval.llm_factory import LLMInterface
 from continuous_eval.metrics.base import LLMBasedMetric
+from continuous_eval.metrics.generation.text.utils import ScoringFunctions
 from continuous_eval.metrics.retrieval.llm_based import LLMBasedContextCoverage
 
 
@@ -129,15 +130,9 @@ Use the following guidelines for evaluation:
             ),
         }
 
-        try:
-            response = self._llm.run(prompt)
-            score_txt, reasoning = response.split("\n", 1)
-            score = float(score_txt.split(":")[-1].strip())
-            normalized_score = (score - 1) / 4
-        except ValueError:
-            score = 0
-            normalized_score = 0
-            reasoning = response
+        reasoning = self._llm.run(prompt)
+        score = ScoringFunctions.Numeric(1, 5)(reasoning)
+        normalized_score = (score - 1) / 4 if score is not None else None
 
         return {
             "LLM_based_answer_correctness": normalized_score,
@@ -193,15 +188,9 @@ Use the following guidelines for evaluation:
             "user_prompt": ("Question: " + question + "\nAnswer: " + answer),
         }
 
-        try:
-            response = self._llm.run(prompt)
-            score_txt, reasoning = response.split("\n", 1)
-            score = float(score_txt.split(":")[-1].strip())
-            normalized_score = (score - 1) / 2
-        except ValueError:
-            score = 0
-            normalized_score = 0
-            reasoning = response
+        reasoning = self._llm.run(prompt)
+        score = ScoringFunctions.Numeric(1, 3)(reasoning)
+        normalized_score = (score - 1) / 2 if score is not None else None
 
         return {
             "LLM_based_answer_relevance": normalized_score,
@@ -261,15 +250,9 @@ Use the following guidelines for evaluation:
             "user_prompt": ("Answer: " + answer + r"\Ground truth reference answer(s): " + gt_answers),
         }
 
-        try:
-            response = self._llm.run(prompt)
-            score_txt, reasoning = response.split("\n", 1)
-            score = float(score_txt.split(":")[-1].strip())
-            normalized_score = (score - 1) / 3
-        except ValueError:
-            score = 0
-            normalized_score = 0
-            reasoning = response
+        reasoning = self._llm.run(prompt)
+        score = ScoringFunctions.Numeric(1, 4)(reasoning)
+        normalized_score = (score - 1) / 3 if score is not None else None
 
         return {
             "LLM_based_style_consistency": normalized_score,

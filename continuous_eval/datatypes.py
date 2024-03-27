@@ -76,7 +76,7 @@ class DataSplit:
             random_state=random_state,
         )
 
-        self.X_train = X_train[self.features]
+        self.X_train = X_train[self.features].astype(float)
         self.y_train = y_train.astype(int)
         # Oversample the training set (if needed)
         if oversample:

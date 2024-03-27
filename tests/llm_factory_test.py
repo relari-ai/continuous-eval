@@ -27,6 +27,7 @@ def test_llm_based_metric():
         "claude-2.1",
         "gemini-pro",
         "cohere",
+        "bedrock:meta.llama2-13b-chat-v1",
     ]
 
     for mdl in models:
