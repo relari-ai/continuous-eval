@@ -34,7 +34,7 @@ class RankedRetrievalMetrics(Metric):
                 if self.matching_strategy.is_relevant(chunk, ground_truth_chunk):
                     relevant_chunks += 1
                     average_precision += relevant_chunks / (i + 1)
-                    continue
+                    break
 
         return average_precision / relevant_chunks if relevant_chunks else 0
 
