@@ -222,7 +222,7 @@ The evaluator manager also offers
 ## Synthetic Data Generation
 
 Ground truth data, or reference data, is important for evaluation as it can offer a comprehensive and consistent measurement of system performance. However, it is often costly and time-consuming to manually curate such a golden dataset.
-We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes. Below is an example for Coding Agents. Try out this demo: [Synthetic Data Demo](https://www.relari.ai/#synthetic_data_demo)
+We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes. Below is an example for Coding Agents. Try out this demo: [Synthetic Data Demo](https://www.relari.ai/synthetic-data-demo)
 
 <h1 align="center">
   <img
