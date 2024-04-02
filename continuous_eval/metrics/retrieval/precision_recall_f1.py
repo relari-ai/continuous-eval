@@ -30,12 +30,15 @@ class PrecisionRecallF1(Metric):
 
         relevant_ret_components = 0
         hit_gt_components = set()
+        gt_components = set(gt_components)  # remove duplicates in ground truth context if any
         for ret_component in ret_components:
+            ret_component_matched = False
             for gt_component in gt_components:
                 if self.matching_strategy.is_relevant(ret_component, gt_component):
-                    relevant_ret_components += 1
+                    ret_component_matched = True
                     hit_gt_components.add(gt_component)
                     continue
+            relevant_ret_components += int(ret_component_matched)
         precision = relevant_ret_components / len(ret_components) if ret_components else 0.0
         recall = len(hit_gt_components) / len(gt_components) if gt_components else 0.0
 
