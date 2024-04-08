@@ -1,6 +1,5 @@
 import json
 import typing
-import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,8 +16,8 @@ _SAFE_DICT["ToolCall"] = ToolCall
 @dataclass(frozen=True)
 class DatasetField:
     name: str
-    type: type
-    description: str
+    type: type = typing.Any  # type: ignore
+    description: str = ""
     is_ground_truth: bool = False
 
     def to_dict(self):
@@ -94,7 +93,6 @@ class Dataset:
 
     def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
-            warnings.warn(f"Manifest file not found in {manifest_path}, it is suggested to define a manifest.")
             return self._infer_manifest()
         else:
             with open(manifest_path, "r") as manifest_file:
