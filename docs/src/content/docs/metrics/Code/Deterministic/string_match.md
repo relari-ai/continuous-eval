@@ -15,14 +15,14 @@ It outputs both the binary exact match score and the fuzzy match score in the ra
 
 ### Example Usage
 
-Required data items: `answer`, `ground_truths`
+Required data items: `answer`, `ground_truth_answers`
 
 ```python
 from continuous_eval.metrics.code.python import CodeStringMatch
 
 datum = {
     "answer": "def function(x, y):\n  return x + y",
-    "ground_truths": [
+    "ground_truth_answers": [
         "def foo(x, y):\n  return x * y",
         "def foo(x, y):\n  return x + y",
     ],

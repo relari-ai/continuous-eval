@@ -18,7 +18,7 @@ The metric depends on syntactically correct Python scripts to produce the Abstra
 
 ### Example Usage
 
-Required data items: `answer`, `ground_truths`
+Required data items: `answer`, `ground_truth_answers`
 
 ```python
 from continuous_eval.metrics.code.python import PythonASTSimilarity
