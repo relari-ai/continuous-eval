@@ -23,8 +23,8 @@ try:
 except ImportError:
     ANTHROPIC_AVAILABLE = False
 try:
-    from langchain.chat_models import AzureChatOpenAI
     from langchain.schema import HumanMessage, SystemMessage
+    from langchain_community.chat_models import AzureChatOpenAI
 
     AZURE_OPENAI_AVAILABLE = True
 except ImportError:
