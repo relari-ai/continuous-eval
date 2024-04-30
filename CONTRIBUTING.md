@@ -30,7 +30,7 @@ And if you like the project, but just don't have time to contribute, that's fine
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the
-[continuous-eval Code of Conduct](https://github.com/relari-ai/continuous-evalblob/master/CODE_OF_CONDUCT.md).
+[continuous-eval Code of Conduct](https://github.com/relari-ai/continuous-eval/blob/master/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 
 ## I Have a Question
