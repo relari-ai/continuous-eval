@@ -230,6 +230,10 @@ We have created a synthetic data pipeline that can custom generate user interact
   >
 </h1>
 
+## 💡 Contributing
+
+Interested in contributing? Contributions to LlamaIndex core as well as contributing
+integrations that build on the core are both accepted and highly encouraged! See our [Contribution Guide](CONTRIBUTING.md) for more details.
 
 ## Resources
 
