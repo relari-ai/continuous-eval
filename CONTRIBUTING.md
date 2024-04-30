@@ -152,7 +152,7 @@ poetry run pytest
 #### Creating a pull request
 
 See [these instructions](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
-to open a pull request against the main LlamaIndex repo.
+to open a pull request against the main continuous-eval repo.
 
 ### Improving The Documentation
 
