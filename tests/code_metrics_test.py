@@ -71,12 +71,3 @@ def test_sql_syntax_no_match():
     ground_truth = "SELECT * FROM users;"
     result = metric(answer, ground_truth)
     assert result["SQL_Syntax_Match_Score"] == 0.0
-
-@pytest.mark.skip(reason="Partial match scoring not implemented yet")
-def test_sql_syntax_partial_match():
-    metric = SQLSyntaxMatch()
-    answer = "SELECT id, name FROM users;"
-    ground_truth = "SELECT * FROM users;"
-    result = metric(answer, ground_truth)
-    # Assuming a hypothetical partial match score of 0.5
-    assert result["SQL_Syntax_Match_Score"] == 0.5
