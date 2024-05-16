@@ -4,7 +4,6 @@ import sqlparse
 
 from continuous_eval.metrics.base import Metric
 
-
 class SQLSyntaxMatch(Metric):
     """
     This metric evaluates the syntactic similarity between the generated SQL query and a set of ground truth queries.
@@ -27,10 +26,19 @@ class SQLSyntaxMatch(Metric):
 
         # Compare the formatted answer with each formatted ground truth answer
         for formatted_gt in formatted_ground_truths:
-            # Simple string comparison for now, can be improved with more sophisticated methods
-            match_score = float(formatted_answer == formatted_gt)
+            # Replace simple string comparison with AST comparison
+            match_score = float(self.compare_ast(formatted_answer, formatted_gt))
             if match_score > max_match_score:
                 max_match_score = match_score
 
         # Return the maximum match score
         return {"SQL_Syntax_Match_Score": max_match_score}
+
+    def compare_ast(self, query1: str, query2: str) -> float:
+        # Parse the queries into ASTs
+        ast1 = sqlparse.parse(query1)
+        ast2 = sqlparse.parse(query2)
+
+        # Compare the structure of the ASTs
+        # This is a placeholder and would need to be replaced with a real implementation
+        return float(ast1 == ast2)
