@@ -56,6 +56,7 @@ class DebertaAnswerScores(Metric):
     def __init__(self, reverse: bool = False):
         super().__init__()
         self.reverse = reverse
+        self.batch_size = 32
 
     def _ret_keys(self):
         reverse = "reverse_" if self.reverse else ""

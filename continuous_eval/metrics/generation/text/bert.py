@@ -15,7 +15,7 @@ from continuous_eval.metrics.base import Metric
 class DebertaScores:
     def __init__(self):
         self._model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
-        self._batch_size = 8
+        self._batch_size = 32
 
     @property
     def device(self):
@@ -46,8 +46,25 @@ class BertSimilarity(Metric):
         self._tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self._model = BertModel.from_pretrained("bert-base-uncased")
         self._pooler_output = pooler_output
+        self.batch_size = 32
 
     def batch(self, prediction: List[str], reference: List[str]):
+        # Function to yield batches of data
+        def mini_batches(data, batch_size):
+            for i in range(0, len(data), batch_size):
+                yield data[i : i + batch_size]
+
+        # Process batches
+        all_similarities = []
+        for pred_batch, ref_batch in zip(
+            mini_batches(prediction, self.batch_size),
+            mini_batches(reference, self.batch_size),
+        ):
+            batch_result = self._subprocess(pred_batch, ref_batch)
+            all_similarities.extend(batch_result)
+        return {"bert_similarity": all_similarities}
+
+    def _subprocess(self, prediction: List[str], reference: List[str]):
         predictions = self._tokenizer(prediction, padding=True)
         references = self._tokenizer(reference, padding=True)
 
@@ -71,7 +88,7 @@ class BertSimilarity(Metric):
         cosine_similarity = torch.nn.CosineSimilarity(dim=0)
         semantic_similarity = cosine_similarity(pred_embedding.T, ref_embedding.T)
         semantic_similarity = torch.clip(semantic_similarity, min=0.0, max=1.0)
-        return {"bert_similarity": semantic_similarity.tolist()}
+        return semantic_similarity.tolist()
 
     def __call__(self, prediction: str, reference: str):
         res = self.batch(prediction=[prediction], reference=[reference])

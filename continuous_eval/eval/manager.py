@@ -18,13 +18,15 @@ class LogMode(Enum):
 
 
 class EvaluationManager:
-    def __init__(self):
-        self._pipeline: Optional[Pipeline] = None
+    def __init__(self, pipeline: Optional[Pipeline] = None):
+        self._pipeline: Optional[Pipeline] = pipeline
         self._eval_results: EvaluationResults = EvaluationResults()
         self._metrics_results: MetricsResults = MetricsResults()
         self._test_results: TestResults = TestResults()
         self._is_running: bool = False
         self._metadata = dict()
+
+        self._metrics_results.pipeline = self._pipeline
 
         self._idx = 0
 

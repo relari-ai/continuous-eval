@@ -13,7 +13,11 @@ class EvaluationExample:
     justification: Optional[str] = ""
 
     def __str__(self):
-        in_str = self.input if isinstance(self.input, str) else "\n".join([f"{k}: {v}" for k, v in self.input.items()])
+        in_str = (
+            self.input
+            if isinstance(self.input, str)
+            else "\n".join([f"{k.replace('_', ' ')}: {v}" for k, v in self.input.items()])
+        )
         just_str = f"\nJustification: {self.justification}" if self.justification else ""
         return f"Input: {in_str}\nScore: {self.score}{just_str}"
 

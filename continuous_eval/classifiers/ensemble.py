@@ -11,6 +11,18 @@ from continuous_eval.datatypes import XYData
 from continuous_eval.utils.telemetry import telemetry
 
 
+def _default_regressor(X: pd.DataFrame, y: pd.Series):
+    classifier = LogisticRegression()
+    parameters = {
+        "penalty": ["l1", "l2"],
+        "C": [0.1, 1, 10],
+        "solver": ["liblinear"],
+    }
+    clf = GridSearchCV(classifier, parameters)
+    clf.fit(X, y)
+    return clf
+
+
 class EnsembleMetric:
     def __init__(
         self,
@@ -18,6 +30,7 @@ class EnsembleMetric:
         calibration: XYData,
         alpha: float = 0.1,
         random_state: Optional[int] = None,
+        predictor_factory: Callable = _default_regressor,
     ) -> None:
         telemetry.log_metric_call(self.__class__.__name__)
         # fmt: off
@@ -29,7 +42,7 @@ class EnsembleMetric:
         assert (set(training.X.columns) == set(calibration.X.columns)), "Training and calibration data must have the same features"
         # fmt: on
         self.features = training.X.columns
-        self._regressor = self._make_regressor(training.X, training.y)
+        self._regressor = predictor_factory(training.X, training.y)
         self._alpha = alpha
         self._classifier = MapieClassifier(
             estimator=self._regressor,  # type: ignore
@@ -38,17 +51,6 @@ class EnsembleMetric:
             random_state=random_state,
         )
         self._classifier.fit(calibration.X, calibration.y)
-
-    def _make_regressor(self, X: pd.DataFrame, y: pd.Series):
-        classifier = LogisticRegression()
-        parameters = {
-            "penalty": ["l1", "l2"],
-            "C": [0.1, 1, 10],
-            "solver": ["liblinear"],
-        }
-        clf = GridSearchCV(classifier, parameters)
-        clf.fit(X, y)
-        return clf
 
     def predict(
         self, X: pd.DataFrame, judicator: Optional[Callable] = None, quiet=False

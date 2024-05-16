@@ -16,8 +16,6 @@ class XYData(tuple):
             raise TypeError("y must be a numpy ndarray")
         if len(X) != len(y):
             raise ValueError("X and y must have the same number of rows")
-        if len(X.columns) < 1:
-            raise ValueError("X must not be empty")
         if len(y.shape) != 1:
             raise ValueError("y must be a 1-dimensional array")
         return super().__new__(cls, (X, y))
@@ -49,8 +47,8 @@ class DataSplit:
         self,
         X: pd.DataFrame,
         y: Union[np.ndarray, pd.Series, Iterable],
-        features: List[str],
         split_ratios: SplitRatios,
+        features: Optional[List[str]] = None,
         oversample: bool = False,
         random_state: Optional[int] = None,
     ):
@@ -66,6 +64,9 @@ class DataSplit:
         assert len(y.shape) == 1, "y must be a 1-dimensional array"
 
         self.features = features
+        if self.features is None:
+            # If no features are provided, assume all numeric columns are features
+            self.features = X.select_dtypes(include=np.number).columns.tolist()
 
         # Split the data into training, testing and calibration sets
         X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=split_ratios.test, random_state=random_state)

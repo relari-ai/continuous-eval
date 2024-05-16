@@ -183,3 +183,18 @@ class Dataset:
     def filter(self, fcn: typing.Callable):
         self._data = [x for x in self._data if fcn(x)]
         return self
+
+    def sample(self, size: typing.Union[float, int]):
+        import random
+
+        if size > 1 and isinstance(size, int):
+            assert size <= len(self._data), f"Sample size {size} is larger than the dataset size {len(self._data)}"
+            k = size
+        elif size > 0 and size < 1 and isinstance(size, float):
+            k = int(len(self._data) * size)
+        else:
+            raise ValueError(f"Invalid sample size {size}")
+        idx = random.choices(range(len(self._data)), k=k)
+        idx = sorted(idx)
+        self._data = [self._data[i] for i in idx]
+        return self

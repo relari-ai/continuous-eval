@@ -1,5 +1,8 @@
 import pytest
 
+# Try to import pytorch; skip tests if the import fails
+required_module = pytest.importorskip("torch")
+
 from continuous_eval.metrics.generation.text.semantic import (
     BertAnswerRelevance,
     BertAnswerSimilarity,
