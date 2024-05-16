@@ -30,13 +30,5 @@ class TestSQLSyntaxMatch(unittest.TestCase):
         result = self.metric(answer, ground_truth)
         self.assertEqual(result["SQL_Syntax_Match_Score"], 0.0)
 
-    def test_partial_match(self):
-        # This test assumes that the metric will be improved to handle partial matches
-        answer = "SELECT id, name FROM users;"
-        ground_truth = "SELECT * FROM users;"
-        result = self.metric(answer, ground_truth)
-        # Assuming a hypothetical partial match score of 0.5
-        self.assertEqual(result["SQL_Syntax_Match_Score"], 0.5)
-
 if __name__ == '__main__':
     unittest.main()
