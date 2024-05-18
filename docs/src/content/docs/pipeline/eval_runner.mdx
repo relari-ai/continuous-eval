@@ -1,0 +1,46 @@
+---
+title: Evaluation Runner
+sidebar:
+  badge:
+    text: new
+    variant: tip
+---
+
+The `EvaluationRunner` manages the evaluation process for a pipeline.
+
+To evaluate on the dataset defined in the pipeline you can run
+
+```python
+runner = EvaluationRunner(pipeline)
+eval_results = runner.evaluate()
+```
+
+The evaluate method will run each metric and return a `MetricsResults` object with the results.
+
+```python
+metrics = evalrunner.evaluate(pipelog)
+metrics.results() # returns a dictionary with the results
+```
+
+### Evaluate on pipeline logs
+
+If you use the `PipelineLogger` to log your pipeline outputs, you can evaluate on the logs directly.
+
+```python
+pipelog = PipelineLogger(pipeline=pipeline)
+# ... log or load logs
+
+# Run the evaluation...
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(pipelog)
+```
+
+### Evaluate on other data
+
+You can also evaluate on other data by passing a `Dataset` object to the `evaluate` method.
+
+```python
+dataset = Dataset(...)
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(dataset)
+```

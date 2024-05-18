@@ -17,9 +17,9 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     generator_llm = "gpt-4-0125-preview"
-    num_questions = 10
-    multi_hop_precentage = 0.2
-    max_try_ratio = 3
+    num_questions = 2
+    multi_hop_precentage = 0.0
+    max_try_ratio = 5
 
     print(f"Generating a {num_questions}-questions dataset with {generator_llm}...")
     db = example_data_downloader("graham_essays/small/chromadb", Path("temp"), force_download=False)
@@ -36,7 +36,7 @@ def main():
         max_try_ratio=max_try_ratio,
     )
     toc = perf_counter()
-    print(f"Finished generating dataset in {tic-toc:.2f}sec.")
+    print(f"Finished generating dataset in {toc-tic:.2f}sec.")
 
     current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     output_directory = Path("generated_dataset")

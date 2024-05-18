@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from continuous_eval.eval.dataset import DatasetField
 from continuous_eval.eval.tests import Test

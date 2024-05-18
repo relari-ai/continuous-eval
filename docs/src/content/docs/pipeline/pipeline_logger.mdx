@@ -1,0 +1,51 @@
+---
+title: Pipeline Logger
+sidebar:
+  badge:
+    text: new
+    variant: tip
+---
+
+
+## Definition
+
+The `PipelineLogger` allows to store the output of each module in a format that is evaluation-ready.
+
+To create a pipeline logger you need a pipeline first.
+
+```python
+from continuous_eval.eval.logger import PipelineLogger
+
+pipelog = PipelineLogger(pipeline=pipeline)
+```
+
+now you can log the output of each module in the pipeline.
+
+```python
+pipelog.log(uid=sample_uid, module="module_name", value=data)
+```
+
+keep in mind that the `uid` is a unique identifier for the sample, and the `module` is the name of the module you are logging.
+Datasets should have a unique identifier for each sample, so you can use that as the `uid`.
+
+With the pipeline logger you can also save/load logs from a file.
+
+```python
+pipelog.save("logs.jsonl")
+# ... later
+pipelog.load("logs.jsonl")
+```
+
+to use it in the evaluation runner, you can pass it as an argument to the `evaluate` method.
+
+```python
+metrics = evalrunner.evaluate(pipelog)
+```
+
+### Log tools use
+
+To log the use of a tool in a module, should just specify the `tool_args` method.
+
+```python
+pipelog.log(uid=sample_uid, module="module_name", value="tool_name", tool_args={"a": a, "b": b})
+```
