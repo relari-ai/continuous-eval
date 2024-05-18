@@ -29,6 +29,11 @@ class CustomMetric(Metric):
         return {"custom_metric_score": score}
 ```
 
+## LLM-based Custom Metric
+
+If you specifically want to create custom metrics based on LLMs (LLM-as-a-judge based on your own criteria), please check out [LLM-based Custom Metric](../../v0.3/metrics/generation/llm-based/custom/).
+
+
 ## Add additional LLM Interface
 
 If you want to use a different LLM endpoint, you can augment the `LLMFactory` to add the model interface and parameters.

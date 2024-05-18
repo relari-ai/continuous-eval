@@ -8,12 +8,11 @@ In this example, we show how to run evaluation over a dataset.
 from pathlib import Path
 
 from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.eval import Dataset, SingleModulePipeline
-from continuous_eval.eval.manager import eval_manager
+from continuous_eval.eval import Dataset, EvaluationRunner, SingleModulePipeline
 from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
 
 # Let's download the retrieval dataset example
-dataset_jsonl = example_data_downloader("retrieval")
+dataset_jsonl = example_data_downloader("retrieval") # 300 samples in the retrieval dataset
 dataset = Dataset(dataset_jsonl)
 
 pipeline = SingleModulePipeline(
@@ -30,11 +29,8 @@ pipeline = SingleModulePipeline(
     ],
 )
 
-# We start the evaluation manager and run the metrics
-eval_manager.set_pipeline(pipeline)
-eval_manager.evaluation.results = dataset.data
-eval_manager.run_metrics()
-eval_manager.metrics.save(Path("metrics_results_retr.json"))
-
-print(eval_manager.metrics.aggregate())
+# We start the evaluation runner and run the metrics over the downloaded dataset
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(dataset)
+print(metrics.aggregate())
 ```

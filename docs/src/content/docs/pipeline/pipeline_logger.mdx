@@ -9,9 +9,9 @@ sidebar:
 
 ## Definition
 
-The `PipelineLogger` allows to store the output of each module in a format that is evaluation-ready.
+The `PipelineLogger` allows storing the output of each module in a format that is evaluation-ready.
 
-To create a pipeline logger you need a pipeline first.
+To create a pipeline logger you need to specify a pipeline first.
 
 ```python
 from continuous_eval.eval.logger import PipelineLogger
@@ -25,8 +25,9 @@ now you can log the output of each module in the pipeline.
 pipelog.log(uid=sample_uid, module="module_name", value=data)
 ```
 
-keep in mind that the `uid` is a unique identifier for the sample, and the `module` is the name of the module you are logging.
-Datasets should have a unique identifier for each sample, so you can use that as the `uid`.
+- `uid` is the required unique identifier for each sample (e.g. "question_01234"). `uid` is used to match the logged outputs from each module in the pipeline for a given sample.
+- `module` is the name of the module you are logging (e.g. "llm_answer_generator", "retriever", etc.)
+- `value` is the output of the module (e.g. "The capital of France is Paris." from the "llm_answer_generator" module)
 
 With the pipeline logger you can also save/load logs from a file.
 
