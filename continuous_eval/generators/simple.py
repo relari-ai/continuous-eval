@@ -3,7 +3,7 @@ import logging
 import random
 
 import numpy as np
-from langchain.vectorstores import VectorStore
+from langchain_community.vectorstores import VectorStore
 from tqdm import tqdm
 
 from continuous_eval.llm_factory import LLMFactory, LLMInterface
@@ -11,7 +11,6 @@ from continuous_eval.utils.telemetry import telemetry
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
-
 
 COMMON_RULES = """
 The user is unaware of any specific context, so make sure the question makes sense to those who are not aware of the context.
@@ -276,6 +275,8 @@ class SimpleDatasetGenerator:
 
         pbar.close()
         dataset = single_hop_questions + multi_hop_questions
+        for idx, d in enumerate(dataset):
+            d["uid"] = idx
         if len(dataset) < num_questions:
             raise Warning(f"Could not generate enough questions. Generated {len(dataset)} questions.")
 

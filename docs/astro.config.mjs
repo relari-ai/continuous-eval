@@ -41,13 +41,15 @@ export default defineConfig({
 					],
 				},
         {
-					label: 'Pipeline',
+					label: 'Orchestration',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Overview', link: '/pipeline/pipeline'},
-						{ label: 'Evaluators and Tests', link: '/pipeline/eval_and_tests'},
-						{ label: 'Evaluation Manager', link: '/pipeline/eval_manager' },
-						{ label: 'Evaluation Dataset', link: '/pipeline/eval_dataset' },
+						{ label: 'Pipeline', link: '/pipeline/pipeline'},
+						{ label: 'Dataset', link: '/pipeline/eval_dataset' },
+						{ label: 'Metrics and Tests', link: '/pipeline/metrics_and_tests'},
+            { label: 'Pipeline Logger', link: '/pipeline/pipeline_logger' },
+            { label: 'Evaluation Runner', link: '/pipeline/eval_runner' },
+						{ label: 'Evaluation Manager (Deprecated)', link: '/pipeline/eval_manager' },
 					],
 
         },

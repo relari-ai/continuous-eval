@@ -21,13 +21,21 @@ class ToolSelectionAccuracy(Metric):
             )
         else:
             # Convert ground_truth to a format that's easy to check for "contains"
-            ground_truth_set = {
-                frozenset(tool.items()) for tool in [{"name": tool["name"], **tool["kwargs"]} for tool in ground_truths]
-            }
+            use_kwargs = all("kwargs" in tool for tool in ground_truths)
+            if use_kwargs:
+                ground_truth_set = {
+                    frozenset(tool.items())
+                    for tool in [{"name": tool["name"], **tool["kwargs"]} for tool in ground_truths]
+                }
+            else:
+                ground_truth_set = {frozenset(tool.items()) for tool in ground_truths}
             # Score
             num_correct, matched_executions = 0, set()
             for tool in tools:
-                tool_set = frozenset({"name": tool["name"], **tool["kwargs"]}.items())
+                if use_kwargs:
+                    tool_set = frozenset({"name": tool["name"], **tool["kwargs"]}.items())
+                else:
+                    tool_set = frozenset({"name": tool["name"]}.items())
                 if tool_set in ground_truth_set and tool_set not in matched_executions:
                     num_correct += 1
                 matched_executions.add(tool_set)
