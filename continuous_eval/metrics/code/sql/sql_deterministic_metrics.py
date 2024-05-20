@@ -1,9 +1,8 @@
 from typing import List, Union
-
 import sqlparse
-
+from sqlglot import diff, parse_one
+from sqlglot.diff import Keep
 from continuous_eval.metrics.base import Metric
-
 
 class SQLSyntaxMatch(Metric):
     """
@@ -34,3 +33,34 @@ class SQLSyntaxMatch(Metric):
 
         # Return the maximum match score
         return {"SQL_Syntax_Match_Score": max_match_score}
+
+class SQLASTSimilarity(Metric):
+    """
+    Compare SQL queries using AST similarity.
+    """
+
+    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
+
+        try:
+            answer_tree = parse_one(answer)
+            ground_truth_trees = [parse_one(gt) for gt in ground_truth_answers]
+        except Exception as e:
+            return {"SQL_AST_Similarity": -1.0}
+
+        similarity_scores = [
+            self._calculate_similarity(answer_tree, ground_truth_tree)
+            for ground_truth_tree in ground_truth_trees
+        ]
+
+        return {
+            "SQL_AST_Similarity": max(similarity_scores),
+        }
+
+    def _calculate_similarity(self, tree1, tree2):
+        diff_result = diff(tree1, tree2)
+        total_changes = len([change for change in diff_result if not isinstance(change, Keep)])
+        total_nodes = len(list(tree1.walk())) + len(list(tree2.walk()))
+        similarity_score = 1 - (total_changes / total_nodes)
+        return similarity_score
