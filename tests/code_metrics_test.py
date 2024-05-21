@@ -1,7 +1,6 @@
 import pytest
 
-from continuous_eval.metrics.code.python.code_deterministic_metrics import CodeStringMatch, PythonASTSimilarity
-from continuous_eval.metrics.code.sql.sql_deterministic_metrics import SQLASTSimilarity, SQLSyntaxMatch
+from continuous_eval.metrics.code import CodeStringMatch, PythonASTSimilarity, SQLASTSimilarity, SQLSyntaxMatch
 from tests.helpers import example_datum
 from tests.helpers.utils import all_close
 

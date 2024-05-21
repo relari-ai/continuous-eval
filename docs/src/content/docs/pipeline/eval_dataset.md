@@ -2,25 +2,63 @@
 title: Evaluation Dataset
 ---
 
-### `Dataset` Class 
+## Dataset Class
 
-**The `Dataset` class takes a folder that contains a flexible evaluation dataset tailored to your evaluation pipeline.**
+The `Dataset` class is a convenient class that represent a dataset that can be used for evaluation.
 
-A custom dataset needs to contain:
+The dataset class can be initialized with a path to a folder or a file.
+The folder should contain the following files:
+
 - `dataset.jsonl` which contains a collection of query / instructions and corresponding reference outputs by the modules in the pipeline.
-- `manifest.yaml` which declares the structure and fields of the dataset to be used by `Pipeline` and `EvaluationManager` instances.
+- an optional `manifest.yaml` which declares the structure and fields of the dataset, the license and other metadata.
 
 ```python
 from continuous_eval.eval import Dataset
 
-dataset = Dataset.from_jsonl("data_folder")
+dataset = Dataset("path_to_folder") # or Dataset("path_to_file.jsonl")
 ```
+
+Alternatively, you can also create a dataset from a list of dictionaries:
+
+```python
+dataset = Dataset.from_data([
+    {"question": "What is the capital of France?", "answer": "Paris"},
+    {"question": "What is the capital of Germany?", "answer": "Berlin"},
+])
+```
+
+To access the raw data, you can use the `data` attribute:
+
+```python
+print(dataset.data[0])
+```
+
+### Dataset fields
+
+Suppose you want to reference a dataset field, you can use the `DatasetField` class:
+
+```python
+class DatasetField:
+    name: str
+    type: type = typing.Any  # type: ignore
+    description: str = ""
+    is_ground_truth: bool = False
+```
+
+When you load the dataset, the `Dataset` class will automatically infer the fields from the data.
+
+```python
+type(dataset.question)  # DatasetField
+```
+
+this will be particularly useful when defining the input and output of the modules in the pipeline.
 
 ### Example Data Folder
 
-Here's an example golden dataset that contains `uuid`, `question`, `answer` (ground truth answers), and `tool_calls` (the tools that are supposed to be used).
+Here's an example golden dataset that contains `uid`, `question`, `answer` (ground truth answers), and `tool_calls` (the tools that are supposed to be used).
 
-#### dataset.jsonl
+#### Dataset File
+
 ```json title="data_folder/dataset.jsonl"
 {
   "uuid": "1",
@@ -63,7 +101,9 @@ Here's an example golden dataset that contains `uuid`, `question`, `answer` (gro
   ]
 }
 ```
-#### manifest.yaml
+
+#### Manifest (optional)
+
 ```yaml title="data_folder/manifest.yaml"
 name: Uber 10Q
 description: Uber 10Q filings from 2022

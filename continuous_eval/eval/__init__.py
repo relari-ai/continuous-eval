@@ -6,3 +6,4 @@ from continuous_eval.eval.pipeline import (
     CalledTools,
 )
 from continuous_eval.eval.dataset import Dataset
+from continuous_eval.eval.runner import EvaluationRunner

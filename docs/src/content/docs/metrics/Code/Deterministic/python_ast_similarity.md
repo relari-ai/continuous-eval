@@ -21,7 +21,7 @@ The metric depends on syntactically correct Python scripts to produce the Abstra
 Required data items: `answer`, `ground_truth_answers`
 
 ```python
-from continuous_eval.metrics.code.python import PythonASTSimilarity
+from continuous_eval.metrics.code import PythonASTSimilarity
 
 datum = {
     "answer": "def function(x, y):\n  return x + y",

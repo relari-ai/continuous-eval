@@ -3,11 +3,11 @@ title: Quick Start
 description: Quick Start
 ---
 
-If you haven't installed continuous-eval, go [here](../installation/).
+If you haven't installed continuous-eval, go [here](../../v0.3/getting-started/installation/).
 
 ## Run a single metric
 
-Import the metric of your choice ([see all metrics](../../metrics/overview/)) and get the results.
+Import the metric of your choice ([see all metrics](../../v0.3/metrics/overview/)) and get the results.
 
 ```python
 from continuous_eval.metrics.retrieval import PrecisionRecallF1
@@ -31,7 +31,7 @@ metric = PrecisionRecallF1()
 print(metric(**datum))
 ```
 
-## Run evalulation over a dataset
+## Run evaluation over a dataset
 
 In the following code example, we load an example evaluation dataset `retrieval`, create a pipeline with one module, and selected two metric groups `PrecisionRecallF1`, `RankedRetrievalMetrics`. 
 
@@ -41,12 +41,11 @@ The aggregated results are printed in the terminal and the results per datum is 
 from pathlib import Path
 
 from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.eval import Dataset, SingleModulePipeline
-from continuous_eval.eval.manager import eval_manager
+from continuous_eval.eval import Dataset, EvaluationRunner, SingleModulePipeline
 from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
 
 # Let's download the retrieval dataset example
-dataset_jsonl = example_data_downloader("retrieval")
+dataset_jsonl = example_data_downloader("retrieval") # 300 samples in the retrieval dataset
 dataset = Dataset(dataset_jsonl)
 
 pipeline = SingleModulePipeline(
@@ -63,13 +62,10 @@ pipeline = SingleModulePipeline(
     ],
 )
 
-# We start the evaluation manager and run the metrics
-eval_manager.set_pipeline(pipeline)
-eval_manager.evaluation.results = dataset.data
-eval_manager.run_metrics()
-eval_manager.metrics.save(Path("metrics_results_retr.json"))
-
-print(eval_manager.metrics.aggregate())
+# We start the evaluation runner and run the metrics over the downloaded dataset
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(dataset)
+print(metrics.aggregate())
 ```
 
 ## Curate a golden dataset

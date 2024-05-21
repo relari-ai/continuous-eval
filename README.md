@@ -18,7 +18,7 @@
 </div>
 
 <h2 align="center">
-  <p>Open-Source Evaluation for GenAI Application Pipelines</p>
+  <p>Open-Source Evaluation for GenAI Applications</p>
 </h2>
 
 
@@ -122,7 +122,7 @@ print(metric(**datum))
     <tr>
         <td rowspan="2">Code Generation</td>
         <td>Deterministic</td>
-        <td>CodeStringMatch, PythonASTSimilarity</td>
+        <td>CodeStringMatch, PythonASTSimilarity, SQLSyntaxMatch, SQLASTSimilarity</td>
     </tr>
     <tr>
         <td>LLM-based</td>
@@ -143,12 +143,13 @@ print(metric(**datum))
 To define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#L23C7-L23C13) class implementing the `__call__` method.
 Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
 
-## Run evaluation on pipeline modules
+## Run evaluation on a pipeline
 
 Define modules in your pipeline and select corresponding metrics.
 
 ```python
-from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset
+from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset, EvaluationRunner
+from continuous_eval.eval.logger import PipelineLogger
 from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
 from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
 from typing import List, Dict
@@ -199,25 +200,24 @@ print(pipeline.graph_repr()) # optional: visualize the pipeline
 Now you can run the evaluation on your pipeline
 
 ```python
-eval_manager.start_run()
-  while eval_manager.is_running():
-    if eval_manager.curr_sample is None:
-      break
-    q = eval_manager.curr_sample["question"] # get the question or any other field
-    # run your pipeline ...
-    eval_manager.next_sample()
+pipelog = PipelineLogger(pipeline=pipeline)
+
+# now run your LLM application pipeline, and for each module, log the results:
+pipelog.log(uid=sample_uid, module="module_name", value=data)
+
+# Once you finish logging the data, you can use the EvaluationRunner to evaluate the logs
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(pipelog)
+metrics.results() # returns a dictionary with the results
 ```
 
-To **log** the results you just need to call the `eval_manager.log` method with the module name and the output, for example:
+To run evaluation over an existing dataset (BYODataset), you can run the following:
 
 ```python
-eval_manager.log("answer_generator", response)
+dataset = Dataset(...)
+evalrunner = EvaluationRunner(pipeline)
+metrics = evalrunner.evaluate(dataset)
 ```
-
-The evaluator manager also offers
-
-- `eval_manager.run_metrics()` to run all the metrics defined in the pipeline
-- `eval_manager.run_tests()` to run the tests defined in the pipeline (see the documentation [docs](docs.relari.ai) for more details)
 
 ## Synthetic Data Generation
 
@@ -244,6 +244,8 @@ integrations that build on the core are both accepted and highly encouraged! See
   - How important is a Golden Dataset for LLM evaluation?
  [(link)](https://medium.com/relari/how-important-is-a-golden-dataset-for-llm-pipeline-evaluation-4ef6deb14dc5)
   - How to evaluate complex GenAI Apps: a granular approach [(link)](https://medium.com/relari/how-to-evaluate-complex-genai-apps-a-granular-approach-0ab929d5b3e2)
+  - How to Make the Most Out of LLM Production Data: Simulated User Feedback [(link)](https://medium.com/towards-data-science/how-to-make-the-most-out-of-llm-production-data-simulated-user-feedback-843c444febc7)
+  - Generate Synthetic Data to Test LLM Applications [(link)](https://medium.com/relari/generate-synthetic-data-to-test-llm-applications-4bffeb51b80e)
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
 - **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/pasquale/continuous-eval)
 

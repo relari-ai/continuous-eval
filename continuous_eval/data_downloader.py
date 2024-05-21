@@ -69,8 +69,8 @@ def example_data_downloader(
         out_dir = destination_dir / resource
         return _download_and_extract_zip(EXAMPLES_DATA_URL + res["filename"], out_dir, force_download=force_download)
     elif res["type"] == "chromadb":
-        from langchain.embeddings.openai import OpenAIEmbeddings
-        from langchain.vectorstores import Chroma
+        from langchain_chroma import Chroma
+        from langchain_openai import OpenAIEmbeddings
 
         out_dir = destination_dir / resource
         _download_and_extract_zip(EXAMPLES_DATA_URL + res["filename"], out_dir, force_download=force_download)
