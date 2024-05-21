@@ -1,8 +1,11 @@
 from typing import List, Union
+
 import sqlparse
 from sqlglot import diff, parse_one
-from sqlglot.diff import Keep
+from sqlglot.diff import Insert, Keep, Move, Remove, Update
+
 from continuous_eval.metrics.base import Metric
+
 
 class SQLSyntaxMatch(Metric):
     """
@@ -14,29 +17,24 @@ class SQLSyntaxMatch(Metric):
         if isinstance(ground_truth_answers, str):
             ground_truth_answers = [ground_truth_answers]
 
-        # Format the answer and ground truth answers using sqlparse for consistent comparison
         formatted_answer = sqlparse.format(answer, reindent=True, keyword_case="upper")
         formatted_ground_truths = [
-            sqlparse.format(gt, reindent=True, keyword_case="upper")
-            for gt in ground_truth_answers
+            sqlparse.format(gt, reindent=True, keyword_case="upper") for gt in ground_truth_answers
         ]
 
-        # Initialize the maximum match score
         max_match_score = 0
 
-        # Compare the formatted answer with each formatted ground truth answer
         for formatted_gt in formatted_ground_truths:
-            # Simple string comparison for now, can be improved with more sophisticated methods
             match_score = float(formatted_answer == formatted_gt)
             if match_score > max_match_score:
                 max_match_score = match_score
 
-        # Return the maximum match score
-        return {"SQL_Syntax_Match_Score": max_match_score}
+        return {"SQL_Syntax_Match": max_match_score}
+
 
 class SQLASTSimilarity(Metric):
     """
-    Compare SQL queries using AST similarity.
+    Compare SQL queries using AST similarity, considering different types of changes differently and improving normalization.
     """
 
     def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
@@ -50,17 +48,30 @@ class SQLASTSimilarity(Metric):
             return {"SQL_AST_Similarity": -1.0}
 
         similarity_scores = [
-            self._calculate_similarity(answer_tree, ground_truth_tree)
-            for ground_truth_tree in ground_truth_trees
+            self._calculate_similarity(answer_tree, ground_truth_tree) for ground_truth_tree in ground_truth_trees
         ]
 
         return {
-            "SQL_AST_Similarity": max(similarity_scores),
+            "SQL_AST_Similarity": max(similarity_scores) if similarity_scores else -1.0,
         }
 
     def _calculate_similarity(self, tree1, tree2):
         diff_result = diff(tree1, tree2)
-        total_changes = len([change for change in diff_result if not isinstance(change, Keep)])
-        total_nodes = len(list(tree1.walk())) + len(list(tree2.walk()))
-        similarity_score = 1 - (total_changes / total_nodes)
+        total_changes = sum(self._change_weight(change) for change in diff_result)
+        max_nodes = max(len(list(tree1.walk())), len(list(tree2.walk())))
+        similarity_score = 1 - (total_changes / max_nodes) if max_nodes > 0 else 1
         return similarity_score
+
+    def _change_weight(self, change):
+        """
+        Assign weights to different types of changes based on their expected impact on query semantics.
+        """
+        if isinstance(change, Keep):
+            return 0
+        elif isinstance(change, Update):
+            return 1.5  # Updates are significant as they imply a modification in function or value.
+        elif isinstance(change, Insert) or isinstance(change, Remove):
+            return 1  # Inserts and Removes affect the structure and content but are simpler than updates.
+        elif isinstance(change, Move):
+            return 0.5  # Moves are generally less impactful as they simply change the order.
+        return 1  # Default weight for other types of changes

@@ -1,7 +1,7 @@
 import pytest
 
 from continuous_eval.metrics.code.python.code_deterministic_metrics import CodeStringMatch, PythonASTSimilarity
-from continuous_eval.metrics.code.sql.sql_deterministic_metrics import SQLSyntaxMatch
+from continuous_eval.metrics.code.sql.sql_deterministic_metrics import SQLASTSimilarity, SQLSyntaxMatch
 from tests.helpers import example_datum
 from tests.helpers.utils import all_close
 
@@ -18,7 +18,7 @@ def test_code_string_match():
     metric = CodeStringMatch()
     assert all(
         all_close(
-            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),  # type: ignore
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),
             expected,
         )
         for datum, expected in zip(example_datum.PYTHON_CODE_EXAMPLES, expected_results)
@@ -37,37 +37,32 @@ def test_python_ast_similarity():
     metric = PythonASTSimilarity()
     assert all(
         all_close(
-            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),  # type: ignore
-            expected,  # type: ignore
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),
+            expected,
         )
         for datum, expected in zip(example_datum.PYTHON_CODE_EXAMPLES, expected_results)
     )
 
-# SQLSyntaxMatch tests using pytest
-def test_sql_syntax_exact_match():
-    metric = SQLSyntaxMatch()
-    answer = "SELECT * FROM users;"
-    ground_truth = "SELECT * FROM users;"
-    result = metric(answer, ground_truth)
-    assert result["SQL_Syntax_Match_Score"] == 1.0
 
-def test_sql_syntax_case_insensitive_match():
+def test_sql_syntax_match():
+    expected_results = [{'SQL_Syntax_Match': 1.0}, {'SQL_Syntax_Match': 0}, {'SQL_Syntax_Match': 0}]
     metric = SQLSyntaxMatch()
-    answer = "select * from users;"
-    ground_truth = "SELECT * FROM users;"
-    result = metric(answer, ground_truth)
-    assert result["SQL_Syntax_Match_Score"] == 1.0
+    assert all(
+        all_close(
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),
+            expected,
+        )
+        for datum, expected in zip(example_datum.SQL_CODE_EXAMPLES, expected_results)
+    )
 
-def test_sql_syntax_whitespace_insensitive_match():
-    metric = SQLSyntaxMatch()
-    answer = "SELECT * FROM users;"
-    ground_truth = "SELECT  *  FROM  users;"
-    result = metric(answer, ground_truth)
-    assert result["SQL_Syntax_Match_Score"] == 1.0
 
-def test_sql_syntax_no_match():
-    metric = SQLSyntaxMatch()
-    answer = "SELECT * FROM orders;"
-    ground_truth = "SELECT * FROM users;"
-    result = metric(answer, ground_truth)
-    assert result["SQL_Syntax_Match_Score"] == 0.0
+def test_sql_ast_similarity():
+    expected_results = [{'SQL_AST_Similarity': 1.0}, {'SQL_AST_Similarity': 0.9375}, {'SQL_AST_Similarity': 0.8}]
+    metric = SQLASTSimilarity()
+    assert all(
+        all_close(
+            metric(answer=datum["answer"], ground_truth_answers=datum["ground_truths"]),
+            expected,
+        )
+        for datum, expected in zip(example_datum.SQL_CODE_EXAMPLES, expected_results)
+    )

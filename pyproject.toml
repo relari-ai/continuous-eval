@@ -38,6 +38,7 @@ boto3 = {version = "^1.34.70", optional = true}
 langchain-community = {version = "^0.0.29", optional = true}
 pyyaml = "^6.0.1"
 sqlparse = "^0.5.0"
+sqlglot = "^23.17.0"
 
 [tool.poetry.extras]
 langchain = ["langchain-community"]
