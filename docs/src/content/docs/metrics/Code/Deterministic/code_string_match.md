@@ -1,5 +1,5 @@
 ---
-title: StringMatch
+title: Code String Match
 sidebar:
     order: 1
 ---
@@ -18,7 +18,7 @@ It outputs both the binary exact match score and the fuzzy match score in the ra
 Required data items: `answer`, `ground_truth_answers`
 
 ```python
-from continuous_eval.metrics.code.python import CodeStringMatch
+from continuous_eval.metrics.code import CodeStringMatch
 
 datum = {
     "answer": "def function(x, y):\n  return x + y",

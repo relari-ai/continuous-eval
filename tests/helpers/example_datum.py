@@ -135,3 +135,24 @@ PYTHON_CODE_EXAMPLES = [
         ],
     },
 ]
+
+SQL_CODE_EXAMPLES = [
+    {
+        "answer": """--comments
+        SELECT * FROM users WHERE id = 1""",
+        "ground_truths": [
+            "SELECT * FROM users  where id = 2",
+            "Select  *  from  users WHERE id = 1",
+        ],
+    },
+    {
+        "answer": "SELECT name, age FROM customers",
+        "ground_truths": ["SELECT age, name FROM customers"],
+    },
+    {
+        "answer": "INSERT INTO orders (order_id, product_id) VALUES (1, 100)",
+        "ground_truths": [
+            "INSERT INTO orders (order_id, product_id) VALUES (1, 101)",
+        ],
+    },
+]
