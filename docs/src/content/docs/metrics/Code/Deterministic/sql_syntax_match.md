@@ -6,7 +6,7 @@ sidebar:
 
 ## Definitions
 
-**SQL Syntax Match** evaluates the syntactic equivelance between generated SQL queries and a set of ground truth queries. The strict comparison can tolerate formatting changes.
+**SQL Syntax Match** evaluates the syntactic equivalence between generated SQL queries and a set of ground truth queries. The strict comparison can tolerate formatting changes.
 
 ## Example Usage
 

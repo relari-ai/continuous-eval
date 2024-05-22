@@ -71,12 +71,12 @@ def test_sql_ast_similarity():
 def test_sql_optimized_ast_similarity():
     expected_results = [{'SQL_AST_Similarity': 1.0}, {'SQL_AST_Similarity': 1.0}, {'SQL_AST_Similarity': 0.75}]
     weights = ASTDiffWeightConfig(
-        keep_weight=0.0,
-        update_weight=2,
-        insert_weight=1.0,
-        remove_weight=1.5,
-        move_weight=0,
-        default_weight=0,
+        keep=0.0,
+        update=2,
+        insert=1.0,
+        remove=1.5,
+        move=0,
+        default=0,
     )
     metric = SQLASTSimilarity(optimize=True, diff_weights=weights)
     assert all(

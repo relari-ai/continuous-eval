@@ -44,18 +44,20 @@ schema={"x": {"A": "INT", "B": "INT", "C": "INT", "D": "INT", "Z": "STRING"}}
 sql_syntax_match_optimized = SQLASTSimilarity(optimized=True, schema=schema)
 ```
 
-You can also customize weights to calculate the AST similarity.
+You can also customize weights to different types of nodes in the AST diff.
+Higher weights indicate more significant changes, which are expected to have a greater impact on query semantics.
+
 ```python
 from continuous_eval.metrics.code.sql.deterministic import ASTDiffWeightConfig
 
 weights = ASTDiffWeightConfig(
-        keep_weight=0.0,
-        update_weight=2,
-        insert_weight=1.0,
-        remove_weight=1.5,
-        move_weight=0,
-        default_weight=0,
-    )
+  keep_weight=0.0,
+  update_weight=2,
+  insert_weight=1.0,
+  remove_weight=1.5,
+  move_weight=0,
+  default_weight=0,
+)
 ASTSimilarity = SQLASTSimilarity(diff_weights=weights)
 ```
 
