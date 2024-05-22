@@ -138,7 +138,8 @@ PYTHON_CODE_EXAMPLES = [
 
 SQL_CODE_EXAMPLES = [
     {
-        "answer": "SELECT * FROM users WHERE id = 1",
+        "answer": """--comments
+        SELECT * FROM users WHERE id = 1""",
         "ground_truths": [
             "SELECT * FROM users  where id = 2",
             "Select  *  from  users WHERE id = 1",

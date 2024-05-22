@@ -28,6 +28,12 @@ metric = SQLSyntaxMatch()
 print(metric(**datum))
 ```
 
+You can optionally initialize the metric to use optimized SQL queries using the [sqlglot optimizer](https://github.com/tobymao/sqlglot?tab=readme-ov-file#sql-optimizer) and optionally pass in the schema. For example:
+```python
+schema={"x": {"A": "INT", "B": "INT", "C": "INT", "D": "INT", "Z": "STRING"}}
+sql_syntax_match_optimized = SQLSyntaxSimilarity(optimized=True, schema=schema)
+```
+
 ## Example Output
 
 ```JSON
