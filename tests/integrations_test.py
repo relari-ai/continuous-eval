@@ -1,14 +1,17 @@
 import random
 from dataclasses import dataclass
-from pathlib import Path
 
 import dspy
+
+# Set up the LM
+from dotenv import load_dotenv
 from dspy.datasets import HotpotQA
 
 from continuous_eval.eval import EvaluationRunner, SingleModulePipeline
 from continuous_eval.metrics.integrations.dspy import DspyMetricAdapter
 
-# Set up the LM
+load_dotenv()
+
 turbo = dspy.OpenAI(model='gpt-3.5-turbo-instruct', max_tokens=250)
 dspy.settings.configure(lm=turbo)
 
