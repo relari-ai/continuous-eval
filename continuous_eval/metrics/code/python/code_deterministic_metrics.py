@@ -2,6 +2,8 @@ import ast
 from typing import List, Union
 
 from munkres import Munkres
+from sqlglot import diff, parse_one
+from sqlglot.diff import Keep
 from thefuzz import fuzz
 
 from continuous_eval.metrics.base import Metric

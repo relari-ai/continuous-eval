@@ -122,7 +122,7 @@ print(metric(**datum))
     <tr>
         <td rowspan="2">Code Generation</td>
         <td>Deterministic</td>
-        <td>CodeStringMatch, PythonASTSimilarity</td>
+        <td>CodeStringMatch, PythonASTSimilarity, SQLSyntaxMatch, SQLASTSimilarity</td>
     </tr>
     <tr>
         <td>LLM-based</td>
