@@ -39,7 +39,7 @@ except ImportError:
 
 class LLMInterface(ABC):
     @abstractmethod
-    def run(self, prompt: Dict[str, str], temperature: float = 0) -> str:
+    def run(self, prompt: Dict[str, str], temperature: float = 0, max_tokens: int = 1024) -> str:
         pass
 
 
@@ -113,11 +113,11 @@ class LLMFactory(LLMInterface):
             raise ValueError(
                 f"Model {model} is not supported. "
                 "Please choose from one of the following LLM providers: "
-                "OpenAI gpt models (e.g. gpt-4-turbo-preview, gpt-3.5-turbo-0125), Anthropic claude models (e.g. claude-2.1, claude-instant-1.2), Google Gemini models (e.g. gemini-pro), Azure OpenAI deployment (azure)"
+                "OpenAI gpt models, Anthropic claude models, Google Gemini models, Azure OpenAI deployment, Cohere models, AWS Bedrock, and VLLM model endpoints."
             )
 
     @retry(wait=wait_random_exponential(min=1, max=90), stop=stop_after_attempt(15))
-    def _llm_response(self, prompt, temperature):
+    def _llm_response(self, prompt, temperature, max_tokens):
         """
         Send a prompt to the LLM and return the response.
         """
@@ -133,7 +133,7 @@ class LLMFactory(LLMInterface):
                     ],
                     seed=0,
                     temperature=temperature,
-                    max_tokens=1024,
+                    max_tokens=max_tokens,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0,
@@ -147,7 +147,7 @@ class LLMFactory(LLMInterface):
                     ],
                     seed=0,
                     temperature=temperature,
-                    max_tokens=1024,
+                    max_tokens=max_tokens,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0,
@@ -156,14 +156,14 @@ class LLMFactory(LLMInterface):
         elif ANTHROPIC_AVAILABLE and isinstance(self.client, Anthropic):
             response = self.client.completions.create(  # type: ignore
                 model="claude-2.1",
-                max_tokens_to_sample=1024,
+                max_tokens_to_sample=max_tokens,
                 temperature=temperature,
                 prompt=f"{prompt['system_prompt']}{HUMAN_PROMPT}{prompt['user_prompt']}{AI_PROMPT}",
             )
             content = response.completion
         elif COHERE_AVAILABLE and isinstance(self.client, CohereClient):
             prompt = f"{prompt['system_prompt']}\n{prompt['user_prompt']}"
-            response = self.client.generate(model="command", prompt=prompt, temperature=temperature, max_tokens=1024)  # type: ignore
+            response = self.client.generate(model="command", prompt=prompt, temperature=temperature, max_tokens=max_tokens)  # type: ignore
             try:
                 content = response.generations[0].text
             except:
@@ -174,7 +174,7 @@ class LLMFactory(LLMInterface):
                 "temperature": temperature,
                 "top_p": 1,
                 "top_k": 1,
-                "max_output_tokens": 1024,
+                "max_output_tokens": max_tokens,
             }
             safety_settings = [
                 {
@@ -207,7 +207,7 @@ class LLMFactory(LLMInterface):
                     HumanMessage(content=prompt["user_prompt"]),
                 ],
                 temperature=temperature,
-                max_tokens=1024,
+                max_tokens=max_tokens,
                 top_p=1,
             )
             content = response.dict()["content"]
@@ -218,12 +218,13 @@ class LLMFactory(LLMInterface):
 
         return content
 
-    def run(self, prompt, temperature=0):
+    def run(self, prompt, temperature=0, max_tokens=1024):
         """
         Run the LLM and return the response.
         Default temperature: 0
+        Default max_tokens: 1024
         """
-        content = self._llm_response(prompt=prompt, temperature=temperature)
+        content = self._llm_response(prompt=prompt, temperature=temperature, max_tokens=max_tokens)
         return content
 
 
