@@ -26,21 +26,26 @@ class HotpotQATone(HotpotQA):
 hotpotqa_dataset = HotpotQATone(HotpotQA())
 
 
+class ToneSignature(dspy.Signature):
+    (
+        """You are given some a question and an answer."""
+        """You must indicate with positive/negative tone whether it was kind (positive)"""
+        """ or not (negative) """
+    )
+
+    question = dspy.InputField()
+    answer = dspy.InputField()
+    tone = dspy.OutputField(desc="Positive or Negative")
+
+
 class Tone(dspy.Module):
     def __init__(self):
         super().__init__()
 
-        self._signature = dspy.ChainOfThought(
-            prompt_template="""Analyze the tone of the following answer and return if its positive or negative:
+        self.generate_tone = dspy.ChainOfThought(ToneSignature)
 
-Answer:
-{answer}
-
-Description:"""
-        )
-
-    def forward(self, answer):
-        return self._signature(answer=answer)
+    def forward(self, question, answer):
+        return self.generate_tone(question=question, answer=answer)
 
 
 tone_metric = DspyMetricAdapter(Tone())
@@ -49,6 +54,7 @@ pipeline = SingleModulePipeline(
     dataset=hotpotqa_dataset,
     eval=[
         tone_metric.use(
+            question=lambda x: x.question,
             answer=lambda x: x.answer,
             ground_truth=lambda x: x.tone,
         ),
