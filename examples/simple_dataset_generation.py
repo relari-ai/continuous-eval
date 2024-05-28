@@ -16,10 +16,10 @@ load_dotenv()
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    generator_llm = "gpt-4-0125-preview"
-    num_questions = 2
-    multi_hop_precentage = 0.0
-    max_try_ratio = 5
+    generator_llm = "gpt-4o"
+    num_questions = 10
+    multi_hop_precentage = 0.2
+    max_try_ratio = 3
 
     print(f"Generating a {num_questions}-questions dataset with {generator_llm}...")
     db = example_data_downloader("graham_essays/small/chromadb", Path("temp"), force_download=False)

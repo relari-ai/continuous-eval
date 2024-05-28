@@ -22,7 +22,7 @@ load_dotenv()
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    generator_llm = "gpt-4-0125-preview"
+    generator_llm = "gpt-4o"
     num_questions = 10
     multi_hop_precentage = 0.2
     max_try_ratio = 3

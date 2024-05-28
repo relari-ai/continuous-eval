@@ -273,6 +273,7 @@ class SimpleDatasetGenerator:
                 num_single_hop_tries += 1
                 continue
 
+        pbar.update(len(multi_hop_questions) + len(single_hop_questions) - pbar.n)
         pbar.close()
         dataset = single_hop_questions + multi_hop_questions
         for idx, d in enumerate(dataset):
