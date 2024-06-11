@@ -36,7 +36,7 @@ class LLMBasedFaithfulness(LLMBasedMetric):
         if self.classify_by_statement:
             # Context coverage uses the same prompt as faithfulness because it calculates how what proportion statements in the answer can be attributed to the context.
             # The difference is that faithfulness uses the generated answer, while context coverage uses ground truth answer (to evaluate context).
-            context_coverage = LLMBasedContextCoverage(use_few_shot=self.use_few_shot)
+            context_coverage = LLMBasedContextCoverage(model=self._llm, use_few_shot=self.use_few_shot)
             results = context_coverage(question, retrieved_context, answer)
             score = results["LLM_based_context_coverage"]
             reasoning = results["LLM_based_context_statements"]
