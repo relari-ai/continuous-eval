@@ -73,7 +73,7 @@ The statement is supported by the context, which states that photosynthesis conv
                 score_txt, reasoning = response.split("\n", 1)
                 score = float("yes" in score_txt.lower())
             except ValueError:
-                score = float("yes" in score_txt.lower())
+                score = float("yes" in response.lower())
                 reasoning = response
 
         return {
