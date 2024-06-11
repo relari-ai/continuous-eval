@@ -32,11 +32,12 @@ class LLMBasedFaithfulness(LLMBasedMetric):
             answer (str): the generated answer
             retrieved_context (List[str]): the retrieved contexts
             question (str): the question
-        """ """"""
+        """ """"
         if self.classify_by_statement:
             # Context coverage uses the same prompt as faithfulness because it calculates how what proportion statements in the answer can be attributed to the context.
             # The difference is that faithfulness uses the generated answer, while context coverage uses ground truth answer (to evaluate context).
-            context_coverage = LLMBasedContextCoverage(use_few_shot=self.use_few_shot)
+            model = self.model if self.model is not None else None
+            context_coverage = LLMBasedContextCoverage(model=model, use_few_shot=self.use_few_shot)
             results = context_coverage(question, retrieved_context, answer)
             score = results["LLM_based_context_coverage"]
             reasoning = results["LLM_based_context_statements"]
@@ -228,6 +229,7 @@ I apologize for the difficulties you're facing. To assist you better, could you 
 Response:
 2.5
 The generated answer is more brief and doesn't have the formality and empathetic tone in the reference answer.
+
 """
         else:
             few_shot_prompt = ""
