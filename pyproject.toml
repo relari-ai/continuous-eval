@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "continuous-eval"
-version = "0.3.10"
+version = "0.3.11"
 description = "Open-Source Evaluation for GenAI Application Pipelines."
 authors = ["Yi Zhang <yi@relari.ai>", "Pasquale Antonante <pasquale@relari.ai>"]
 readme = "README.md"
