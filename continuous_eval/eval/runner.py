@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Union
 
-from continuous_eval.eval.dataset import Dataset, DatasetField
+from continuous_eval.eval.dataset import Dataset, DatasetField, LambdaField
 from continuous_eval.eval.logger import PipelineLogger
 from continuous_eval.eval.modules import Module
 from continuous_eval.eval.pipeline import CalledTools, ModuleOutput, Pipeline
@@ -30,15 +30,34 @@ class EvaluationRunner:
         return self._pipeline.dataset
 
     # Evaluate
-
-    def _prepare(self, eval_results: PipelineResults, module: Module, metric: Metric):
+    @staticmethod
+    def prepare(dataset: Dataset, eval_results: PipelineResults, module: Module, metric: Metric):
         kwargs = dict()
         if metric.overloaded_params is not None:
             for key, val in metric.overloaded_params.items():
+                if key == "uid":
+                    continue
                 if isinstance(val, DatasetField):
-                    kwargs[key] = [x[val.name] for x in self.dataset.data]  # type: ignore
+                    kwargs[key] = [x[module.name][val.name] if module.name in x else x[val.name] for x in dataset.data]  # type: ignore
+                elif isinstance(val, LambdaField):
+                    kwargs[key] = list()
+                    for rx in eval_results.results:
+                        uid = rx["uid"]
+                        if module.name in rx:
+                            kwargs[key].append(val.func(rx[module.name]))
+                        else:
+                            for x in dataset.data:
+                                if x["uid"] == uid:
+                                    kwargs[key].append(val.func(x))
+                                    break
+                    # kwargs[key] = [
+                    #     val.func(x[module.name]) if module.name in x else val.func(x)
+                    #     for x in dataset.data
+                    # ]
                 elif isinstance(val, ModuleOutput):
-                    module_name = module.name if val.module is None else val.module.name
+                    module_name = module.name if val.module is None else val.module
+                    if isinstance(val, Module):
+                        module_name = val.name
                     kwargs[key] = [val(x[module_name]) for x in eval_results.results]
                 elif isinstance(val, CalledTools):
                     module_name = module.name if val.module is None else val.module.name
@@ -46,6 +65,14 @@ class EvaluationRunner:
                     kwargs[key] = [val(x[val_key]) for x in eval_results.results]
                 else:
                     raise ValueError(f"Invalid promised parameter {key}={val}")
+            return kwargs
+        else:
+            for item in eval_results.results:
+                itr = item[module.name] if module.name in item else item
+                for key, value in itr.items():
+                    if key not in kwargs:
+                        kwargs[key] = []
+                    kwargs[key].append(value)
         return kwargs
 
     @telemetry_event("eval_manager")
@@ -67,7 +94,8 @@ class EvaluationRunner:
         metrics_results = MetricsResults(self.pipeline)
         metrics_results.samples = {
             module.name: {
-                metric.name: metric.batch(**self._prepare(eval_results, module, metric)) for metric in module.eval
+                metric.name: metric.batch(**self.prepare(self.dataset, eval_results, module, metric))
+                for metric in module.eval
             }
             for module in self._pipeline.modules
             if module.eval is not None

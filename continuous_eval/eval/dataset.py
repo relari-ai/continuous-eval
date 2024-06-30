@@ -1,7 +1,9 @@
 import json
+import random
 import typing
 from dataclasses import dataclass
 from pathlib import Path
+from string import ascii_lowercase, digits
 
 import yaml
 
@@ -11,6 +13,15 @@ from continuous_eval.eval.utils import type_hint_to_str
 _SAFE_DICT = {k: v for k, v in typing.__dict__.items() if not k.startswith("__")}
 _SAFE_DICT["UID"] = UID
 _SAFE_DICT["ToolCall"] = ToolCall
+
+
+def _generate_uid():
+    return "".join(random.choices(ascii_lowercase + digits, k=8))
+
+
+@dataclass(frozen=True)
+class LambdaField:
+    func: typing.Callable
 
 
 @dataclass(frozen=True)
@@ -28,7 +39,7 @@ class DatasetField:
         }
 
 
-@dataclass(frozen=True)
+@dataclass
 class DatasetManifest:
     name: str
     description: str
@@ -36,7 +47,7 @@ class DatasetManifest:
     license: str
     fields: typing.Dict[str, DatasetField]
 
-    def to_yaml(self):
+    def to_dict(self):
         return {
             "name": self.name,
             "description": self.description,
@@ -44,6 +55,24 @@ class DatasetManifest:
             "license": self.license,
             "fields": {field_name: field.to_dict() for field_name, field in self.fields.items()},
         }
+
+    @classmethod
+    def from_json(cls, data: typing.Dict):
+        return cls(
+            name=data.get("name", ""),
+            description=data.get("description", ""),
+            format=data.get("format", ""),
+            license=data.get("license", ""),
+            fields={
+                field_name: DatasetField(
+                    name=field_name,
+                    type=eval(field_info["type"], _SAFE_DICT),
+                    description=field_info.get("description", ""),
+                    is_ground_truth=field_info.get("ground_truth", False),
+                )
+                for field_name, field_info in data["fields"].items()
+            },
+        )
 
 
 class Dataset:
@@ -68,14 +97,22 @@ class Dataset:
         # load jsonl dataset
         with open(dataset_path, "r") as json_file:
             self._data = [json.loads(x) for x in json_file.readlines()]
+        for sample in self._data:
+            sample["uid"] = UID(sample["uid"]) if "uid" in sample else _generate_uid()
         self._manifest = self._load_or_infer_manifest(manifest_path)
         self._create_dynamic_properties()
 
     @classmethod
-    def from_data(cls, data: typing.List[typing.Dict[str, typing.Any]]):
+    def from_data(
+        cls,
+        data: typing.List[typing.Dict[str, typing.Any]],
+        manifest: typing.Optional[typing.Dict] = None,
+    ):
         dataset = cls.__new__(cls)
         dataset._data = data
-        dataset._manifest = dataset._infer_manifest()
+        for sample in dataset._data:
+            sample["uid"] = UID(sample["uid"]) if "uid" in sample else _generate_uid()
+        dataset._manifest = DatasetManifest.from_json(manifest) if manifest is not None else dataset._infer_manifest()
         dataset._create_dynamic_properties()
         return dataset
 
@@ -89,7 +126,7 @@ class Dataset:
         if save_manifest:
             manifest_path = file_path.parent / "manifest.yaml"
             with open(manifest_path, "w") as manifest_file:
-                manifest_file.write(yaml.dump(self._manifest.to_yaml()))
+                manifest_file.write(yaml.dump(self._manifest.to_dict()))
 
     def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
@@ -148,6 +185,10 @@ class Dataset:
         return getattr(self, name).type
 
     @property
+    def manifest(self):
+        return self._manifest
+
+    @property
     def data(self):
         return self._data
 
@@ -155,9 +196,17 @@ class Dataset:
     def name(self):
         return self._manifest.name
 
+    @name.setter
+    def name(self, value):
+        self._manifest.name = value
+
     @property
     def description(self):
         return self._manifest.description
+
+    @description.setter
+    def description(self, value):
+        self._manifest.description = value
 
     @property
     def format(self):
@@ -167,12 +216,22 @@ class Dataset:
     def license(self):
         return self._manifest.license
 
+    @license.setter
+    def license(self, value):
+        self._manifest.license = value
+
     @property
     def fields(self) -> typing.List[DatasetField]:
         return list(self._manifest.fields.values())
 
     def get_field(self, name: str) -> DatasetField:
         return self._manifest.fields[name]
+
+    def get_by_uid(self, uid: str) -> typing.Optional[typing.Dict]:
+        for sample in self._data:
+            if sample["uid"] == uid:
+                return sample
+        return None
 
     def __getitem__(self, key: str):
         return [x[key] for x in self._data]

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Callable, List, Optional, Set, Tuple
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
 from continuous_eval.eval.modules import Module, SingleModule
@@ -11,7 +11,7 @@ from continuous_eval.metrics import Metric
 @dataclass
 class ModuleOutput:
     selector: Callable = field(default=lambda x: x)
-    module: Optional[Module] = None
+    module: Optional[Union[Module, str]] = None
 
     def __call__(self, *args: Any) -> Any:
         return self.selector(*args)
@@ -34,7 +34,7 @@ class Graph:
 
 
 class Pipeline:
-    def __init__(self, modules: List[Module], dataset: Dataset) -> None:
+    def __init__(self, modules: List[Module], dataset: Optional[Dataset] = None) -> None:
         self._modules = modules
         self._dataset = dataset
         self._graph = self._build_graph()
@@ -46,6 +46,10 @@ class Pipeline:
     @property
     def dataset(self):
         return self._dataset
+
+    @dataset.setter
+    def dataset(self, dataset: Dataset):
+        self._dataset = dataset
 
     def module_by_name(self, name: str) -> Module:
         for module in self._modules:
@@ -71,6 +75,8 @@ class Pipeline:
             names.add(module.name)
 
     def _build_graph(self):
+        if self._dataset is None:
+            return None
         nodes = {m.name for m in self._modules}
         edges = set()
         dataset_edges = set()
@@ -96,6 +102,8 @@ class Pipeline:
         return Graph(nodes, edges, dataset_edges)
 
     def graph_repr(self, with_type_hints: bool = False):
+        if self._graph is None:
+            return None
         repr_str = "graph TD;\n"
         dataset_node_label = "Dataset"
         repr_str += f"    {dataset_node_label}(({dataset_node_label}));\n"
@@ -112,9 +120,14 @@ class Pipeline:
             repr_str += f'    {dataset_node_label} -. "{dataset_field_name}" .-> {end_node};\n'
         return repr_str
 
+    def asdict(self):
+        return {
+            "modules": [m.asdict() for m in self._modules],
+        }
+
 
 def SingleModulePipeline(
-    dataset: Dataset,
+    dataset: Optional[Dataset] = None,
     eval: Optional[List[Metric]] = None,
     tests: Optional[List[Test]] = None,
     name: str = "eval",

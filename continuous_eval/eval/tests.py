@@ -20,6 +20,12 @@ class Test(ABC):
         """
         raise NotImplementedError
 
+    def asdict(self):
+        return {
+            "__class__": self.__class__.__name__,
+            "name": self.name,
+        }
+
 
 # Some common tests
 class GreaterOrEqualThan(Test):

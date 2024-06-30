@@ -3,7 +3,23 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from continuous_eval.eval.dataset import DatasetField
 from continuous_eval.eval.tests import Test
+from continuous_eval.eval.utils import type_hint_to_str
 from continuous_eval.metrics import Metric
+
+
+def _serialize_input_type(obj):
+    if isinstance(obj, DatasetField):
+        return {"__class__": obj.__class__.__name__, "name": obj.name}
+    elif isinstance(obj, Module):
+        return {"__class__": obj.__class__.__name__, "name": obj.name}
+    elif isinstance(obj, type):
+        return type_hint_to_str(obj)
+    elif isinstance(obj, (list, tuple)):
+        return [_serialize_input_type(x) for x in obj]
+    elif obj is None:
+        return "None"
+    else:
+        raise TypeError(f"Object of type {type(obj).__name__} is not serializable")
 
 
 @dataclass(frozen=True, eq=True)
@@ -32,6 +48,16 @@ class Module:
         if self.eval is not None:
             eval_names = {metric.name for metric in self.eval}
             assert len(eval_names) == len(self.eval), f"Each metric name must be unique"
+
+    def asdict(self):
+        return {
+            "name": self.name,
+            "input": _serialize_input_type(self.input),
+            "output": type_hint_to_str(self.output),
+            "description": self.description,
+            "eval": [metric.asdict() for metric in self.eval] if self.eval else None,
+            "tests": [test.asdict() for test in self.tests] if self.tests else None,
+        }
 
 
 @dataclass(frozen=True, eq=True)

@@ -58,6 +58,12 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
     def name(self):
         return self.__class__.__name__
 
+    def asdict(self):
+        return {
+            "__class__": self.__class__.__name__,
+            "name": self.name,
+        }
+
 
 class LLMBasedMetric(Metric):
     """
