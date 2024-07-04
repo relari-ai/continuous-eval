@@ -18,7 +18,7 @@
 </div>
 
 <h2 align="center">
-  <p>Open-Source Evaluation for GenAI Applications</p>
+  <p>Open-Source Evaluation for LLM Applications</p>
 </h2>
 
 
