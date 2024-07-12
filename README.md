@@ -222,7 +222,7 @@ metrics = evalrunner.evaluate(dataset)
 ## Synthetic Data Generation
 
 Ground truth data, or reference data, is important for evaluation as it can offer a comprehensive and consistent measurement of system performance. However, it is often costly and time-consuming to manually curate such a golden dataset.
-We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes. Below is an example for Coding Agents. Try out this demo: [Synthetic Data Demo](https://www.relari.ai/synthetic-data-demo)
+We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes. Below is an example for Coding Agents.
 
 <h1 align="center">
   <img
@@ -232,8 +232,7 @@ We have created a synthetic data pipeline that can custom generate user interact
 
 ## 💡 Contributing
 
-Interested in contributing? Contributions to LlamaIndex core as well as contributing
-integrations that build on the core are both accepted and highly encouraged! See our [Contribution Guide](CONTRIBUTING.md) for more details.
+Interested in contributing? See our [Contribution Guide](CONTRIBUTING.md) for more details.
 
 ## Resources
 
