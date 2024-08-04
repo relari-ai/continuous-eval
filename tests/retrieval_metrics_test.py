@@ -9,9 +9,10 @@ from continuous_eval.metrics.retrieval import (
     RankedRetrievalMetrics,
     RougeChunkMatch,
     RougeSentenceMatch,
+    TokenCount,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close, in_zero_one, list_of_dicts_to_dict_of_lists
+from tests.helpers.utils import all_close, in_zero_one
 
 
 def test_precision_recall_exact_chunk_match():
@@ -75,3 +76,13 @@ def test_llm_based_context_coverage_openai():
 
     metric = LLMBasedContextCoverage(model=LLMFactory("gpt-3.5-turbo-1106"))
     assert all(in_zero_one(metric(**datum)["LLM_based_context_coverage"]) for datum in data)
+
+
+def test_token_count():
+    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
+    metric = TokenCount("o200k_base")
+    expected = [17, 16]
+    assert (result := [metric(**datum)["num_tokens"] for datum in data]) == expected, result
+    expected = [17, 18]
+    metric = TokenCount("approx")
+    assert (result := [metric(**datum)["num_tokens"] for datum in data]) == expected, result

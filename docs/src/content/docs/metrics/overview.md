@@ -35,7 +35,7 @@ Below is the list of metrics available:
     <tr>
         <td rowspan="2">Retrieval</td>
         <td>Deterministic</td>
-        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
+        <td>PrecisionRecallF1, RankedRetrievalMetrics, TokenCount</td>
     </tr>
     <tr>
         <td>LLM-based</td>
@@ -92,6 +92,10 @@ Below is the list of metrics available:
 **`RankedRetrievalMetrics`**
 - **Definition:** Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
 - **Inputs:** `retrieved_context`, `ground_truth_context`
+
+**`TokenCount`**
+- **Definition:** Counts the amount of tokens in the retrieved context.
+- **Inputs:** `retrieved_context`
 
 ##### LLM-based
 
