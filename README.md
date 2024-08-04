@@ -18,14 +18,14 @@
 </div>
 
 <h2 align="center">
-  <p>Production-Grade Evaluation for LLM-Powered Applications</p>
+  <p>Data-Driven Evaluation for LLM-Powered Applications</p>
 </h2>
 
 
 
 ## Overview
 
-`continuous-eval` is an open-source package created for granular and rigorous evaluation of LLM-powered application. 
+`continuous-eval` is an open-source package created for data-driven evaluation of LLM-powered application.
 
 <h1 align="center">
   <img
@@ -63,7 +63,7 @@ To run LLM-based metrics, the code requires at least one of the LLM API keys in 
 ## Run a single metric
 
 Here's how you run a single metric on a datum.
-Check all available metrics here: [link](https://docs.relari.ai/)
+Check all available metrics here: [link](https://continuous-eval.docs.relari.ai/)
 
 ```python
 from continuous_eval.metrics.retrieval import PrecisionRecallF1
@@ -95,7 +95,7 @@ print(metric(**datum))
     <tr>
         <td rowspan="2">Retrieval</td>
         <td>Deterministic</td>
-        <td>PrecisionRecallF1, RankedRetrievalMetrics</td>
+        <td>PrecisionRecallF1, RankedRetrievalMetrics, TokenCount</td>
     </tr>
     <tr>
         <td>LLM-based</td>
@@ -222,13 +222,9 @@ metrics = evalrunner.evaluate(dataset)
 ## Synthetic Data Generation
 
 Ground truth data, or reference data, is important for evaluation as it can offer a comprehensive and consistent measurement of system performance. However, it is often costly and time-consuming to manually curate such a golden dataset.
-We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes. Below is an example for Coding Agents.
+We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes.
 
-<h1 align="center">
-  <img
-    src="docs/public/synthetic-data-demo.png"
-  >
-</h1>
+To generate custom synthetic data, please visit [Relari](https://www.relari.ai/) to create a free account and you can then generate custom synthetic golden datasets through the Relari Cloud.
 
 ## 💡 Contributing
 
@@ -236,7 +232,7 @@ Interested in contributing? See our [Contribution Guide](CONTRIBUTING.md) for mo
 
 ## Resources
 
-- **Docs:** [link](https://docs.relari.ai/)
+- **Docs:** [link](https://continuous-eval.docs.relari.ai/)
 - **Examples Repo**: [end-to-end example repo](https://github.com/relari-ai/examples)
 - **Blog Posts:**
   - Practical Guide to RAG Pipeline Evaluation: [Part 1: Retrieval](https://medium.com/relari/a-practical-guide-to-rag-pipeline-evaluation-part-1-27a472b09893), [Part 2: Generation](https://medium.com/relari/a-practical-guide-to-rag-evaluation-part-2-generation-c79b1bde0f5d)
@@ -246,7 +242,7 @@ Interested in contributing? See our [Contribution Guide](CONTRIBUTING.md) for mo
   - How to Make the Most Out of LLM Production Data: Simulated User Feedback [(link)](https://medium.com/towards-data-science/how-to-make-the-most-out-of-llm-production-data-simulated-user-feedback-843c444febc7)
   - Generate Synthetic Data to Test LLM Applications [(link)](https://medium.com/relari/generate-synthetic-data-to-test-llm-applications-4bffeb51b80e)
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
-- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/pasquale/continuous-eval)
+- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/relari/demo)
 
 ## License
 
