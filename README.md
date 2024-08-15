@@ -242,7 +242,7 @@ Interested in contributing? See our [Contribution Guide](CONTRIBUTING.md) for mo
   - How to Make the Most Out of LLM Production Data: Simulated User Feedback [(link)](https://medium.com/towards-data-science/how-to-make-the-most-out-of-llm-production-data-simulated-user-feedback-843c444febc7)
   - Generate Synthetic Data to Test LLM Applications [(link)](https://medium.com/relari/generate-synthetic-data-to-test-llm-applications-4bffeb51b80e)
 - **Discord:** Join our community of LLM developers [Discord](https://discord.gg/GJnM8SRsHr)
-- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/relari/demo)
+- **Reach out to founders:** [Email](mailto:founders@relari.ai) or [Schedule a chat](https://cal.com/relari/intro)
 
 ## License
 
