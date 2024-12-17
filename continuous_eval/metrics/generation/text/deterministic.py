@@ -30,7 +30,7 @@ class DeterministicFaithfulness(Metric):
         self._rouge = RougeScore()
         self._bleu = BleuScore()
 
-    def __call__(
+    def compute(
         self, answer: str, retrieved_context: Union[List[str], str], **kwargs
     ):
         """Computes the faithfulness of the answer with respect to the retrieved contexts."""
@@ -100,7 +100,10 @@ class DeterministicFaithfulness(Metric):
 
 
 class DeterministicAnswerCorrectness(Metric):
-    def __call__(
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
+
+    def compute(
         self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
     ):
         """Computes the correctness of the answer with respect to the ground truth."""
@@ -163,6 +166,9 @@ class DeterministicAnswerCorrectness(Metric):
 
 
 class DeterministicMatch(Metric):
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
+
     def _cmp(self, ans, gt):
         ans_ = ans.strip().lower() if isinstance(ans, str) else ans
         gt_ = gt.strip().lower() if isinstance(gt, str) else gt
@@ -171,7 +177,7 @@ class DeterministicMatch(Metric):
         except ValueError:
             return 0.0
 
-    def __call__(
+    def compute(
         self, answer: str, ground_truth_answers: Union[str, List[str]], **kwargs
     ):
         """Computes the correctness of the answer with respect to the ground truth."""
@@ -198,7 +204,7 @@ class FleschKincaidReadability(Metric):
     """Computes the Flesch Reading Ease and Flesch-Kincaid Grade Level readability scores."""
 
     def __init__(self):
-        super().__init__()
+        super().__init__(is_cpu_bound=True)
         self._word_tokenizer = nltk.tokenize.RegexpTokenizer(r"\w+")
         self._syl_tokenizer = nltk.tokenize.SyllableTokenizer()
 
@@ -213,7 +219,7 @@ class FleschKincaidReadability(Metric):
     def args(self):
         return {"answer": Arg(type=str, is_ground_truth=False)}
 
-    def __call__(self, answer, **kwargs):
+    def compute(self, answer, **kwargs):
         """Computes the Flesch Reading Ease and Flesch-Kincaid Grade Level scores."""
         if answer.strip() == "":
             return {

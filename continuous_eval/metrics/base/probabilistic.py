@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict
 
 from continuous_eval.metrics.base import Field as MetricField
 from continuous_eval.metrics.base.prompt import MetricPrompt
+from continuous_eval.utils.telemetry import telemetry
+from continuous_eval.metrics.base.metric import Metric
 
 DEFAULT_MODEL = os.getenv(
     "DEFAULT_PROBABILISTIC_METRIC_MODEL", "openai:gpt-4o-mini"
@@ -54,7 +56,7 @@ Attention: each class in the scoring function must be a single token.
 """
 
 
-class ProbabilisticMetric:
+class ProbabilisticMetric(Metric):
     def __init__(
         self,
         name: str,
@@ -191,37 +193,11 @@ class ProbabilisticMetric:
             reasoning=message.get("reasoning", ""),
         )
 
-    def __call__(self, **kwargs):
+    def compute(self, **kwargs):
+        telemetry.log_event(name="ProbabilisticMetric", info={"internal": True})
         score = self._process(**kwargs)
         return {
             f"{self.name}_score": score.score,
             f"{self.name}_reasoning": score.reasoning,
             f"{self.name}_probabilities": score.probabilities,
         }
-
-
-class ProbabilisticMetricFactory:
-    @staticmethod
-    def create(
-        name: str,
-        prompt: MetricPrompt,
-        temperature: float = 1.0,
-        model: str = DEFAULT_MODEL,
-    ):
-        class_name = name
-        ProbabilisticMetricClass = type(
-            class_name,
-            (ProbabilisticMetric,),
-            {
-                "__init__": lambda self, **kwargs: super(
-                    ProbabilisticMetricClass, self
-                ).__init__(
-                    class_name,  # type: ignore
-                    prompt,
-                    temperature,
-                    model,  # type: ignore
-                )
-            },
-        )
-
-        return ProbabilisticMetricClass

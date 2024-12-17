@@ -81,7 +81,7 @@ class Faithfulness(ProbabilisticMetric, Metric):
         }
 
 
-class AnswerCorrectness(ProbabilisticMetric, Metric):
+class AnswerCorrectness(ProbabilisticMetric):
     """
     The LLM based answer correctness metric.
     Measures whether the generated answer is correct compared to the ground truths.
@@ -107,7 +107,7 @@ class AnswerCorrectness(ProbabilisticMetric, Metric):
         )
         self.use_few_shot = use_few_shot
 
-    def __call__(
+    def compute(
         self,
         question: str,
         answer: str,
@@ -116,7 +116,7 @@ class AnswerCorrectness(ProbabilisticMetric, Metric):
     ):
         if not isinstance(ground_truth_answers, list):
             ground_truth_answers = [ground_truth_answers]
-        score = super().__call__(
+        score = super().compute(
             question=question,
             answer=answer,
             ground_truth_answers=ground_truth_answers,
@@ -210,7 +210,7 @@ class AnswerRelevance(ProbabilisticMetric, Metric):
         }
 
 
-class StyleConsistency(ProbabilisticMetric, Metric):
+class StyleConsistency(ProbabilisticMetric):
     """
     The LLM based style consistency metric.
     Measures whether the generated answer is consistent in style to the ground truth answer.
@@ -238,10 +238,10 @@ class StyleConsistency(ProbabilisticMetric, Metric):
         )
         self.use_few_shot = use_few_shot
 
-    def __call__(
+    def compute(
         self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
     ):
-        score = super().__call__(
+        score = super().compute(
             answer=answer,
             ground_truth_answers=ground_truth_answers,
             use_few_shot=self.use_few_shot,

@@ -94,7 +94,6 @@ class EvaluationRunner:
                     kwargs[key].append(value)
         return kwargs
 
-    # @telemetry.event(name="EvaluationRunner.evaluate")
     @telemetry_event(name="EvaluationRunner.evaluate")
     def evaluate(
         self,
@@ -126,7 +125,7 @@ class EvaluationRunner:
         }
         return metrics_results
 
-    # @telemetry.event(name="EvaluationRunner.test")
+    @telemetry_event(name="EvaluationRunner.evaluate")
     def test(self, metrics: MetricsResults) -> TestResults:
         logger.info("Running tests")
         test_results = TestResults()

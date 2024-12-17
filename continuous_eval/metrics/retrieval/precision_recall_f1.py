@@ -20,7 +20,7 @@ class PrecisionRecallF1(Metric):
         ), "Matching strategy must be an instance of MatchingStrategy."
         self.matching_strategy = matching_strategy
 
-    def __call__(
+    def compute(
         self,
         retrieved_context: List[str],
         ground_truth_context: List[str],

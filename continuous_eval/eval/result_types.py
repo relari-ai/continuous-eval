@@ -159,6 +159,9 @@ class TestResults:
     def __init__(self) -> None:
         self.results = dict()
 
+    def __repr__(self) -> str:
+        return str(self.results)
+
     def is_empty(self) -> bool:
         return not bool(self.results)
 

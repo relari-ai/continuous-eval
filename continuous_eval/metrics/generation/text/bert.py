@@ -43,7 +43,7 @@ class DebertaScores:
 
 class BertSimilarity(Metric):
     def __init__(self, pooler_output: bool = False):
-        super().__init__()
+        super().__init__(disable_multiprocessing=True)
         # Load pre-trained BERT model and tokenizer
         self._tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self._model = BertModel.from_pretrained("bert-base-uncased")
@@ -94,7 +94,7 @@ class BertSimilarity(Metric):
         semantic_similarity = torch.clip(semantic_similarity, min=0.0, max=1.0)
         return semantic_similarity.tolist()
 
-    def __call__(self, prediction: str, reference: str):
+    def compute(self, prediction: str, reference: str):
         res = self.batch(prediction=[prediction], reference=[reference])
         return {"bert_similarity": res["bert_similarity"][0]}
 

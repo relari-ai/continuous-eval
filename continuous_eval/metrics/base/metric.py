@@ -1,5 +1,6 @@
 import inspect
 import logging
+import os
 from abc import ABC, ABCMeta
 from collections import defaultdict
 from concurrent.futures import (
@@ -7,10 +8,7 @@ from concurrent.futures import (
     ThreadPoolExecutor,
     as_completed,
 )
-
-# from functools import wraps
 from os import cpu_count
-from typing import _GenericAlias  # type: ignore
 from typing import (
     Any,
     Callable,
@@ -19,28 +17,24 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
+    _GenericAlias,  # type: ignore
     get_args,
     get_origin,
 )
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 from tqdm import tqdm
 
-from continuous_eval.utils.telemetry import (
-    telemetry_event,
-    telemetry_initializer,
-)
+from continuous_eval.utils.telemetry import telemetry
 from continuous_eval.utils.types import str_to_type_hint, type_hint_to_str
 
-# from joblib import Parallel, delayed
-# Set multiprocessing to use dill for pickling
-# multiprocessing.set_start_method("fork", force=True)
+load_dotenv()
 
-# class DillProcessPoolExecutor(ProcessPoolExecutor):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self._call = dill.dumps
-#         self._result = dill.loads
+DISABLE_MULTIPROCESSING = (
+    os.getenv("CONTINUOUS_EVAL_DISABLE_MULTIPROCESSING", "false").lower()
+    == "true"
+)
 
 logger = logging.getLogger("Metric")
 logger.setLevel(logging.DEBUG)  # Set to lowest level to allow all messages
@@ -138,40 +132,36 @@ class Field(BaseModel):
         return str_to_type_hint(self.type)
 
 
-# class MetricDecoratorMeta(ABCMeta, type):
-#     def __new__(cls, name, bases, dct):
-#         for attr, method in dct.items():
-#             if callable(method) and attr in ["__call__", "batch"]:
-#                 dct[attr] = telemetry_event(
-#                     name=None, info={"type": "metric", "batch": attr == "batch"}
-#                 )(method)
-#         return type.__new__(cls, name, bases, dct)
-
-
 class MetricDecoratorMeta(ABCMeta, type):
     def __new__(cls, name, bases, dct):
-        return super().__new__(cls, name, bases, dct)
-
-    def __getattribute__(cls, attr):
-        # Dynamically wrap the method with telemetry when accessed
-        method = super().__getattribute__(attr)
-        if callable(method) and attr in ["__call__", "batch"]:
-            return telemetry_event(
-                name=None, info={"type": "metric", "batch": attr == "batch"}
-            )(method)
-        return method
+        # Skip the Metric class itself
+        for attr, method in dct.items():
+            if callable(method) and attr == "batch":
+                dct[attr] = telemetry.event(
+                    name=None,
+                    info={"type": "metric", "batch": attr == "batch"},
+                )(method)
+        return type.__new__(cls, name, bases, dct)
 
 
 class Metric(ABC, metaclass=MetricDecoratorMeta):
     def __init__(
-        self, is_cpu_bound: bool = False, show_progress: bool = True
+        self,
+        is_cpu_bound: bool = False,
+        disable_multiprocessing: bool = False,
+        show_progress: bool = True,
     ) -> None:
         super().__init__()
         self._overloaded_params = None
         self.io_bound = not is_cpu_bound
-        self.max_workers = cpu_count() or 1
-        if self.io_bound:
-            self.max_workers = min(32, self.max_workers * 5)
+        if disable_multiprocessing or DISABLE_MULTIPROCESSING:
+            self.max_workers = None
+        else:
+            # Compute the number of workers based on the number of cores
+            self.max_workers = cpu_count() or 1
+            if self.io_bound:
+                # If the metric is IO-bound, use a larger number of workers
+                self.max_workers = min(32, self.max_workers * 5)
         self.show_progress = show_progress
 
     def use(self, **kwargs) -> "Metric":
@@ -182,7 +172,13 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
     def overloaded_params(self):
         return self._overloaded_params
 
-    def __call__(self, **kwargs):
+    def __call__(self, *args, **kwargs):
+        telemetry.log_event(
+            name=self.name, info={"type": "metric", "batch": False}
+        )
+        return self.compute(*args, **kwargs)
+
+    def compute(self, **kwargs):
         # Implement this method in the subclass
         raise NotImplementedError()
 
@@ -201,7 +197,7 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
         ]
 
     def batch(self, **kwargs) -> Any:
-        signature = inspect.signature(self.__call__)
+        signature = inspect.signature(self.compute)
         arg_names = set(signature.parameters.keys()) - {"kwargs"}
         tot = len(next(iter(kwargs.values())))
 
@@ -217,9 +213,7 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
             ThreadPoolExecutor if self.io_bound else ProcessPoolExecutor
         )
         try:
-            with process_pool(
-                max_workers=self.max_workers, initializer=telemetry_initializer
-            ) as executor:
+            with process_pool(max_workers=self.max_workers) as executor:
                 futures = [
                     executor.submit(self.__call__, **item)
                     for item in generate_items()
@@ -238,27 +232,6 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
             logger.warning(f"Processing failed with error: {str(e)}")
             logger.warning("Falling back to sequential processing")
             return self._batch_sequential(generate_items, tot)
-
-        # try:
-        #     results = Parallel(
-        #         n_jobs=self.max_workers,
-        #         prefer="processes" if not self.io_bound else "threads",
-        #         verbose=0,
-        #     )(
-        #         delayed(self.__call__)(**item)
-        #         for item in tqdm(
-        #             list(generate_items()),
-        #             desc=self.name,
-        #             total=tot,
-        #             disable=not self.show_progress,
-        #         )
-        #     )
-        #     return results
-        # except Exception as e:
-        #     logger.warning(f"Parallel processing failed with error: {str(e)}")
-        #     logger.warning("Error type:", type(e).__name__)
-        #     logger.warning("Falling back to sequential processing")
-        #     return self._batch_sequential(generate_items, tot)
 
     def aggregate(self, results: List[Any]) -> Any:
         # Default implementation

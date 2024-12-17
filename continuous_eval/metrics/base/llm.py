@@ -74,7 +74,7 @@ class LLMMetric(Metric):
             name=name, prompt=prompt, temperature=temperature, model=model
         )
 
-    def __call__(self, **kwargs):
+    def compute(self, **kwargs):
         if self.overloaded_params is not None:
             margs = {
                 arg: kwargs[f.name] for arg, f in self.overloaded_params.items()
@@ -85,25 +85,3 @@ class LLMMetric(Metric):
         res = self._llm.run(prompt=prompt, temperature=self.temperature)
         score = self.prompt.response_format.score(res)  # type: ignore
         return score
-
-
-class LLMMetricFactory:
-    @staticmethod
-    def create(
-        name: str,
-        prompt: MetricPrompt,
-        temperature: float = 1.0,
-        model: str = LLMFactory.default(),
-    ):
-        class_name = name
-        ProbabilisticMetricClass = type(
-            class_name,
-            (LLMMetric,),
-            {
-                "__init__": lambda self, **kwargs: super(
-                    ProbabilisticMetricClass, self
-                ).__init__(class_name, prompt, temperature, model)  # type: ignore
-            },
-        )
-
-        return ProbabilisticMetricClass

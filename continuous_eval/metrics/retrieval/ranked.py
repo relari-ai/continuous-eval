@@ -24,7 +24,7 @@ class RankedRetrievalMetrics(Metric):
             self.matching_strategy.type == MatchingStrategyType.CHUNK_MATCH
         ), "Ranked metrics are calculated at chunk level."
 
-    def __call__(self, retrieved_context, ground_truth_context, **kwargs):
+    def compute(self, retrieved_context, ground_truth_context, **kwargs):
         # Calculate ranked metrics (MAP, MRR, NDCG) based on different matching strategies.
         map = self.calculate_average_precision(
             retrieved_context, ground_truth_context

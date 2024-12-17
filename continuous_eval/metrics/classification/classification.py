@@ -18,7 +18,7 @@ class SingleLabelClassification(Metric):
         classes: Union[int, Set[str]],
         average: Literal["micro", "macro", "weighted"] = "macro",
     ):
-        super().__init__()
+        super().__init__(is_cpu_bound=True)
         assert average in ["macro", "micro", "weighted"]
         self._average = average
         if isinstance(classes, int):
@@ -35,7 +35,7 @@ class SingleLabelClassification(Metric):
             label: index for index, label in enumerate(self._classes)
         }
 
-    def __call__(
+    def compute(
         self,
         predicted_class: Union[str, int, List[float]],
         ground_truth_class: Union[str, int],

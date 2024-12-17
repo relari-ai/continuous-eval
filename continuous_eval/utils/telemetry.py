@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import uuid
-from collections import defaultdict
 from functools import lru_cache, wraps
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -55,8 +54,6 @@ def _get_or_generate_uid() -> str:
 
 
 class AnonymousTelemetry:
-    internal = defaultdict(int)
-
     def __init__(self):
         self.uid = _get_or_generate_uid()
         self._client = Posthog(
@@ -68,34 +65,45 @@ class AnonymousTelemetry:
             logger.debug("Telemetry is disabled")
             self._client.disabled = True
 
-    # def event(self, name: Optional[str] = None, info: Dict[str, Any] = {}):
-    #     def decorator(func):
-    #         @wraps(func)
-    #         def wrapper(*args, **kwargs):
-    #             event_name = name or args[0].__class__.__name__
-    #             info["__qualname__"] = func.__qualname__
-    #             self.log_event(name=event_name, info=info)
-    #             return func(*args, **kwargs)
+    def event(self, name: Optional[str] = None, info: Dict[str, Any] = {}):
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                # event_name = name or args[0].__class__.__name__
+                self.log_event(name=func.__qualname__, info=info)
+                return func(*args, **kwargs)
 
-    #         return wrapper
-    #     return decorator
+            return wrapper
+
+        return decorator
 
     def log_event(self, name: str, info: Dict[str, Any] = {}):
         try:
             self._client.capture(
                 distinct_id=self.uid, event=name, properties=info
             )
-            AnonymousTelemetry.internal[name] += 1
         except Exception as e:
             # This way it silences all thread level logging as well
             if _debug_telemetry():
                 logging.debug(f"Telemetry error: {e}")
 
 
-# telemetry = AnonymousTelemetry()
+def telemetry_initializer() -> AnonymousTelemetry:
+    """
+    This function is executed once per child process to initialize telemetry.
+    """
+    global telemetry
+    telemetry = AnonymousTelemetry()
+    logger.debug("Telemetry reinitialized in child process.")
+    return telemetry
+
+
+telemetry = telemetry_initializer()
 
 
 def telemetry_event(name: Optional[str] = None, info: Dict[str, Any] = {}):
+    global telemetry
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -108,16 +116,3 @@ def telemetry_event(name: Optional[str] = None, info: Dict[str, Any] = {}):
         return wrapper
 
     return decorator
-
-
-def telemetry_initializer():
-    """
-    This function is executed once per child process to initialize telemetry.
-    """
-    global telemetry
-    print(telemetry_initializer)
-    telemetry = AnonymousTelemetry()
-    logger.debug("Telemetry reinitialized in child process.")
-
-
-telemetry_initializer()

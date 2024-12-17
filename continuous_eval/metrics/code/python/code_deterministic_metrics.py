@@ -8,7 +8,10 @@ from continuous_eval.metrics.base import Arg, Field, Metric
 
 
 class CodeStringMatch(Metric):
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
+
+    def compute(self, answer: str, ground_truth_answers: List[str], **kwargs):
         max_exact_match = 0
         max_similarity_score = 0
         for gt in ground_truth_answers:
@@ -52,6 +55,9 @@ class PythonASTSimilarity(Metric):
     Source: https://github.com/PedroSalazarParedes/python-ast-comparison
     Modifications: Adjusted to be used in the context of generated code evaluation
     """
+
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
 
     def _compare_ASTs(
         self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int
@@ -357,7 +363,7 @@ class PythonASTSimilarity(Metric):
 
         return matrix
 
-    def __call__(
+    def compute(
         self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
     ):
         if isinstance(ground_truth_answers, str):

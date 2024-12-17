@@ -1,12 +1,14 @@
 import warnings
 from typing import Dict, List
 
-import pandas as pd
 
 try:
     import torch
-except ImportError:
-    raise ImportError("To use BertSimilarity, please install PyTorch.")
+    import pandas as pd
+except (ImportError, ModuleNotFoundError):
+    raise ImportError(
+        "To use BertSimilarity, please install PyTorch and Pandas."
+    )
 
 from continuous_eval.metrics.base import Arg, Field, Metric
 from continuous_eval.metrics.generation.text.bert import (
@@ -18,13 +20,16 @@ from continuous_eval.metrics.generation.text.bert import (
 class BertAnswerRelevance(Metric):
     """Measures the semantic similarity between the Generated Answer and the Question"""
 
+    def __init__(self):
+        super().__init__(disable_multiprocessing=True)
+
     def batch(
         self, answer: List[str], question: List[str]
     ) -> List[Dict[str, float]]:
         score = BertSimilarity().batch(prediction=answer, reference=question)
         return [{"bert_answer_relevance": x} for x in score["bert_similarity"]]
 
-    def __call__(self, answer: str, question: str) -> Dict[str, float]:
+    def compute(self, answer: str, question: str) -> Dict[str, float]:
         """Measures the semantic similarity between the Generated Answer and the Question"""
         return {
             "bert_answer_relevance": BertSimilarity()(answer, question)[
@@ -47,7 +52,10 @@ class BertAnswerRelevance(Metric):
 class BertAnswerSimilarity(Metric):
     """Measures the semantic similarity between the Generated Answer and the Ground Truth Answers"""
 
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
+
+    def compute(self, answer: str, ground_truth_answers: List[str], **kwargs):
         """Measures the semantic similarity between the Generated Answer and the Ground Truth Answers
 
         Args:
@@ -112,7 +120,7 @@ class DebertaAnswerScores(Metric):
     """
 
     def __init__(self, reverse: bool = False):
-        super().__init__()
+        super().__init__(disable_multiprocessing=True)
         self.reverse = reverse
         self.batch_size = 32
 
@@ -162,7 +170,7 @@ class DebertaAnswerScores(Metric):
             )
         ]
 
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def compute(self, answer: str, ground_truth_answers: List[str], **kwargs):
         """Measure semantic relationship between the Generated Answer and the Ground Truth Answers in three categories:
         - Entailment: the Generated Answer IMPLIES a Ground Truth Answer.
         - Contradiction: the Generated Answer CONTRADICTS a Ground Truth Answer.
