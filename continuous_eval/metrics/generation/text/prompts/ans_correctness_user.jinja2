@@ -1,0 +1,12 @@
+Question: `{{ question }}`
+{% if ground_truth_answers | length > 1 %}
+Ground truth answers:
+{% for answer in ground_truth_answers %}
+- `{{ answer }}`
+{% endfor %}
+{% else %}
+Ground truth answer: `{{ ground_truth_answers[0] }}`
+{% endif %}
+Generated answer: `{{ answer }}`
+
+Evaluation:

@@ -1,1 +1,3 @@
-from continuous_eval.metrics.classification.classification import SingleLabelClassification
+from continuous_eval.metrics.classification.classification import (
+    SingleLabelClassification,
+)

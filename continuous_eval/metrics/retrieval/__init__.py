@@ -1,6 +1,6 @@
 from continuous_eval.metrics.retrieval.llm_based import (
-    LLMBasedContextCoverage,
-    LLMBasedContextPrecision,
+    ContextCoverage,
+    ContextPrecision,
 )
 from continuous_eval.metrics.retrieval.matching_strategy import (
     ExactChunkMatch,

@@ -6,7 +6,7 @@ UID = str
 def args_to_dict(*args, **kwargs):
     arg_dict = dict(kwargs)
     for index, value in enumerate(args):
-        arg_dict[f'_arg{index}'] = value
+        arg_dict[f"_arg{index}"] = value
     return arg_dict
 
 

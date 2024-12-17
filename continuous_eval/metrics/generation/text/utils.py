@@ -6,7 +6,7 @@ from typing import Optional, Union
 import nltk
 from rouge import Rouge
 
-from continuous_eval.metrics._utils.simple_tokenizer import SimpleTokenizer
+from continuous_eval.metrics.retrieval.simple_tokenizer import SimpleTokenizer
 
 
 def _numeric_matcher(input_val, min_val, max_val) -> Optional[float]:
@@ -38,10 +38,13 @@ class TokenOverlap:
 
     def _tokenize(self, text, language="english"):
         sentences = nltk.tokenize.sent_tokenize(text, language)
-        return [token for sent in sentences for token in self._tokenizer.tokenize(sent)]
+        return [
+            token
+            for sent in sentences
+            for token in self._tokenizer.tokenize(sent)
+        ]
 
     def calculate(self, prediction, reference):
-
         pred_tokens = self._tokenize(prediction)
         ref_tokens = self._tokenize(reference)
 

@@ -1,6 +1,5 @@
 import json
 from collections import ChainMap
-from copy import deepcopy
 from functools import cached_property, lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -8,7 +7,7 @@ from typing import Dict, List, Optional, Union
 from continuous_eval.eval.dataset import Dataset
 from continuous_eval.eval.modules import AgentModule
 from continuous_eval.eval.pipeline import Pipeline
-from continuous_eval.eval.utils import instantiate_type
+from continuous_eval.utils.types import instantiate_type
 
 TOOL_PREFIX = "_tool__"
 
@@ -30,12 +29,16 @@ class PipelineResults:
             if datum["uid"] not in logs.data:
                 continue
             eval_results.results.append({**datum, **logs.data[datum["uid"]]})
-        assert len(eval_results) == len(logs.data), "Could not find some uid in the dataset"
+        assert len(eval_results) == len(
+            logs.data
+        ), "Could not find some uid in the dataset"
         return eval_results
 
     def initialize(self, pipeline: Pipeline):
         num_samples = len(pipeline.dataset.data)
-        self.results: List[Dict] = [self._build_empty_samples(pipeline) for _ in range(num_samples)]
+        self.results: List[Dict] = [
+            self._build_empty_samples(pipeline) for _ in range(num_samples)
+        ]
 
     def __len__(self):
         return len(self.results)
@@ -100,7 +103,10 @@ class MetricsResults:
 
         if len(self.results) > 1:
             flatten = [
-                {f"{outer_key}_{key}": value for key, value in inner_dict.items()}
+                {
+                    f"{outer_key}_{key}": value
+                    for key, value in inner_dict.items()
+                }
                 for outer_key, dict_list in self.results.items()
                 for inner_dict in dict_list
             ]
@@ -123,9 +129,12 @@ class MetricsResults:
             aggregated_samples[module_name] = dict()
             for metric_name, metric_values in metrics_results.items():
                 metric = self.pipeline.get_metric(module_name, metric_name)
-                aggregated_samples[module_name][metric_name] = metric.aggregate(metric_values)
+                aggregated_samples[module_name][metric_name] = metric.aggregate(
+                    metric_values
+                )
         actual_results = {
-            module_name: dict(ChainMap(*metrics.values())) for module_name, metrics in aggregated_samples.items()
+            module_name: dict(ChainMap(*metrics.values()))
+            for module_name, metrics in aggregated_samples.items()
         }
         return actual_results
 

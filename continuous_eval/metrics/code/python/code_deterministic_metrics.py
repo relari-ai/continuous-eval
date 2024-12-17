@@ -2,15 +2,13 @@ import ast
 from typing import List, Union
 
 from munkres import Munkres
-from sqlglot import diff, parse_one
-from sqlglot.diff import Keep
 from thefuzz import fuzz
 
-from continuous_eval.metrics.base import Metric
+from continuous_eval.metrics.base import Arg, Field, Metric
 
 
 class CodeStringMatch(Metric):
-    def __call__(self, answer: str, ground_truth_answers: List[str]):
+    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
         max_exact_match = 0
         max_similarity_score = 0
         for gt in ground_truth_answers:
@@ -25,6 +23,26 @@ class CodeStringMatch(Metric):
             "Fuzzy_Match_Score": max_similarity_score,
         }
 
+    @property
+    def args(self):
+        return {
+            "answer": Arg(type=str, description="The generated code"),
+            "ground_truth_answers": Arg(
+                type=List[str], description="The ground truth code"
+            ),
+        }
+
+    @property
+    def schema(self):
+        return {
+            "Exact_Match_Score": Field(type=float),
+            "Fuzzy_Match_Score": Field(type=float),
+        }
+
+    @property
+    def help(self):
+        return "Evaluates the exact and fuzzy match scores between the generated code and the ground truth code."
+
 
 class PythonASTSimilarity(Metric):
     """
@@ -35,7 +53,9 @@ class PythonASTSimilarity(Metric):
     Modifications: Adjusted to be used in the context of generated code evaluation
     """
 
-    def _compare_ASTs(self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int) -> int:
+    def _compare_ASTs(
+        self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int
+    ) -> int:
         """Compare two ASTs corresponding to python programs.
 
         Args:
@@ -49,28 +69,40 @@ class PythonASTSimilarity(Metric):
         """
         children_a = list(ast.iter_child_nodes(ast_a))
         children_b = list(ast.iter_child_nodes(ast_b))
-        if (type(ast_a) == type(ast_b)) and len(list(children_a)) == 0 and len(list(children_b)) == 0:
+        if (
+            (type(ast_a) is type(ast_b))
+            and len(list(children_a)) == 0
+            and len(list(children_b)) == 0
+        ):
             return 1
 
-        if (type(ast_a) != type(ast_b)) or (len(children_a) != len(children_b)):
+        if (type(ast_a) is not type(ast_b)) or (
+            len(children_a) != len(children_b)
+        ):
             return 0
 
         if reorder_depth == 0:
             match_index = sum(
                 map(
-                    lambda pairs: self._compare_ASTs(pairs[0], pairs[1], reorder_depth),
+                    lambda pairs: self._compare_ASTs(
+                        pairs[0], pairs[1], reorder_depth
+                    ),
                     zip(children_a, children_b),
                 )
             )
             return match_index + 1
 
         elif reorder_depth > 0:
-            match_index = self._reorder_children_compare(ast_a, ast_b, reorder_depth - 1)
+            match_index = self._reorder_children_compare(
+                ast_a, ast_b, reorder_depth - 1
+            )
             return match_index + 1
 
         return 0
 
-    def _reorder_children_compare(self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int) -> int:
+    def _reorder_children_compare(
+        self, ast_a: ast.AST, ast_b: ast.AST, reorder_depth: int
+    ) -> int:
         """Reorders child nodes and compares them.
 
         Args:
@@ -92,13 +124,17 @@ class PythonASTSimilarity(Metric):
         if len(children_a) <= 1 or len(children_b) <= 1:
             for child_a in children_a:
                 for child_b in children_b:
-                    best_match_value += self._compare_ASTs(child_a, child_b, reorder_depth)
+                    best_match_value += self._compare_ASTs(
+                        child_a, child_b, reorder_depth
+                    )
         else:
             for child_a in children_a:
                 row = []
                 cost_row = []
                 for child_b in children_b:
-                    similarity = self._compare_ASTs(child_a, child_b, reorder_depth)
+                    similarity = self._compare_ASTs(
+                        child_a, child_b, reorder_depth
+                    )
                     row.append(similarity)
                     cost_row.append(10000000 - similarity)
 
@@ -113,7 +149,9 @@ class PythonASTSimilarity(Metric):
 
         return best_match_value
 
-    def _compare_subtrees(self, sig_subtrees_p1: list, sig_subtrees_p2: list, reorder_depth: int) -> tuple:
+    def _compare_subtrees(
+        self, sig_subtrees_p1: list, sig_subtrees_p2: list, reorder_depth: int
+    ) -> tuple:
         """Compare two significant subtree lists reordering up to a certain depth.
 
         Args:
@@ -138,14 +176,18 @@ class PythonASTSimilarity(Metric):
             for child_a in children_a:
                 best_match += [child_a]
                 for child_b in children_b:
-                    best_match_value += self._compare_ASTs(child_a, child_b, reorder_depth)
+                    best_match_value += self._compare_ASTs(
+                        child_a, child_b, reorder_depth
+                    )
                     best_match += [child_b]
         else:
             for child_a in children_a:
                 row = []
                 cost_row = []
                 for child_b in children_b:
-                    similarity = self._compare_ASTs(child_a, child_b, reorder_depth)
+                    similarity = self._compare_ASTs(
+                        child_a, child_b, reorder_depth
+                    )
                     row.append(similarity)
                     cost_row.append(10000000 - similarity)
 
@@ -165,12 +207,16 @@ class PythonASTSimilarity(Metric):
 
         all_subtrees_weight = sum(
             map(
-                lambda tree: self._apply_weights_to_subtrees(self._get_num_nodes(tree), tree),
+                lambda tree: self._apply_weights_to_subtrees(
+                    self._get_num_nodes(tree), tree
+                ),
                 sig_subtrees_p1,
             )
         ) + sum(
             map(
-                lambda tree: self._apply_weights_to_subtrees(self._get_num_nodes(tree), tree),
+                lambda tree: self._apply_weights_to_subtrees(
+                    self._get_num_nodes(tree), tree
+                ),
                 sig_subtrees_p2,
             )
         )
@@ -225,7 +271,9 @@ class PythonASTSimilarity(Metric):
         """
         return len(list(ast.walk(root)))
 
-    def _apply_weights_to_subtrees(self, weight: float, subtree: ast.AST) -> float:
+    def _apply_weights_to_subtrees(
+        self, weight: float, subtree: ast.AST
+    ) -> float:
         """Apply weights to subtrees according to the time por their roots.
 
         Args:
@@ -256,7 +304,9 @@ class PythonASTSimilarity(Metric):
             new_weight *= 1
         return new_weight
 
-    def _apply_weights_to_subtrees_mult(self, weight: float, ast_1: ast.AST, ast_2: ast.AST) -> float:
+    def _apply_weights_to_subtrees_mult(
+        self, weight: float, ast_1: ast.AST, ast_2: ast.AST
+    ) -> float:
         """Find the average weight of both trees in order to weigh the comparison.
 
         Args:
@@ -270,7 +320,10 @@ class PythonASTSimilarity(Metric):
         if weight == 0:
             return 0
         else:
-            return (self._apply_weights_to_subtrees(weight, ast_1) + self._apply_weights_to_subtrees(weight, ast_2)) / 2
+            return (
+                self._apply_weights_to_subtrees(weight, ast_1)
+                + self._apply_weights_to_subtrees(weight, ast_2)
+            ) / 2
 
     def _compare_many(self, programs: list) -> list:
         """Compare all of the programs in the list.
@@ -281,7 +334,12 @@ class PythonASTSimilarity(Metric):
         Returns:
             A matrix with the similarity rating of between all the programs.
         """
-        tree_list = list(map(lambda prog: self._get_significant_subtrees(ast.parse(prog)), programs))
+        tree_list = list(
+            map(
+                lambda prog: self._get_significant_subtrees(ast.parse(prog)),
+                programs,
+            )
+        )
 
         matrix = []
         for program_1_tree_num in range(0, len(tree_list)):
@@ -299,25 +357,51 @@ class PythonASTSimilarity(Metric):
 
         return matrix
 
-    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
+    def __call__(
+        self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
+    ):
         if isinstance(ground_truth_answers, str):
             ground_truth_answers = [ground_truth_answers]
         try:
             answer_tree = ast.parse(answer, mode="exec")
-            ground_truth_trees = [ast.parse(gt, mode="exec") for gt in ground_truth_answers]
-        except SyntaxError as e:
+            ground_truth_trees = [
+                ast.parse(gt, mode="exec") for gt in ground_truth_answers
+            ]
+        except SyntaxError:
             return {"Python_AST_Similarity": -1.0}
 
         answer_subtree = self._get_significant_subtrees(answer_tree)
         ground_truth_subtrees = [
-            self._get_significant_subtrees(ground_truth_tree) for ground_truth_tree in ground_truth_trees
+            self._get_significant_subtrees(ground_truth_tree)
+            for ground_truth_tree in ground_truth_trees
         ]
 
         similarity_scores = [
-            self._compare_subtrees(answer_subtree, ground_truth_subtree, 1000)[0]
+            self._compare_subtrees(answer_subtree, ground_truth_subtree, 1000)[
+                0
+            ]
             for ground_truth_subtree in ground_truth_subtrees
         ]
 
         return {
             "Python_AST_Similarity": max(similarity_scores),
         }
+
+    @property
+    def args(self):
+        return {
+            "answer": Arg(type=str, description="The generated code"),
+            "ground_truth_answers": Arg(
+                type=List[str], description="The ground truth code"
+            ),
+        }
+
+    @property
+    def schema(self):
+        return {
+            "Python_AST_Similarity": Field(type=float),
+        }
+
+    @property
+    def help(self):
+        return "Evaluates the similarity between the generated code and the ground truth code using AST comparison."

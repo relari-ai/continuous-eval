@@ -6,9 +6,9 @@ from sqlglot import diff, parse_one, transpile
 from sqlglot.diff import Insert, Keep, Move, Remove, Update
 from sqlglot.optimizer import optimize
 
-from continuous_eval.metrics.base import Metric
+from continuous_eval.metrics.base import Arg, Field, Metric
 
-logger = logging.getLogger("metrics")
+logger = logging.getLogger("SQLMetrics")
 
 
 @dataclass(frozen=True)
@@ -43,17 +43,21 @@ class _SQLMetric:
         formatted_sql = transpile(sql, pretty=True, comments=False)[0]
         if self._optimize:
             try:
-                optimized_sql = optimize(parse_one(formatted_sql), schema=self._schema).sql(pretty=True)
+                optimized_sql = optimize(
+                    parse_one(formatted_sql), schema=self._schema
+                ).sql(pretty=True)
                 return optimized_sql
             except Exception as e:
-                logger.warning(f"Failed to optimize SQL query given schema: {e}. Using unoptimized query.")
+                logger.warning(
+                    f"Failed to optimize SQL query given schema: {e}. Using unoptimized query."
+                )
                 return formatted_sql
         return formatted_sql
 
 
 class SQLSyntaxMatch(Metric, _SQLMetric):
     """
-    This metric evaluates the syntactic similarity between the generated SQL query and a set of ground truth queries.
+    Evaluates the syntactic similarity between the generated SQL query and a set of ground truth queries.
     It uses the sqlglot library to format and compare the SQL queries.
     """
 
@@ -61,10 +65,16 @@ class SQLSyntaxMatch(Metric, _SQLMetric):
         super(SQLSyntaxMatch, self).__init__()
         _SQLMetric.__init__(self, optimize=optimize, schema=schema)
 
-    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str]):
+    def __call__(
+        self, answer: str, ground_truth_answers: Union[List[str], str]
+    ):
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
 
         transformed_answer = self._prepare_query(answer)
-        transformed_ground_truths = [self._prepare_query(gt) for gt in ground_truth_answers]
+        transformed_ground_truths = [
+            self._prepare_query(gt) for gt in ground_truth_answers
+        ]
 
         max_match_score = 0.0
 
@@ -74,6 +84,19 @@ class SQLSyntaxMatch(Metric, _SQLMetric):
                 max_match_score = match_score
 
         return {"SQL_Syntax_Match": max_match_score}
+
+    @property
+    def args(self):
+        return {
+            "answer": Arg(type=str, description="The generated SQL query"),
+            "ground_truth_answers": Arg(
+                type=List[str], description="The ground truth SQL queries"
+            ),
+        }
+
+    @property
+    def schema(self):
+        return {"SQL_Syntax_Match": Field(type=float)}
 
 
 class SQLASTSimilarity(Metric, _SQLMetric):
@@ -91,30 +114,45 @@ class SQLASTSimilarity(Metric, _SQLMetric):
         _SQLMetric.__init__(self, optimize=optimize, schema=schema)
         self._diff_weights = diff_weights
 
-    def __call__(self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs):
+    def __call__(
+        self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
+    ):
+        if isinstance(ground_truth_answers, str):
+            ground_truth_answers = [ground_truth_answers]
 
         transformed_answer = self._prepare_query(answer)
-        transformed_ground_truths = [self._prepare_query(gt) for gt in ground_truth_answers]
+        transformed_ground_truths = [
+            self._prepare_query(gt) for gt in ground_truth_answers
+        ]
 
         try:
             answer_tree = parse_one(transformed_answer)
-            ground_truth_trees = [parse_one(gt) for gt in transformed_ground_truths]
+            ground_truth_trees = [
+                parse_one(gt) for gt in transformed_ground_truths
+            ]
         except Exception:
             return {"SQL_AST_Similarity": -1.0}
 
         similarity_scores = [
-            self._calculate_similarity(answer_tree, ground_truth_tree) for ground_truth_tree in ground_truth_trees
+            self._calculate_similarity(answer_tree, ground_truth_tree)
+            for ground_truth_tree in ground_truth_trees
         ]
 
         return {
-            "SQL_AST_Similarity": max(similarity_scores) if similarity_scores else -1.0,
+            "SQL_AST_Similarity": max(similarity_scores)
+            if similarity_scores
+            else -1.0,
         }
 
     def _calculate_similarity(self, tree1, tree2):
         diff_result = diff(tree1, tree2)
-        total_changes = sum(self._apply_weights(change) for change in diff_result)
+        total_changes = sum(
+            self._apply_weights(change) for change in diff_result
+        )
         max_nodes = max(len(list(tree1.walk())), len(list(tree2.walk())))
-        similarity_score = 1 - (total_changes / max_nodes) if max_nodes > 0 else 1
+        similarity_score = (
+            1 - (total_changes / max_nodes) if max_nodes > 0 else 1
+        )
         return similarity_score
 
     def _apply_weights(self, change):
@@ -133,3 +171,18 @@ class SQLASTSimilarity(Metric, _SQLMetric):
             return self._diff_weights.move
         else:
             return self._diff_weights.default
+
+    @property
+    def args(self):
+        return {
+            "answer": Arg(type=str, description="The generated SQL query"),
+            "ground_truth_answers": Arg(
+                type=List[str], description="The ground truth SQL queries"
+            ),
+        }
+
+    @property
+    def schema(self):
+        return {
+            "SQL_AST_Similarity": Field(type=float, limits=(0, 1)),
+        }

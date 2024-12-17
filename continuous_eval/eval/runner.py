@@ -5,7 +5,12 @@ from continuous_eval.eval.dataset import Dataset, DatasetField, LambdaField
 from continuous_eval.eval.logger import PipelineLogger
 from continuous_eval.eval.modules import Module
 from continuous_eval.eval.pipeline import CalledTools, ModuleOutput, Pipeline
-from continuous_eval.eval.result_types import TOOL_PREFIX, MetricsResults, PipelineResults, TestResults
+from continuous_eval.eval.result_types import (
+    TOOL_PREFIX,
+    MetricsResults,
+    PipelineResults,
+    TestResults,
+)
 from continuous_eval.metrics import Metric
 from continuous_eval.utils.telemetry import telemetry_event
 
@@ -31,14 +36,24 @@ class EvaluationRunner:
 
     # Evaluate
     @staticmethod
-    def prepare(dataset: Dataset, eval_results: PipelineResults, module: Module, metric: Metric):
+    def prepare(
+        dataset: Dataset,
+        eval_results: PipelineResults,
+        module: Module,
+        metric: Metric,
+    ):
         kwargs = dict()
         if metric.overloaded_params is not None:
             for key, val in metric.overloaded_params.items():
                 if key == "uid":
                     continue
                 if isinstance(val, DatasetField):
-                    kwargs[key] = [x[module.name][val.name] if module.name in x else x[val.name] for x in dataset.data]  # type: ignore
+                    kwargs[key] = [
+                        x[module.name][val.name]
+                        if module.name in x
+                        else x[val.name]
+                        for x in dataset.data
+                    ]  # type: ignore
                 elif isinstance(val, LambdaField):
                     kwargs[key] = list()
                     for rx in eval_results.results:
@@ -50,19 +65,23 @@ class EvaluationRunner:
                                 if x["uid"] == uid:
                                     kwargs[key].append(val.func(x))
                                     break
-                    # kwargs[key] = [
-                    #     val.func(x[module.name]) if module.name in x else val.func(x)
-                    #     for x in dataset.data
-                    # ]
                 elif isinstance(val, ModuleOutput):
-                    module_name = module.name if val.module is None else val.module
+                    module_name = (
+                        module.name if val.module is None else val.module
+                    )
                     if isinstance(val, Module):
                         module_name = val.name
-                    kwargs[key] = [val(x[module_name]) for x in eval_results.results]
+                    kwargs[key] = [
+                        val(x[module_name]) for x in eval_results.results
+                    ]
                 elif isinstance(val, CalledTools):
-                    module_name = module.name if val.module is None else val.module.name
+                    module_name = (
+                        module.name if val.module is None else val.module.name
+                    )
                     val_key = f"{TOOL_PREFIX}{module_name}"
-                    kwargs[key] = [val(x[val_key]) for x in eval_results.results]
+                    kwargs[key] = [
+                        val(x[val_key]) for x in eval_results.results
+                    ]
                 else:
                     raise ValueError(f"Invalid promised parameter {key}={val}")
             return kwargs
@@ -75,7 +94,8 @@ class EvaluationRunner:
                     kwargs[key].append(value)
         return kwargs
 
-    @telemetry_event("eval_manager")
+    # @telemetry.event(name="EvaluationRunner.evaluate")
+    @telemetry_event(name="EvaluationRunner.evaluate")
     def evaluate(
         self,
         data: Optional[Union[PipelineResults, PipelineLogger, Dataset]] = None,
@@ -90,11 +110,15 @@ class EvaluationRunner:
         else:
             eval_results = data
         assert self._pipeline is not None, "Pipeline not set"
-        assert len(eval_results.results) > 0, "No evaluation samples to run the metrics on"
+        assert (
+            len(eval_results.results) > 0
+        ), "No evaluation samples to run the metrics on"
         metrics_results = MetricsResults(self.pipeline)
         metrics_results.samples = {
             module.name: {
-                metric.name: metric.batch(**self.prepare(self.dataset, eval_results, module, metric))
+                metric.name: metric.batch(
+                    **self.prepare(self.dataset, eval_results, module, metric)
+                )
                 for metric in module.eval
             }
             for module in self._pipeline.modules
@@ -102,12 +126,15 @@ class EvaluationRunner:
         }
         return metrics_results
 
-    @telemetry_event("eval_manager_tests")
+    # @telemetry.event(name="EvaluationRunner.test")
     def test(self, metrics: MetricsResults) -> TestResults:
         logger.info("Running tests")
         test_results = TestResults()
         test_results.results = {
-            module.name: {test.name: test.run(metrics.results[module.name]) for test in module.tests}
+            module.name: {
+                test.name: test.run(metrics.results[module.name])
+                for test in module.tests
+            }
             for module in self._pipeline.modules
             if module.tests is not None
         }

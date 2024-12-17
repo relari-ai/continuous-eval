@@ -1,0 +1,24 @@
+You are tasked to evaluate whether the statement is fully supported by the context. With a reasoning following the response, respond with either Yes or No.
+
+{% if 'use_few_shot' %}
+{% raw %}
+-- EXAMPLES --
+Example 1:
+Context: The Eiffel Tower, a wrought-iron lattice tower on the Champ de Mars in Paris, France, is one of the most famous landmarks in the world. It was designed by Gustave Eiffel and completed in 1889.
+Statement: The Eiffel Tower can be found in the center of London, near the Thames River.
+Response:
+{
+  "reasoning": "The statement contradicts with the context, which states that Eiffel Tower is in Paris, as opposed to the center of London.",
+  "score": "No"
+}
+
+Example 2:
+Context: Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that can later be released to fuel the organisms' activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water.
+Statement: Photosynthesis in plants primarily involves the conversion of light energy into chemical energy stored in forms such as sugar.
+Response:
+{
+  "reasoning": "The statement is supported by the context, which states that photosynthesis converts light energy into chemical energy and that the chemical energy is stored in carbohydrate molecules, such as sugars.",
+  "score": "Yes"
+}
+{% endraw %}
+{% endif %}

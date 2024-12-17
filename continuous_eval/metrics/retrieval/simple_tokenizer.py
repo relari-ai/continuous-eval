@@ -19,7 +19,6 @@ except LookupError:
 
 # Modified version of NLTKWordTokenizer
 class SimpleTokenizer(TokenizerI):
-
     # List of contractions adapted from Robert MacIntyre's tokenizer.
     _contractions = MacIntyreContractions()
     CONTRACTIONS2 = list(map(re.compile, _contractions.CONTRACTIONS2))
@@ -31,11 +30,15 @@ class SimpleTokenizer(TokenizerI):
         text = copy(text.lower())
 
         # strip punctuation (including dollar symbol and commas in numbers)
-        text = "".join([char for char in text if char not in string.punctuation])
+        text = "".join(
+            [char for char in text if char not in string.punctuation]
+        )
 
         if remove_stopwords:
             stop_words = set(stopwords.words("english"))
-            text = " ".join([word for word in text.split() if word not in stop_words])
+            text = " ".join(
+                [word for word in text.split() if word not in stop_words]
+            )
 
         # add extra space to make things easier
         text = " " + text + " "
@@ -45,4 +48,7 @@ class SimpleTokenizer(TokenizerI):
         for regexp in self.CONTRACTIONS3:
             text = regexp.sub(r" \1 \2 ", text)
 
-        return [t if (self.IS_NUMBER.match(t) is None) else float(t) for t in text.split()]
+        return [
+            t if (self.IS_NUMBER.match(t) is None) else float(t)
+            for t in text.split()
+        ]

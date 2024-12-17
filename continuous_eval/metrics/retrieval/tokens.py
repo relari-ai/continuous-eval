@@ -1,6 +1,8 @@
+from typing import List
+
 import tiktoken
 
-from continuous_eval.metrics.base import Metric
+from continuous_eval.metrics.base import Arg, Field, Metric
 
 _CHARACTERS_PER_TOKEN = 4.0
 
@@ -23,3 +25,15 @@ class TokenCount(Metric):
         else:
             num_tokens = len(self._encoder.encode(ctx))
         return {"num_tokens": num_tokens}
+
+    @property
+    def args(self):
+        return {
+            "retrieved_context": Arg(type=List[str], is_ground_truth=False),
+        }
+
+    @property
+    def schema(self):
+        return {
+            "num_tokens": Field(type=int),
+        }
