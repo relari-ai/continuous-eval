@@ -3,7 +3,6 @@ import string
 from copy import copy
 from typing import List
 
-from nltk import download as nltk_download
 from nltk.corpus import stopwords
 from nltk.tokenize.api import TokenizerI
 from nltk.tokenize.destructive import MacIntyreContractions
@@ -12,8 +11,6 @@ from nltk.tokenize.destructive import MacIntyreContractions
 try:
     stopwords.ensure_loaded()
 except LookupError:
-    nltk_download("punkt", quiet=True)
-    nltk_download("stopwords", quiet=True)
     stopwords.ensure_loaded()
 
 

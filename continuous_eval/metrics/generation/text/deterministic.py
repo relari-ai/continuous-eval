@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Union
 
 import nltk
-from nltk import download as nltk_download
 
 from continuous_eval.metrics.base import Arg, Field, Metric
 from continuous_eval.metrics.generation.text.utils import (
@@ -23,7 +22,6 @@ class DeterministicFaithfulness(Metric):
         self,
         thresholds: DeterministicFaithfulnessConfig = DeterministicFaithfulnessConfig(),
     ):
-        nltk_download("punkt", quiet=True)
         super().__init__()
         self.cfg = thresholds
         self._token_overlap = TokenOverlap()
