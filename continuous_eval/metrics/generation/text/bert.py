@@ -16,7 +16,10 @@ from continuous_eval.metrics.base import Arg, Field, Metric
 
 class DebertaScores:
     def __init__(self):
-        self._model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
+        self._model = CrossEncoder(
+            "cross-encoder/nli-deberta-v3-large",
+            tokenizer_args={"use_fast": False},
+        )
         self._batch_size = 32
 
     @property
