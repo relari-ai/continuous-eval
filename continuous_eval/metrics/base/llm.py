@@ -42,12 +42,12 @@ class LLMMetric(Metric):
         if hasattr(self.prompt.response_format, "schema"):
             return {
                 k: MetricField(type=t)
-                for k, t in self.prompt.response_format.schema.items()
+                for k, t in self.prompt.response_format.schema.items()  # type: ignore
             }  # type: ignore
         else:
             return {
                 f"{self.name}_score": MetricField(
-                    type=self.prompt.response_format.type
+                    type=self.prompt.response_format.type  # type: ignore
                 ),  # type: ignore
                 f"{self.name}_reasoning": MetricField(type=str),
             }

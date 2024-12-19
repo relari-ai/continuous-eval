@@ -6,7 +6,6 @@ import numpy as np
 from continuous_eval.metrics.base import (
     Arg,
     Field,
-    Metric,
     MetricPrompt,
     response_type,
 )
@@ -19,7 +18,7 @@ from continuous_eval.metrics.base.probabilistic import (
 _CWD = Path(__file__).parent
 
 
-class ContextPrecision(ProbabilisticMetric, Metric):
+class ContextPrecision(ProbabilisticMetric):
     """Calculate the precision of the retrieved context given the ground truth context."""
 
     def __init__(

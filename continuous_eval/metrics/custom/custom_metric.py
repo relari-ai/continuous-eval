@@ -49,7 +49,7 @@ class CustomMetric(LLMMetric):
             sys_prompt,
             user_prompt,
             response_format=JSON(
-                {k: v.type_hint for k, v in response_format.items()}
+                {k: v.type for k, v in response_format.items()}
             ),
         )
         super().__init__(

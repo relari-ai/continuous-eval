@@ -2,10 +2,8 @@ import json
 import re
 from abc import ABC, ABCMeta
 from enum import Enum, EnumMeta
-from typing import Dict, List, Optional, Type, Union
-
+from typing import Dict, List, Optional, Type, Union, _GenericAlias  # type: ignore
 from json_repair import repair_json
-
 from continuous_eval.utils.types import str_to_type_hint, type_hint_to_str
 
 
@@ -50,15 +48,15 @@ class CategoryResponseType(
         return obj
 
     @classmethod
-    def serialize(self):
+    def serialize(self):  # type: ignore
         return {"class": self.__name__}
 
     @classmethod
-    def deserialize(self, serialized: Dict):
+    def deserialize(self, serialized: Dict):  # type: ignore
         return self
 
     @classmethod
-    def score(self, input_val: str):
+    def score(self, input_val: str):  # type: ignore
         cat = [v for v in self.values()]
         input_words = input_val.lower().split()
         first_occurrences = {
@@ -67,7 +65,7 @@ class CategoryResponseType(
             if word.lower() in input_words
         }
         if first_occurrences:
-            return self(min(first_occurrences, key=first_occurrences.get)).value
+            return self(min(first_occurrences, key=first_occurrences.get)).value  # type: ignore
         raise ValueError("No matching categories found")
 
     @property
@@ -166,7 +164,7 @@ class JSON(ScoringFunction):
         self.is_list = isinstance(schema, list)
         self.schema: Dict[str, Type] = schema if not self.is_list else schema[0]  # type: ignore
         for key, value in self.schema.items():
-            if not isinstance(value, type):
+            if not isinstance(value, (type, _GenericAlias)):  # type: ignore
                 raise ValueError(
                     f"All values in the schema must be type hints, got {type(value)} for key {key}"
                 )
@@ -203,6 +201,8 @@ class JSON(ScoringFunction):
         raise ValueError("Invalid serialized JSON")
 
     def _check_json_obj(self, json_obj: Dict):
+        if not isinstance(json_obj, dict):
+            return {key: None for key in self.schema.keys()}
         for key in self.schema.keys():
             if key not in json_obj:
                 json_obj[key] = None
@@ -210,7 +210,7 @@ class JSON(ScoringFunction):
                 try:
                     json_obj[key] = self.schema[key](json_obj[key])
                 except Exception:
-                    json_obj[key] = None
+                    json_obj[key] = json_obj[key]
         return json_obj
 
     def score(self, input_val: str):

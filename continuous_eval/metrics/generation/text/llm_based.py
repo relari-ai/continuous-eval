@@ -4,7 +4,6 @@ from typing import List, Union
 from continuous_eval.metrics.base import (
     Arg,
     Field,
-    Metric,
     MetricPrompt,
     response_type,
 )
@@ -16,7 +15,7 @@ from continuous_eval.metrics.base.probabilistic import (
 _CWD = Path(__file__).parent
 
 
-class Faithfulness(ProbabilisticMetric, Metric):
+class Faithfulness(ProbabilisticMetric):
     """
     The LLM based faithfulness metric.
     Measures whether the generated answer is faithful to the retrieved context.
@@ -152,7 +151,7 @@ class AnswerCorrectness(ProbabilisticMetric):
         }
 
 
-class AnswerRelevance(ProbabilisticMetric, Metric):
+class AnswerRelevance(ProbabilisticMetric):
     """
     The LLM based answer relevance metric.
     Measures whether the generated answer is relevant to the question.

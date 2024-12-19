@@ -46,6 +46,7 @@ metric = CustomMetric(
     name="Conciseness",
     criteria=criteria,
     rubric=rubric,
+    examples=examples,
     arguments={
         "question": Arg(
             type=str, description="The question to asked to the system."

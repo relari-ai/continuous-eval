@@ -200,7 +200,7 @@ class Dataset:
         for field_name, field_info in self._manifest.fields.items():
             setattr(self, field_name, field_info)
 
-    def filed_types(self, name: str) -> type:
+    def field_type(self, name: str) -> type:
         return getattr(self, name).type
 
     @property

@@ -89,7 +89,7 @@ class MetricPrompt:
         return cls(
             system_prompt=data["system_prompt"],
             user_prompt=data["user_prompt"]["template"],
-            response_format=get_response_format(data["response_format"]),
+            response_format=get_response_format(data["response_format"]),  # type: ignore
             description=data.get("description", ""),
             args=args,
         )
@@ -97,6 +97,8 @@ class MetricPrompt:
     def _validate(self):
         if not self._raw_system_prompt:
             raise ValueError("System prompt is required")
+        if not self._raw_user_prompt:
+            raise ValueError("User prompt is required")
         delta_var = self._vars - set(self._args)
         if delta_var:
             raise ValueError(f"Missing arguments in prompt: {delta_var}")

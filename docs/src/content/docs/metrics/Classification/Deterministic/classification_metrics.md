@@ -37,6 +37,8 @@ print(metric(**datum))
 ### Aggregate Results
 
 ```python
+from continuous_eval.metrics.classification import SingleLabelClassification
+
 y_pred = ["A", "A", "B", "A", "B"]
 y_true =  ["A", "B", "B", "A", "B"]
 
@@ -53,10 +55,10 @@ The evaluation manager will aggregate the results of the metric automatically, c
 
 ```JSON
 {
-  'accuracy': 0.8, 
-  'balanced_accuracy': 0.83, 
-  'precision': 0.83, 
-  'recall': 0.83, 
-  'f1': 0.8
+  "accuracy": 0.8,
+  "balanced_accuracy": 0.8333333333333333,
+  "precision": 0.8333333333333333,
+  "recall": 0.8333333333333333,
+  "f1": 0.8,
 }
 ```

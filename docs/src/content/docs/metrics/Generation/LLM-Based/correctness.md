@@ -1,11 +1,10 @@
 ---
-title: LLM-based Correctness
+title: AnswerCorrectness
 ---
 
 ### Definition
 
-
-**LLM-based Answer Correctness** outputs a score between 0.0 - 1.0 assessing the overall quality of the answer, given the question and ground truth answer. 
+** Answer Correctness** outputs a score between 0.0 - 1.0 assessing the overall quality of the answer, given the question and ground truth answer. 
 
 **Scoring rubric in LLM Prompt:**
 
@@ -15,14 +14,12 @@ title: LLM-based Correctness
 - 0.75 means that the answer is relevant to the question and is correct.
 - 1.0 means that the answer is relevant to the question and is correct and complete.
 
-
 ### Example Usage
 
 Required data items: `question`, `answer`, `ground_truths`
 
 ```python
-from continuous_eval.metrics.generation.text import LLMBasedAnswerCorrectness
-from continuous_eval.llm_factory import LLMFactory
+from continuous_eval.metrics.generation.text import AnswerCorrectness
 
 datum = {
     "question": "Who wrote 'Romeo and Juliet'?",
@@ -35,15 +32,15 @@ datum = {
     ]
 }
 
-metric = LLMBasedAnswerCorrectness(LLMFactory("gpt-4-1106-preview"))
+metric = AnswerCorrectness()
 print(metric(**datum))
 ```
 
 ### Sample Output
 
-```JSON
+```python
 {
-    'LLM_based_answer_correctness': 1.0, 
-    'LLM_based_answer_correctness_reasoning': 'The answer is relevant to the question and is correct and complete. It matches the ground truth reference answers provided.'
+    "correctness": 0.9999867895679586,
+    "reasoning": "The generated answer correctly identifies Shakespeare as the author of 'Romeo and Juliet'.",
 }
 ```

@@ -9,11 +9,9 @@ sidebar:
 **Tool Selection Accuracy** measures how well an LLM selects a tool / function in a given module.
 
 The used tools are compared with the expected tools and the metric outputs:
--   `num_correct`: total number of tools that are selected AND called with the correct arguments
--   `score`: `num_correct` / total number of tools in `ground_truths`
 
-<br>
-
+- `num_correct`: total number of tools that are selected AND called with the correct arguments
+- `score`: `num_correct` / total number of tools in `ground_truths`
 
 ### Example Usage
 
@@ -44,7 +42,7 @@ print(metric(**datum))
 
 ### Example Output
 
-```JSON
+```python
 {
     "num_correct": 1, 
     "score": 0.5

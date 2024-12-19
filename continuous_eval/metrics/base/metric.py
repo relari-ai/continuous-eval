@@ -94,18 +94,20 @@ class Field(BaseModel):
     limits: Optional[Tuple[float, float]] = None
     internal: bool = False
     description: Optional[str] = None
+    type_hint: str = "Any"
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    @field_validator("type")
-    def check_type(cls, value):
+    # @field_validator("type", mode="before")
+    # def check_type(cls, value, values):
+    def post_init(self, __context):
         # Handle standard types
-        if isinstance(value, type) and hasattr(value, "__name__"):
-            return value.__name__
+        if isinstance(self.type, type) and hasattr(self.type, "__name__"):
+            self.type_hint = self.type.__name__
         # Handle `typing` types
-        if hasattr(value, "__origin__"):
-            origin = get_origin(value)
-            args = get_args(value)
+        if hasattr(self.type, "__origin__"):
+            origin = get_origin(self.type)
+            args = get_args(self.type)
             args_str = ", ".join(
                 [
                     arg.__name__ if isinstance(arg, type) else str(arg)
@@ -120,16 +122,16 @@ class Field(BaseModel):
                 )
             else:
                 origin_name = ""
-            return f"{origin_name}[{args_str}]"
+            self.type_hint = f"{origin_name}[{args_str}]"
         raise ValueError("Invalid type provided")
 
     @field_serializer("type")
     def serialize_type(self, type: Any, _info):
         return type_hint_to_str(type)
 
-    @property
-    def type_hint(self):
-        return str_to_type_hint(self.type)
+    # @property
+    # def type_hint(self):
+    #     return str_to_type_hint(self.type)
 
 
 class MetricDecoratorMeta(ABCMeta, type):

@@ -49,7 +49,7 @@ export default defineConfig({
 						{ label: 'Metrics and Tests', link: '/pipeline/metrics_and_tests'},
             { label: 'Pipeline Logger', link: '/pipeline/pipeline_logger' },
             { label: 'Evaluation Runner', link: '/pipeline/eval_runner' },
-						{ label: 'Evaluation Manager (Deprecated)', link: '/pipeline/eval_manager' },
+            { label: 'Supported LLMs', link: '/pipeline/llms' },
 					],
 
         },
@@ -57,6 +57,7 @@ export default defineConfig({
 					label: 'Metrics',
 					items: [
 						{ label: 'Overview', link: '/metrics/overview/' },
+						{label: 'Metric Class', link: '/metrics/base/'},
 						{
 							label: 'Retrieval',
 							collapsed: true,
@@ -127,15 +128,11 @@ export default defineConfig({
 								},
 							]
 						},
-						{label: 'Custom Metrics', link: '/metrics/custom_metrics/'},
-						{label: 'Metric Ensembling', link: '/metrics/ensembling_classifier/'},
+						{label: 'LLM-as-a-judge Metrics', link: '/metrics/llm_as_a_judge/'},
+            {label: 'Probabilistic Metrics', link: '/metrics/probabilistic_metrics/'},
 						],
 				},
-				{
-					label: 'Datasets',
-					autogenerate: { directory: '/dataset/' }
-				},
-        		{
+        {
 					label: 'Examples',
 					items : [
 						{

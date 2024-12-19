@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Union
 from continuous_eval.metrics.base import (
     Arg,
     Field,
-    Metric,
     MetricPrompt,
     response_type,
 )
@@ -16,7 +15,7 @@ from continuous_eval.metrics.base.probabilistic import (
 _CWD = Path(__file__).parent
 
 
-class SQLCorrectness(ProbabilisticMetric, Metric):
+class SQLCorrectness(ProbabilisticMetric):
     """
     The LLM based SQL correctness metric.
     Measures whether the generated SQL query is correct and matches the ground truth SQL query considering natural language exp.
