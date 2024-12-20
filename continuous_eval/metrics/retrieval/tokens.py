@@ -8,7 +8,7 @@ _CHARACTERS_PER_TOKEN = 4.0
 
 
 class TokenCount(Metric):
-    def __init__(self, encoder_name: str) -> None:
+    def __init__(self, encoder_name: str = "gpt-4o-mini") -> None:
         super().__init__(is_cpu_bound=True)
         if encoder_name == "approx":
             self._encoder = None
@@ -16,7 +16,12 @@ class TokenCount(Metric):
             try:
                 self._encoder = tiktoken.get_encoding(encoder_name)
             except ValueError:
-                raise ValueError(f"Invalid encoder name: {encoder_name}")
+                try:
+                    self._encoder = tiktoken.encoding_for_model(encoder_name)
+                except ValueError:
+                    raise ValueError(
+                        f"Invalid encoder name: {encoder_name}. You can use encoders names like `o200k_base` or model names like `gpt4o-mini`."
+                    )
 
     def compute(self, retrieved_context, **kwargs):
         ctx = "\n".join(retrieved_context)
