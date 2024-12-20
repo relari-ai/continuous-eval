@@ -11,25 +11,13 @@ from continuous_eval.metrics.base.response_type import (
 )
 
 
-class MetricPrompt:
+class PromptTemplate:
     def __init__(
         self,
         system_prompt: str,
         user_prompt: str,
-        response_format: Union[ResponseFormat, ScoringFunction],
-        description: Optional[str] = None,
         args: Optional[Dict[str, Arg]] = None,
     ):
-        """
-        A prompt for a custom metric.
-
-        Args:
-            system_prompt (str): The system prompt to be used.
-            user_prompt (str): The user prompt to be used (supports jinja2 templating).
-            response_format (Union[ResponseFormat, ScoringFunction]): The expected response format or scoring function.
-            description (str, optional): A description of the prompt. Defaults to "No description provided".
-            args (Dict[str, Arg], optional): A dictionary of argument properties. Defaults to None.
-        """
         self._env = Environment(loader=BaseLoader())
 
         self._raw_system_prompt = system_prompt
@@ -44,26 +32,7 @@ class MetricPrompt:
             self._raw_system_prompt
         )
         self._args = args or {var: Arg() for var in self._vars}
-        self.response_format = response_format
-        self.description = description
         self._validate()
-
-    @classmethod
-    def from_file(
-        cls,
-        system_prompt_path: Path,
-        user_prompt_path: Path,
-        response_format: Union[ResponseFormat, ScoringFunction],
-        description: Optional[str] = None,
-        args: Optional[Dict[str, Arg]] = None,
-    ):
-        with open(system_prompt_path, "r") as f:
-            system_prompt = f.read()
-        with open(user_prompt_path, "r") as f:
-            user_prompt = f.read()
-        return cls(
-            system_prompt, user_prompt, response_format, description, args
-        )
 
     def serialize(self):
         return {
@@ -72,10 +41,18 @@ class MetricPrompt:
                 "format": "jinja",
                 "template": self._raw_user_prompt,
             },
-            "response_format": self.response_format.serialize(),
-            "description": self.description,
             "args": {k: v.to_dict() for k, v in self._args.items()},
         }
+
+    def __getstate__(self) -> object:
+        return self.serialize()
+
+    def __setstate__(self, state: Dict):
+        self.__init__(
+            state["system_prompt"],
+            state["user_prompt"]["template"],
+            {k: Arg.from_dict(v) for k, v in state["args"].items()},
+        )
 
     @classmethod
     def deserialize(cls, data: Dict):
@@ -89,8 +66,6 @@ class MetricPrompt:
         return cls(
             system_prompt=data["system_prompt"],
             user_prompt=data["user_prompt"]["template"],
-            response_format=get_response_format(data["response_format"]),  # type: ignore
-            description=data.get("description", ""),
             args=args,
         )
 
@@ -128,3 +103,81 @@ class MetricPrompt:
 
     def get_identifiers(self):
         return set(self._args.keys())
+
+    @classmethod
+    def from_file(
+        cls,
+        system_prompt_path: Path,
+        user_prompt_path: Path,
+        args: Optional[Dict[str, Arg]] = None,
+    ):
+        with open(system_prompt_path, "r") as f:
+            system_prompt = f.read()
+        with open(user_prompt_path, "r") as f:
+            user_prompt = f.read()
+        return cls(system_prompt, user_prompt, args)
+
+
+class MetricPrompt(PromptTemplate):
+    def __init__(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        response_format: Union[ResponseFormat, ScoringFunction],
+        description: Optional[str] = None,
+        args: Optional[Dict[str, Arg]] = None,
+    ):
+        """
+        A prompt for a custom metric.
+
+        Args:
+            system_prompt (str): The system prompt to be used.
+            user_prompt (str): The user prompt to be used (supports jinja2 templating).
+            response_format (Union[ResponseFormat, ScoringFunction]): The expected response format or scoring function.
+            description (str, optional): A description of the prompt. Defaults to "No description provided".
+            args (Dict[str, Arg], optional): A dictionary of argument properties. Defaults to None.
+        """
+        super().__init__(system_prompt, user_prompt, args)
+        self.response_format = response_format
+        self.description = description
+
+    @classmethod
+    def from_file(
+        cls,
+        system_prompt_path: Path,
+        user_prompt_path: Path,
+        response_format: Union[ResponseFormat, ScoringFunction],
+        description: Optional[str] = None,
+        args: Optional[Dict[str, Arg]] = None,
+    ):
+        with open(system_prompt_path, "r") as f:
+            system_prompt = f.read()
+        with open(user_prompt_path, "r") as f:
+            user_prompt = f.read()
+        return cls(
+            system_prompt, user_prompt, response_format, description, args
+        )
+
+    def serialize(self):
+        return {
+            **super().serialize(),
+            "response_format": self.response_format.serialize(),
+            "description": self.description,
+        }
+
+    @classmethod
+    def deserialize(cls, data: Dict):
+        if data["user_prompt"]["format"] != "jinja":
+            raise ValueError("Only jinja prompts are supported")
+        if "template" not in data["user_prompt"]:
+            raise ValueError("User prompt must contain a 'template'")
+        args = None
+        if "args" in data:
+            args = {k: Arg.from_dict(v) for k, v in data["args"].items()}
+        return cls(
+            system_prompt=data["system_prompt"],
+            user_prompt=data["user_prompt"]["template"],
+            response_format=get_response_format(data["response_format"]),  # type: ignore
+            description=data.get("description", ""),
+            args=args,
+        )
