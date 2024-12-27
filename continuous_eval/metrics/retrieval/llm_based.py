@@ -45,13 +45,13 @@ class ContextPrecision(ProbabilisticMetric):
         self.use_few_shot = use_few_shot
         self.log_relevance_by_context = log_relevance_by_context
 
-    def __call__(self, retrieved_context, question, **kwargs):
+    def compute(self, retrieved_context, question, **kwargs):
         """
         Calculate the context precision score for the given datum.
         """
         scores = list()
         for context in retrieved_context:
-            score = super().__call__(
+            score = super().compute(
                 question=question,
                 context=context,
                 use_few_shot=self.use_few_shot,
@@ -131,7 +131,7 @@ class ContextCoverage(LLMMetric):
         )
         self.use_few_shot = use_few_shot
 
-    def __call__(
+    def compute(
         self,
         question: str,
         retrieved_context: List[str],
@@ -145,7 +145,7 @@ class ContextCoverage(LLMMetric):
             ground_truth_answers = [ground_truth_answers]
         scores_by_gt_answer = list()
         for gt in ground_truth_answers:
-            score = super().__call__(
+            score = super().compute(
                 question=question,
                 context=retrieved_context,
                 answer=gt,

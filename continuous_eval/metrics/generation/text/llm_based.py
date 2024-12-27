@@ -41,13 +41,13 @@ class Faithfulness(ProbabilisticMetric):
         )
         self.use_few_shot = use_few_shot
 
-    def __call__(
+    def compute(
         self,
         retrieved_context: List[str],
         answer: str,
         **kwargs,
     ):
-        score = super().__call__(
+        score = super().compute(
             context=retrieved_context,
             statement=answer,
             use_few_shot=self.use_few_shot,
@@ -177,8 +177,8 @@ class AnswerRelevance(ProbabilisticMetric):
         )
         self.use_few_shot = use_few_shot
 
-    def __call__(self, question: str, answer: str, **kwargs):
-        score = super().__call__(
+    def compute(self, question: str, answer: str, **kwargs):
+        score = super().compute(
             question=question,
             answer=answer,
             use_few_shot=self.use_few_shot,

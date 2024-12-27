@@ -143,12 +143,6 @@ class ProbabilisticMetric(Metric):
         return None
 
     def _process(self, **kwargs) -> Score:
-        if self.overloaded_params is not None:
-            margs = {
-                arg: kwargs[f.name] for arg, f in self.overloaded_params.items()
-            }
-        else:
-            margs = kwargs
         # Init categories
         category_map = {
             str(cat): cat
@@ -158,7 +152,7 @@ class ProbabilisticMetric(Metric):
             str(cat): -float("inf")
             for cat in self.prompt.response_format.values()  # type: ignore
         }  # type: ignore
-        msgs = self.prompt.render(**margs)
+        msgs = self.prompt.render(**kwargs)
         model_response = self._client.beta.chat.completions.parse(
             model=self.model,
             messages=[

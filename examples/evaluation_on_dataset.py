@@ -1,7 +1,7 @@
 from time import perf_counter
 
 from continuous_eval.data_downloader import example_data_downloader
-from continuous_eval.eval import Dataset, EvaluationRunner, SingleModulePipeline
+from continuous_eval.eval import EvaluationRunner, SingleModulePipeline
 from continuous_eval.eval.tests import GreaterOrEqualThan
 from continuous_eval.metrics.retrieval import (
     PrecisionRecallF1,
@@ -11,13 +11,10 @@ from continuous_eval.metrics.retrieval import (
 
 def main():
     # Let's download the retrieval dataset example
-    dataset_jsonl = example_data_downloader("retrieval")
-    dataset = Dataset(
-        dataset_jsonl
-    )  # .sample(10)  # random sample of 100 examples
+    dataset = example_data_downloader("retrieval")
 
     pipeline = SingleModulePipeline(
-        dataset=dataset,
+        dataset=dataset,  # type: ignore
         eval=[
             PrecisionRecallF1().use(
                 retrieved_context=dataset.retrieved_contexts,  # type: ignore

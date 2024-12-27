@@ -39,7 +39,7 @@ class SQLCorrectness(ProbabilisticMetric):
             model=model,
         )
 
-    def __call__(
+    def compute(
         self,
         question: str,
         answer: str,
@@ -47,7 +47,7 @@ class SQLCorrectness(ProbabilisticMetric):
         schema: Optional[Dict] = None,
         **kwargs,
     ):
-        score = super().__call__(
+        score = super().compute(
             question=question,
             answer=answer,
             ground_truth_answers=ground_truth_answers,

@@ -4,9 +4,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from continuous_eval.eval.modules import AgentModule
+from continuous_eval.eval.modules import TOOL_PREFIX
 from continuous_eval.eval.pipeline import Pipeline
-from continuous_eval.eval.result_types import TOOL_PREFIX
 from continuous_eval.utils.types import instantiate_type
 
 logger = logging.getLogger("eval-manager")
@@ -35,7 +34,7 @@ class PipelineLogger:
         empty_samples = dict()
         for module in self._pipeline.modules:
             empty_samples[module.name] = instantiate_type(module.output)
-            if isinstance(module, AgentModule):
+            if module.tools:
                 empty_samples[f"{TOOL_PREFIX}{module.name}"] = list()
         return empty_samples
 

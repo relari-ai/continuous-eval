@@ -5,11 +5,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from continuous_eval.eval.dataset import Dataset
-from continuous_eval.eval.modules import AgentModule
 from continuous_eval.eval.pipeline import Pipeline
 from continuous_eval.utils.types import instantiate_type
-
-TOOL_PREFIX = "_tool__"
+from continuous_eval.eval.logger import PipelineLogger
+from continuous_eval.utils.generic import all_sets_equal
 
 
 class PipelineResults:
@@ -18,12 +17,20 @@ class PipelineResults:
 
     @classmethod
     def from_dataset(cls, dataset: Dataset):
+        if not isinstance(dataset, Dataset):
+            raise ValueError("Invalid data type")
         eval_results = cls()
         eval_results.results = dataset.data
         return eval_results
 
     @classmethod
-    def from_logs(cls, logs):
+    def from_logs(cls, logs: PipelineLogger):
+        if not isinstance(logs, PipelineLogger):
+            raise ValueError("Invalid data type")
+        if logs.pipeline is None:
+            raise ValueError("Pipeline not set")
+        if logs.pipeline.dataset is None:
+            raise ValueError("Dataset not set")
         eval_results = cls()
         for datum in logs.pipeline.dataset.data:
             if datum["uid"] not in logs.data:
@@ -34,7 +41,32 @@ class PipelineResults:
         ), "Could not find some uid in the dataset"
         return eval_results
 
+    @classmethod
+    def from_dict(cls, data: Dict):
+        eval_results = cls()
+        modules = set(data.keys())
+        if not modules:
+            raise ValueError("No modules found")
+        uids = {module: list(data[module].keys()) for module in modules}
+        if not all_sets_equal(
+            {module: set(uids[module]) for module in modules}
+        ):
+            raise ValueError("Not all uids are the same")
+        uids = uids[next(iter(modules))]
+        if not uids:
+            raise ValueError("No samples found")
+        for uid in uids:
+            eval_results.results.append(
+                {
+                    "uid": uid,
+                    **{module: data[module][uid] for module in modules},
+                }
+            )
+        return eval_results
+
     def initialize(self, pipeline: Pipeline):
+        if pipeline.dataset is None:
+            raise ValueError("Evaluation pipeline's dataset not set")
         num_samples = len(pipeline.dataset.data)
         self.results: List[Dict] = [
             self._build_empty_samples(pipeline) for _ in range(num_samples)
@@ -52,8 +84,9 @@ class PipelineResults:
         empty_samples = dict()
         for module in pipeline.modules:
             empty_samples[module.name] = instantiate_type(module.output)
-            if isinstance(module, AgentModule):
-                empty_samples[f"{TOOL_PREFIX}{module.name}"] = list()
+            # TODO: Remove this once we have tools
+            # if isinstance(module, AgentModule):
+            #     empty_samples[f"{TOOL_PREFIX}{module.name}"] = list()
         return empty_samples
 
     def save(self, filepath: Path):

@@ -32,7 +32,9 @@ class _LLMFactory:
     def default() -> str:
         return os.getenv("DEFAULT_EVAL_MODEL", "openai:gpt-4o-mini")
 
-    def get(self, model, **kwargs) -> LLMInterface:
+    def get(self, model: Optional[str] = None, **kwargs) -> LLMInterface:
+        if model is None:
+            model = self.default()
         _split = model.split(":")
         provider = _split[0]
         model = model[len(provider) + 1 :]

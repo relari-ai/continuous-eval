@@ -65,9 +65,7 @@ class SQLSyntaxMatch(Metric, _SQLMetric):
         super(SQLSyntaxMatch, self).__init__()
         _SQLMetric.__init__(self, optimize=optimize, schema=schema)
 
-    def __call__(
-        self, answer: str, ground_truth_answers: Union[List[str], str]
-    ):
+    def compute(self, answer: str, ground_truth_answers: Union[List[str], str]):
         if isinstance(ground_truth_answers, str):
             ground_truth_answers = [ground_truth_answers]
 
@@ -114,7 +112,7 @@ class SQLASTSimilarity(Metric, _SQLMetric):
         _SQLMetric.__init__(self, optimize=optimize, schema=schema)
         self._diff_weights = diff_weights
 
-    def __call__(
+    def compute(
         self, answer: str, ground_truth_answers: Union[List[str], str], **kwargs
     ):
         if isinstance(ground_truth_answers, str):

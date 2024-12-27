@@ -54,9 +54,8 @@ def instantiate_type(type_hint: Type):
     try:
         # This only works for types without required arguments in their __init__.
         instance = origin()
-    except TypeError as e:
+    except TypeError:
         # If instantiation fails, return an error message or raise a custom exception
-        print(e)
         instance = None
     return instance
 

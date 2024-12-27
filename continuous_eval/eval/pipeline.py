@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
@@ -10,20 +10,22 @@ from continuous_eval.utils.types import type_hint_to_str
 
 @dataclass
 class ModuleOutput:
-    selector: Callable = field(default=lambda x: x)
+    selector: Optional[Callable] = None
     module: Optional[Union[Module, str]] = None
 
     def __call__(self, *args: Any) -> Any:
-        return self.selector(*args)
+        selector = self.selector or (lambda x: x)
+        return selector(*args)
 
 
 @dataclass
 class CalledTools:
-    selector: Callable = field(default=lambda x: x)
+    selector: Optional[Callable] = None
     module: Optional[Module] = None
 
     def __call__(self, *args: Any) -> Any:
-        return self.selector(*args)
+        selector = self.selector or (lambda x: x)
+        return selector(*args)
 
 
 @dataclass

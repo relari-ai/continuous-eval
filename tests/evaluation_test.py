@@ -126,6 +126,3 @@ def test_evaluation():
     assert module_name in test_results.results
     assert "Recall" in test_results.results[module_name]
     assert not test_results.results[module_name]["Recall"]
-
-
-test_evaluation()

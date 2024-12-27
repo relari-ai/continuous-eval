@@ -31,13 +31,10 @@ from continuous_eval.utils.types import str_to_type_hint, type_hint_to_str
 
 load_dotenv()
 
-DISABLE_MULTIPROCESSING = (
-    os.getenv("CONTINUOUS_EVAL_DISABLE_MULTIPROCESSING", "false").lower()
-    == "true"
-)
-
 logger = logging.getLogger("Metric")
 logger.setLevel(logging.DEBUG)  # Set to lowest level to allow all messages
+
+_DISABLE_MULTIPROCESSING_ENV_VAR = "CONTINUOUS_EVAL_DISABLE_MULTIPROCESSING"
 
 
 class Arg(BaseModel):
@@ -98,8 +95,6 @@ class Field(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    # @field_validator("type", mode="before")
-    # def check_type(cls, value, values):
     def post_init(self, __context):
         # Handle standard types
         if isinstance(self.type, type) and hasattr(self.type, "__name__"):
@@ -129,10 +124,6 @@ class Field(BaseModel):
     def serialize_type(self, type: Any, _info):
         return type_hint_to_str(type)
 
-    # @property
-    # def type_hint(self):
-    #     return str_to_type_hint(self.type)
-
 
 class MetricDecoratorMeta(ABCMeta, type):
     def __new__(cls, name, bases, dct):
@@ -156,7 +147,11 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
         super().__init__()
         self._overloaded_params = None
         self.io_bound = not is_cpu_bound
-        if disable_multiprocessing or DISABLE_MULTIPROCESSING:
+        if (
+            disable_multiprocessing
+            or os.getenv(_DISABLE_MULTIPROCESSING_ENV_VAR, "false").lower()
+            == "true"
+        ):
             self.max_workers = None
         else:
             # Compute the number of workers based on the number of cores
@@ -187,7 +182,6 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
     def _batch_sequential(
         self, generate_items: Callable[[], Any], tot: int
     ) -> Any:
-        logger.info("Using sequential batch processing")
         return [
             self.__call__(**kwargs)
             for kwargs in tqdm(
@@ -210,7 +204,6 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
 
         if self.max_workers is None or self.max_workers == 1:
             return self._batch_sequential(generate_items, tot)
-
         process_pool = (
             ThreadPoolExecutor if self.io_bound else ProcessPoolExecutor
         )
