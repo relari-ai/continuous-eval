@@ -29,8 +29,8 @@ def _serialize_input_type(obj):
 @dataclass(frozen=True, eq=True)
 class Tool:
     name: str
-    args: Dict[str, Type]
-    out_type: Type
+    args: Dict[str, Type] = field(default_factory=dict)
+    out_type: Optional[Type] = field(default=None)
     description: Optional[str] = field(default=None)
 
     def asdict(self):
@@ -46,7 +46,7 @@ class Tool:
 class Module:
     name: str
     input: Union[DatasetField, "Module", None]
-    output: Type
+    output: Union[Type, None] = field(default=None)
     description: Optional[str] = field(default=None)
     eval: Optional[List[Metric]] = field(default=None)
     tests: Optional[List[Test]] = field(default=None)

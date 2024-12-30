@@ -22,7 +22,7 @@ class DeterministicFaithfulness(Metric):
         self,
         thresholds: DeterministicFaithfulnessConfig = DeterministicFaithfulnessConfig(),
     ):
-        super().__init__()
+        super().__init__(is_cpu_bound=True)
         self.cfg = thresholds
         self._token_overlap = TokenOverlap()
         self._rouge = RougeScore()

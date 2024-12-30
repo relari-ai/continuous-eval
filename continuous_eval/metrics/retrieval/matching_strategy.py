@@ -55,11 +55,6 @@ class ExactSentenceMatch(MatchingStrategy):
 
 class RougeChunkMatch(MatchingStrategy):
     _rouge = Rouge()
-    # def __new__(cls, *args, **kwargs):
-    #     # Always initialize _rouge during object creation
-    #     instance = super().__new__(cls)
-    #     instance._rouge = Rouge()  # type: ignore
-    #     return instance
 
     def __init__(self, threshold=_DEFAULT_ROUGE_CHUNK_MATCH_THRESHOLD) -> None:
         super().__init__()
