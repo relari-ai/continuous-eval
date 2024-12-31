@@ -1,11 +1,10 @@
 ---
-title: Probabilistic Metrics
+title: Probabilistic LLM Metrics
 sidebar:
   order: 20
 ---
  
-It is possible to define probabilistic metrics that return a probability the different scores.
-While this is powerful, it has its limitations which will be discussed later.
+Probabilistic LLM metrics are LLM-as-a-Judge metrics that provide score distributions with their associated confidence levels, enabling assessment of model certainty in its evaluations. These distributions are derived from the model's token-level log probabilities.
 
 ## Define a Probabilistic Metric
 
@@ -43,9 +42,22 @@ metric = PIICheck()
 print(metric(answer="John Doe resides at 123 Main Street, Springfield."))
 ```
 
+#### Example Output
+
+```json
+{
+    "PIICheck_score": "yes",
+    "PIICheck_reasoning": "The answer contains a full name (John Doe) and a complete address (123 Main Street, Springfield), both of which are considered personally identifiable information (PII). Therefore, it falls under the category of containing sensitive information.",
+    "PIICheck_probabilities": {
+        "yes": 1.0,
+        "no": 0.0
+    }
+}
+```
+
 ### Integer Scoring
 
-In this case, the metric returns a probability over integer values.
+In this case, the metric returns a probability over integer values. In addition to the score distribution, the metric can output the weighted score directly using `weighted_score` method of `response_format`.
 
 ```python
 from continuous_eval.metrics.base import Arg, MetricPrompt, response_type
@@ -70,14 +82,39 @@ class SentimentAnalysis(ProbabilisticMetric):
             system_prompt,
             user_prompt,
             args={"sentence": Arg(type=str, description="The sentence to evaluate.")},
-            response_format=response_type.Integer(ge=1, le=5),  # type: ignore
+            response_format=response_type.Integer(ge=1, le=5),  # Greater than or equal to 1, less than or equal to 5
             description="Evaluate the sentiment of the sentence.",
         )
         super().__init__(name="SentimentAnalysis", prompt=prompt)
 
 
 metric = SentimentAnalysis()
-print(metric(sentence="The product is not bad, but it’s not great either"))
+result = metric(sentence="The product is not bad, but it’s not great either")
+print(result)
+
+# Optionally, you can output the weighted score directly, which is normalized based on the upper and lower bounds of the response format
+print({"weighted_score": metric.prompt.response_format.weighted_score(result['SentimentAnalysis_probabilities'])})
+```
+
+#### Example Output
+
+```json
+{
+    "SentimentAnalysis_score": 3,
+    "SentimentAnalysis_reasoning": "The sentence expresses a moderate view of the product, suggesting it has some positive qualities ('not bad'), but it also indicates a lack of strong enthusiasm or satisfaction ('not great either'). This makes the sentiment neutral, as it neither strongly opposes nor strongly endorses the product.",
+    "SentimentAnalysis_probabilities": {
+        "1": 0.0,
+        "2": 1.250152864552272e-09,
+        "3": 0.9999999985326031,
+        "4": 2.1724399318911855e-10,
+        "5": 0.0
+    }
+}
+
+# Weighted Score Output
+{
+    "weighted_score": 0.499999953716648  // Returns a value between 0 and 1
+}
 ```
 
 ## Current limitations

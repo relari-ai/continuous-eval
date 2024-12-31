@@ -58,6 +58,8 @@ export default defineConfig({
 					items: [
 						{ label: 'Overview', link: '/metrics/overview/' },
 						{label: 'Metric Class', link: '/metrics/base/'},
+						{label: 'LLM-as-a-Judge Metrics', link: '/metrics/llm_as_a_judge/'},
+						{label: 'Probabilistic LLM Metrics', link: '/metrics/probabilistic_metrics/'},			
 						{
 							label: 'Retrieval',
 							collapsed: true,
@@ -128,8 +130,6 @@ export default defineConfig({
 								},
 							]
 						},
-						{label: 'LLM-as-a-judge Metrics', link: '/metrics/llm_as_a_judge/'},
-            {label: 'Probabilistic Metrics', link: '/metrics/probabilistic_metrics/'},
 						],
 				},
         {

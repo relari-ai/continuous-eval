@@ -46,6 +46,19 @@ metric = CustomMetric(
 print(metric(answer="John Doe resides at 123 Main Street, Springfield."))
 ```
 
+#### Example Output
+
+```json
+{
+    "reasoning": "The answer contains identifiable personal information, including a full name ('John Doe') and a specific home address ('123 Main Street, Springfield'). This qualifies as personally identifiable information (PII).",
+    "score": "Yes",
+    "identifies": [
+        "John Doe",
+        "123 Main Street, Springfield"
+    ]
+}
+```
+
 Here we defined the `criteria` and `rubric` for the metric.
 We also defined the `arguments` and `response_format` for the metric.
 The `arguments` are the arguments that the metric will take as input along with their types and descriptions.
@@ -97,6 +110,19 @@ class PIICheck(LLMMetric):
 
 metric = PIICheck()
 print(metric(answer="John Doe resides at 123 Main Street, Springfield."))
+```
+
+#### Example Output
+
+```json
+{
+    "reasoning": "The answer contains a full name 'John Doe' and a specific address '123 Main Street, Springfield', which are considered personally identifiable information (PII) as they can be used to identify an individual.",
+    "score": "Yes",
+    "identifies": [
+        "John Doe",
+        "123 Main Street, Springfield"
+    ]
+}
 ```
 
 The main difference between `CustomMetric` and `LLMMetric` is that when using `LLMMetric`, you have to define the system and user prompts yourself.
