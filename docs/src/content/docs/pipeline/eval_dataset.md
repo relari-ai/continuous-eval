@@ -154,6 +154,16 @@ Below are the example datasets you can use to test your pipeline/code.
     <td>10 Paul Graham essays, created from <a href="https://github.com/ofou/graham-essays">graham-essays</a></td>
     <td>Zip of txt</td>
   </tr>
+  <tr>
+    <td>graham_essays/small/dataset</td>
+    <td>55 questions about Paul Graham essays</td>
+    <td>`Dataset`</td>
+  </tr>
+  <tr>
+    <td>graham_essays/small/results</td>
+    <td>The results (i.e., answer and retrieved documents) from a simple RAG pipeline</td>
+    <td>JSON</td>
+  </tr>
 </table>
 
 #### Download Datasets

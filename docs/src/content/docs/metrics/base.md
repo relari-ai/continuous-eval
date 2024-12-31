@@ -2,42 +2,43 @@
 title: Metric Classes
 ---
 
-### Base Class
+## Base Class
 
 The `Metric` class is the base class for all metrics. It provides a common interface for all metrics, and it is used to create new metrics.
 
 A valid metric must implement the following methods:
 
 - `compute`: compute the metric
-- `args`: return the arguments of the metric
-- `schema`: return the schema of the metric
+- `schema`: return the output schema of the metric
 
 Let's see an example: consider (a simplified version of) the `TokenCount` metric.
 
 ```python
 class TokenCount(Metric):
-    def __init__(self -> None:
+    """
+    Calculate the number of tokens in the retrieved context.
+    """
+    def __init__(self) -> None:
         super().__init__(is_cpu_bound=True)
 
-    def compute(self, retrieved_context, **kwargs):
+    def compute(self, retrieved_context:List[str], **kwargs):
         ctx = "\n".join(retrieved_context)
         num_tokens = int(len(ctx) / 4.0)
         return {"num_tokens": num_tokens}
-
-    @property
-    def args(self):
-        return {"retrieved_context": Arg(type=List[str], is_ground_truth=False)}
 
     @property
     def schema(self):
         return {"num_tokens": Field(type=int)}
 ```
 
-# TokenCount Class Explanation
+It is important to annotate the arguments of the `compute` method with the expected type. This is used to validate the input of the metric and provide the `args` property.
+Also, it is important to add the `**kwargs` argument to the `compute` method.
 
-The provided code defines a Python class named `TokenCount`, which is a subclass of a base class called `Metric`. This class is designed to compute a specific metric related to token counting in a given context. Here’s a step-by-step explanation of the code:
+Optionally, you can add a `help` property or add a docstring to the class to provide a description of the metric.
 
 ## Step-by-Step Explanation
+
+The provided code defines a Python class named `TokenCount`, which is a subclass of a base class called `Metric`. This class is designed to compute a specific metric related to token counting in a given context. Here’s a step-by-step explanation of the code:
 
 ### Class Definition
 
@@ -73,18 +74,6 @@ The `compute` method is responsible for calculating the metric. It takes `retrie
 
 The method returns a dictionary containing the computed number of tokens: `{"num_tokens": num_tokens}`.
 
-### Args Property
-
-The `args` property defines the expected arguments for the metric, which we can infer the arguments of the `compute` method.
-
-```python
-@property
-def args(self):
-    return {"retrieved_context": Arg(type=List[str], is_ground_truth=False)}
-```
-
-It returns a dictionary where the key is `"retrieved_context"` and the value is an instance of `Arg`.
-
 ### Schema Property
 
 ```python
@@ -100,4 +89,3 @@ The `schema` property defines the output structure of the metric. This can be in
 ## Default Metrics
 
 Continuous-eval provides a set of default metrics that are useful for evaluating the performance of a model. These metrics are implemented in the `metrics` module.
-

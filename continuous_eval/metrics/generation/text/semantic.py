@@ -10,7 +10,7 @@ except (ImportError, ModuleNotFoundError):
         "To use BertSimilarity, please install PyTorch and Pandas."
     )
 
-from continuous_eval.metrics.base import Arg, Field, Metric
+from continuous_eval.metrics.base import Field, Metric
 from continuous_eval.metrics.generation.text.bert import (
     BertSimilarity,
     DebertaScores,
@@ -35,13 +35,6 @@ class BertAnswerRelevance(Metric):
             "bert_answer_relevance": BertSimilarity()(answer, question)[
                 "bert_similarity"
             ]
-        }
-
-    @property
-    def args(self):
-        return {
-            "answer": Arg(type=str),
-            "question": Arg(type=str),
         }
 
     @property
@@ -99,13 +92,6 @@ class BertAnswerSimilarity(Metric):
         return [
             {"bert_answer_similarity": x} for x in ret["bert_answer_similarity"]
         ]
-
-    @property
-    def args(self):
-        return {
-            "answer": Arg(type=str),
-            "ground_truth_answers": Arg(type=List[str]),
-        }
 
     @property
     def schema(self):
@@ -207,13 +193,6 @@ class DebertaAnswerScores(Metric):
         return {
             entailment_key: probs[1].item(),
             contradiction_key: probs[0].item(),
-        }
-
-    @property
-    def args(self):
-        return {
-            "answer": Arg(type=str),
-            "ground_truth_answers": Arg(type=List[str]),
         }
 
     @property

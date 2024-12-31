@@ -1,7 +1,7 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from continuous_eval.eval.types import ToolCall
-from continuous_eval.metrics.base import Arg, Field, Metric
+from continuous_eval.metrics.base import Field, Metric
 
 
 class ToolSelectionAccuracy(Metric):
@@ -12,20 +12,6 @@ class ToolSelectionAccuracy(Metric):
     def __init__(self, order_sensitive: bool = False) -> None:
         super().__init__(is_cpu_bound=True)
         self._order_sensitive = order_sensitive
-
-    @property
-    def args(self) -> Dict[str, Any]:
-        return {
-            "answer": Arg(type=List[Dict], is_ground_truth=False),
-            "ground_truths": Arg(type=List[Dict], is_ground_truth=True),
-        }
-
-    @property
-    def schema(self) -> Dict[str, Field]:
-        return {
-            "score": Field(type=float, limits=(0, 1)),
-            "num_correct": Field(type=int),
-        }
 
     def compute(
         self, tools: List[ToolCall], ground_truths: List[ToolCall], **kwargs
@@ -73,4 +59,11 @@ class ToolSelectionAccuracy(Metric):
         return {
             "num_correct": num_correct,
             "score": num_correct / len(ground_truths),
+        }
+
+    @property
+    def schema(self) -> Dict[str, Field]:
+        return {
+            "score": Field(type=float, limits=(0, 1)),
+            "num_correct": Field(type=int),
         }

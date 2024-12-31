@@ -18,6 +18,10 @@ class DeterministicFaithfulnessConfig:
 
 
 class DeterministicFaithfulness(Metric):
+    """
+    Evaluate the faithfulness of the generated text with respect to the retrieved context.
+    """
+
     def __init__(
         self,
         thresholds: DeterministicFaithfulnessConfig = DeterministicFaithfulnessConfig(),
@@ -92,12 +96,10 @@ class DeterministicFaithfulness(Metric):
             "bleu_score_by_sentence": Field(type=List[float]),
         }
 
-    @property
-    def help(self):
-        return "Evaluates the faithfulness of the answer with respect to the retrieved context."
-
 
 class DeterministicAnswerCorrectness(Metric):
+    """Evaluates the correctness of the answer with respect to the ground truth."""
+
     def __init__(self):
         super().__init__(is_cpu_bound=True)
 
@@ -149,21 +151,10 @@ class DeterministicAnswerCorrectness(Metric):
             "bleu_score": Field(type=float, limits=(0, 1)),
         }
 
-    @property
-    def args(self):
-        return {
-            "answer": Arg(type=str, is_ground_truth=False),
-            "ground_truth_answers": Arg(
-                type=Union[List[str], str], is_ground_truth=True
-            ),
-        }
-
-    @property
-    def help(self):
-        return "Evaluates the correctness of the answer with respect to the ground truth."
-
 
 class DeterministicMatch(Metric):
+    """Evaluates the exact match score between the generated text and the ground truth."""
+
     def __init__(self):
         super().__init__(is_cpu_bound=True)
 
@@ -188,15 +179,6 @@ class DeterministicMatch(Metric):
     def schema(self) -> Dict[str, Field]:
         return {"match": Field(type=float, limits=(0, 1))}
 
-    @property
-    def args(self):
-        return {
-            "answer": Arg(type=str, is_ground_truth=False),
-            "ground_truth_answers": Arg(
-                type=Union[str, List[str]], is_ground_truth=True
-            ),
-        }
-
 
 class FleschKincaidReadability(Metric):
     """Computes the Flesch Reading Ease and Flesch-Kincaid Grade Level readability scores."""
@@ -206,19 +188,7 @@ class FleschKincaidReadability(Metric):
         self._word_tokenizer = nltk.tokenize.RegexpTokenizer(r"\w+")
         self._syl_tokenizer = nltk.tokenize.SyllableTokenizer()
 
-    @property
-    def schema(self) -> Dict[str, Field]:
-        return {
-            "flesch_reading_ease": Field(type=float),
-            "flesch_kincaid_grade_level": Field(type=float),
-        }
-
-    @property
-    def args(self):
-        return {"answer": Arg(type=str, is_ground_truth=False)}
-
     def compute(self, answer, **kwargs):
-        """Computes the Flesch Reading Ease and Flesch-Kincaid Grade Level scores."""
         if answer.strip() == "":
             return {
                 "flesch_reading_ease": 121.22,
@@ -252,4 +222,11 @@ class FleschKincaidReadability(Metric):
         return {
             "flesch_reading_ease": fre_score,
             "flesch_kincaid_grade_level": fk_grade,
+        }
+
+    @property
+    def schema(self) -> Dict[str, Field]:
+        return {
+            "flesch_reading_ease": Field(type=float),
+            "flesch_kincaid_grade_level": Field(type=float),
         }

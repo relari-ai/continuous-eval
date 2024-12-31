@@ -2,7 +2,6 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
-import astroD2 from 'astro-d2'
 
 // https://astro.build/config
 export default defineConfig({
@@ -133,24 +132,14 @@ export default defineConfig({
 						],
 				},
         {
-					label: 'Examples',
-					items : [
-						{
-							label: 'Basic',
-							autogenerate: { directory: '/examples/Basics/' }
-						},
-						{
-							label: 'Advanced',
-							autogenerate: { directory: '/examples/Advanced/' }
-						},
-						{
-							label: 'End-to-End',
-							autogenerate: { directory: '/examples/End_to_End/' }
-						},
-					],
+					label: 'Examples 🔗',
+          attrs: {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+          link: 'https://github.com/relari-ai/examples'
 				},
 			],
 		}),
-    astroD2({output: 'd2', basePath: '/v0.3'}),
 	],
 });

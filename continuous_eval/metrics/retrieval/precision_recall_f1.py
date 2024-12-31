@@ -2,7 +2,7 @@ from typing import List
 
 from nltk.tokenize import sent_tokenize
 
-from continuous_eval.metrics.base import Arg, Field, Metric
+from continuous_eval.metrics.base import Field, Metric
 from continuous_eval.metrics.retrieval.matching_strategy import (
     MatchingStrategy,
     MatchingStrategyType,
@@ -77,13 +77,6 @@ class PrecisionRecallF1(Metric):
             "context_precision": precision,
             "context_recall": recall,
             "context_f1": f1,
-        }
-
-    @property
-    def args(self):
-        return {
-            "retrieved_context": Arg(type=List[str], is_ground_truth=False),
-            "ground_truth_context": Arg(type=List[str], is_ground_truth=True),
         }
 
     @property

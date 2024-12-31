@@ -9,10 +9,14 @@ from sklearn.metrics import (
     recall_score,
 )
 
-from continuous_eval.metrics.base import Arg, Field, Metric
+from continuous_eval.metrics.base import Field, Metric
 
 
 class SingleLabelClassification(Metric):
+    """
+    Evaluate the accuracy, precision, recall, and F1 score of a single-label classification task.
+    """
+
     def __init__(
         self,
         classes: Union[int, Set[str]],
@@ -78,28 +82,9 @@ class SingleLabelClassification(Metric):
         }
 
     @property
-    def name(self):
-        return "SingleLabelClassification"
-
-    @property
-    def help(self):
-        return "Evaluates the accuracy, precision, recall, and F1 score of a single-label classification task."
-
-    @property
     def schema(self):
         return {
             "classification_prediction": Field(type=Union[str, int]),
             "classification_ground_truth": Field(type=Union[str, int]),
             "classification_correct": Field(type=bool),
-        }
-
-    @property
-    def args(self):
-        return {
-            "predicted_class": Arg(
-                type=Union[str, int, List[float]], is_ground_truth=False
-            ),
-            "ground_truth_class": Arg(
-                type=Union[str, int], is_ground_truth=True
-            ),
         }

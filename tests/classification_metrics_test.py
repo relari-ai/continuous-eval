@@ -1,5 +1,5 @@
 from continuous_eval.metrics.classification import SingleLabelClassification
-from tests.helpers.utils import all_close, validate_args, validate_schema
+from tests.helpers.utils import all_close, validate_metric_metadata
 
 
 def test_numeric():
@@ -16,10 +16,8 @@ def test_numeric():
     }
 
     metric = SingleLabelClassification(classes=classes)
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(y, y_gt) for y, y_gt in zip(y_pred, y_true)]
-    assert all([validate_schema(metric.schema, x) for x in results])
+    validate_metric_metadata(metric, results)
     agg = metric.aggregate(results)
     assert all_close(agg, expected)
 
@@ -38,10 +36,8 @@ def test_string_class():
     }
 
     metric = SingleLabelClassification(classes=classes)
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(y, y_gt) for y, y_gt in zip(y_pred, y_true)]
-    assert all([validate_schema(metric.schema, x) for x in results])
+    validate_metric_metadata(metric, results)
     agg = metric.aggregate(results)
     assert all_close(agg, expected)
 
@@ -65,9 +61,7 @@ def test_probability_scores():
     }
 
     metric = SingleLabelClassification(classes=classes)
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(y, y_gt) for y, y_gt in zip(y_pred, y_true)]
-    assert all([validate_schema(metric.schema, x) for x in results])
+    validate_metric_metadata(metric, results)
     agg = metric.aggregate(results)
     assert all_close(agg, expected)

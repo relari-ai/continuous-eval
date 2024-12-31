@@ -45,6 +45,10 @@ class DebertaScores:
 
 
 class BertSimilarity(Metric):
+    """
+    Evaluate the semantic similarity between the generated text and the reference text using BERT.
+    """
+
     def __init__(self, pooler_output: bool = False):
         super().__init__(disable_multiprocessing=True)
         # Load pre-trained BERT model and tokenizer
@@ -111,7 +115,3 @@ class BertSimilarity(Metric):
     @property
     def schema(self):
         return {"bert_similarity": Field(type=float)}
-
-    @property
-    def help(self):
-        return "Evaluates the semantic similarity between the generated text and the reference text using BERT."

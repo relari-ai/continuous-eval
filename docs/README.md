@@ -6,7 +6,6 @@
 
 - [Node.js](https://nodejs.org/en/download/)
 - [npm](https://www.npmjs.com/get-npm)
-- [d2](https://github.com/terrastruct/d2/blob/master/docs/INSTALL.md)
 
 ## 🧞 Commands
 

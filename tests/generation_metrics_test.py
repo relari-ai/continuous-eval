@@ -8,7 +8,7 @@ from continuous_eval.metrics.generation.text import (
     StyleConsistency,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close, validate_args, validate_schema
+from tests.helpers.utils import all_close, validate_metric_metadata
 
 
 def test_deterministic_answer_relevance():
@@ -37,10 +37,8 @@ def test_deterministic_answer_relevance():
         },
     ]
     metric = DeterministicAnswerCorrectness()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -60,10 +58,8 @@ def test_rouge_sentence_faithfulness():
         },
     ]
     metric = DeterministicFaithfulness()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -76,10 +72,8 @@ def test_llm_based_faithfulness():
         example_datum.IMPLICATIONS_GLOBAL_WARMING,
     ]
     metric = Faithfulness()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_answer_correctness():
@@ -88,10 +82,8 @@ def test_llm_based_answer_correctness():
         example_datum.IMPLICATIONS_GLOBAL_WARMING,
     ]
     metric = AnswerCorrectness()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_answer_relevance():
@@ -100,10 +92,8 @@ def test_llm_based_answer_relevance():
         example_datum.IMPLICATIONS_GLOBAL_WARMING,
     ]
     metric = AnswerRelevance()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_style_consistency():
@@ -112,10 +102,8 @@ def test_llm_based_style_consistency():
         example_datum.IMPLICATIONS_GLOBAL_WARMING,
     ]
     metric = StyleConsistency()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
 
 
 def test_flesch_kincaid():
@@ -124,8 +112,6 @@ def test_flesch_kincaid():
         "flesch_kincaid_grade_level": -1.4499999999999993,
     }
     metric = FleschKincaidReadability()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     result = metric(answer="The cat sat on the mat.")
-    assert validate_schema(metric.schema, result)
+    validate_metric_metadata(metric, result)
     assert all_close(result, expected)

@@ -9,7 +9,7 @@ from continuous_eval.metrics.code.sql.deterministic import (
 )
 from continuous_eval.metrics.code.sql.llm import SQLCorrectness
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close, validate_args, validate_schema
+from tests.helpers.utils import all_close, validate_metric_metadata
 
 
 def test_code_string_match():
@@ -22,15 +22,13 @@ def test_code_string_match():
         {"Exact_Match_Score": 0, "Fuzzy_Match_Score": 0.71},
     ]
     metric = CodeStringMatch()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [
         metric(
             answer=datum["answer"], ground_truth_answers=datum["ground_truths"]
         )
         for datum in example_datum.PYTHON_CODE_EXAMPLES
     ]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -47,15 +45,13 @@ def test_python_ast_similarity():
         {"Python_AST_Similarity": 0.0937},
     ]
     metric = PythonASTSimilarity()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [
         metric(
             answer=datum["answer"], ground_truth_answers=datum["ground_truths"]
         )
         for datum in example_datum.PYTHON_CODE_EXAMPLES
     ]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -69,15 +65,13 @@ def test_sql_syntax_match():
         {"SQL_Syntax_Match": 0},
     ]
     metric = SQLSyntaxMatch()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [
         metric(
             answer=datum["answer"], ground_truth_answers=datum["ground_truths"]
         )
         for datum in example_datum.SQL_CODE_EXAMPLES
     ]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -91,15 +85,13 @@ def test_sql_ast_similarity():
         {"SQL_AST_Similarity": 0.8},
     ]
     metric = SQLASTSimilarity()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [
         metric(
             answer=datum["answer"], ground_truth_answers=datum["ground_truths"]
         )
         for datum in example_datum.SQL_CODE_EXAMPLES
     ]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -121,15 +113,13 @@ def test_sql_optimized_ast_similarity():
         default=0,
     )
     metric = SQLASTSimilarity(optimize=True, diff_weights=weights)
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [
         metric(
             answer=datum["answer"], ground_truth_answers=datum["ground_truths"]
         )
         for datum in example_datum.SQL_CODE_EXAMPLES
     ]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(res, expected)
         for res, expected in zip(results, expected_results)
@@ -138,8 +128,6 @@ def test_sql_optimized_ast_similarity():
 
 def test_sql_correctness():
     metric = SQLCorrectness()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     datum = {
         "question": "Retrieve the names and email addresses of all customers who have not made any purchases in the last 6 months.",
         "answer": "SELECT name, email FROM customers WHERE last_purchase_date < DATE_SUB(CURDATE(), INTERVAL 6 MONTH);",
@@ -149,7 +137,8 @@ LEFT JOIN orders o ON c.customer_id = o.customer_id AND o.order_date >= DATE_SUB
 WHERE o.order_id IS NULL;""",
     }
     results = metric(**datum)
-    assert validate_schema(metric.schema, results)
+    validate_metric_metadata(metric, results)
+
     datum = {
         "question": "Retrieve the names of customers who have placed orders totaling more than $1000.",
         "answer": """SELECT c.name
@@ -181,4 +170,4 @@ WHERE customer_id IN (
         },
     }
     results = metric(**datum)
-    assert validate_schema(metric.schema, results)
+    validate_metric_metadata(metric, results)

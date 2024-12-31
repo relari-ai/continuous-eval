@@ -1,6 +1,6 @@
 from continuous_eval.metrics.base.metric import Arg, Field
 from continuous_eval.metrics.custom import CustomMetric, Example
-from tests.helpers.utils import validate_args, validate_schema
+from tests.helpers.utils import validate_metric_metadata
 
 
 def test_llm_based_metric():
@@ -50,6 +50,4 @@ def test_llm_based_metric():
         answer="Hello, you good toray?",
         context="Toray means today in Japanese.",
     )
-    assert validate_schema(metric.schema, ret)
-    assert metric.help is not None
-    assert validate_args(metric.args)
+    validate_metric_metadata(metric, ret)

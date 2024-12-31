@@ -8,6 +8,10 @@ from continuous_eval.metrics.base import Arg, Field, Metric
 
 
 class CodeStringMatch(Metric):
+    """
+    Evaluate the exact and fuzzy match scores between the generated code and the ground truth code.
+    """
+
     def __init__(self):
         super().__init__(is_cpu_bound=True)
 
@@ -42,19 +46,17 @@ class CodeStringMatch(Metric):
             "Fuzzy_Match_Score": Field(type=float),
         }
 
-    @property
-    def help(self):
-        return "Evaluates the exact and fuzzy match scores between the generated code and the ground truth code."
-
 
 class PythonASTSimilarity(Metric):
     """
-    The following functions are adapted from python-ast-comparison by Pedro Salazar Paredes
-    Copyright (c) 2023 Pedro Salazar Paredes
-    Licensed under the MIT License
-    Source: https://github.com/PedroSalazarParedes/python-ast-comparison
-    Modifications: Adjusted to be used in the context of generated code evaluation
+    Evaluate the similarity between the generated code and the ground truth code using AST comparison.
     """
+
+    # The following functions are adapted from python-ast-comparison by Pedro Salazar Paredes
+    # Copyright (c) 2023 Pedro Salazar Paredes
+    # Licensed under the MIT License
+    # Source: https://github.com/PedroSalazarParedes/python-ast-comparison
+    # Modifications: Adjusted to be used in the context of generated code evaluation
 
     def __init__(self):
         super().__init__(is_cpu_bound=True)
@@ -407,7 +409,3 @@ class PythonASTSimilarity(Metric):
         return {
             "Python_AST_Similarity": Field(type=float),
         }
-
-    @property
-    def help(self):
-        return "Evaluates the similarity between the generated code and the ground truth code using AST comparison."

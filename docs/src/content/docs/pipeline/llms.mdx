@@ -2,7 +2,7 @@
 title: SupportedLLMs
 ---
 
-### Supported LLMs
+## Supported LLMs
 
 - OpenAI
 - Anthropic
@@ -12,3 +12,62 @@ title: SupportedLLMs
 - Groq
 - Meta
 - Gemini
+
+## How to use LLMs
+
+To use an LLM, you need to specify the `llm` parameter in the `Pipeline` class.
+
+```python
+from continuous_eval.llms import LLMFactory
+
+llm = LLMFactory.get("openai:gpt-4o-mini")
+
+print(
+    llm.run(
+        {
+            "system_prompt": "You are a helpful assistant.",
+            "user_prompt": "What is the capital of France?",
+        }
+    )
+)
+```
+
+By default only OpenAI is supported. To use other LLMs, you need to install the corresponding package and register the provider.
+Suppose we want to use `Anthropic`'s `Claude 3.5 Sonnet`.
+
+```bash
+poetry install -E anthropic
+# or
+pip install continuous-eval[anthropic]
+```
+
+Then, register the provider.
+
+```python
+from continuous_eval.llms import LLMFactory
+from continuous_eval.llms.anthropic import Anthropic
+
+LLMFactory.register_provider("anthropic", Anthropic)
+llm = LLMFactory.get("anthropic:claude-3-5-sonnet-20241022")
+```
+
+alternatively, we can also register a specific model, for example with Azure
+
+```python
+from continuous_eval.llms import LLMFactory
+from continuous_eval.llms.azure_openai import AzureOpenAIFactory
+
+LLMFactory.register_provider(
+    "azure_openai",
+    model="gpt-4o-mini",
+    provider_class=AzureOpenAIFactory(
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+        endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    ),
+)
+llm = LLMFactory.get("azure_openai:gpt-4o-mini")
+```
+
+

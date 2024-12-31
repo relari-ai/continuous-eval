@@ -45,6 +45,7 @@ class CustomMetric(LLMMetric):
             response_format=response_format,
         )
         user_prompt = user_prompt_template.render(arguments=arguments)
+        self._criteria = criteria
         self.prompt = MetricPrompt(
             sys_prompt,
             user_prompt,
@@ -55,3 +56,7 @@ class CustomMetric(LLMMetric):
         super().__init__(
             name=name, prompt=self.prompt, temperature=temperature, model=model
         )
+
+    @property
+    def help(self):
+        return self._criteria

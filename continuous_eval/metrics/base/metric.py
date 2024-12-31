@@ -18,8 +18,6 @@ from typing import (
     Tuple,
     TypeVar,
     _GenericAlias,  # type: ignore
-    get_args,
-    get_origin,
 )
 
 from dotenv import load_dotenv
@@ -41,7 +39,6 @@ class Arg(BaseModel):
     type: Any = str
     description: str = ""
     is_required: bool = True
-    is_ground_truth: bool = False
     default: Any = None
 
     @field_validator("type")
@@ -56,12 +53,6 @@ class Arg(BaseModel):
             return value
         return False
 
-    @field_validator("default")
-    def check_default(cls, value):
-        if value is not None and not isinstance(value, cls.type):
-            raise ValueError(f"Default value {value} is not of type {cls.type}")
-        return value
-
     @field_serializer("type")
     def serialize_type(self, type: Any, _info):
         return type_hint_to_str(type)
@@ -72,7 +63,6 @@ class Arg(BaseModel):
             type=str_to_type_hint(data["type"]),
             description=data.get("description", ""),
             is_required=data.get("is_required", True),
-            is_ground_truth=data.get("is_ground_truth", False),
             default=data.get("default", None),
         )
 
@@ -81,7 +71,6 @@ class Arg(BaseModel):
             "type": type_hint_to_str(self.type),
             "description": self.description,
             "is_required": self.is_required,
-            "is_ground_truth": self.is_ground_truth,
             "default": self.default,
         }
 
@@ -91,34 +80,13 @@ class Field(BaseModel):
     limits: Optional[Tuple[float, float]] = None
     internal: bool = False
     description: Optional[str] = None
-    type_hint: str = "Any"
+    # type_hint: str = "Any"  # auto-generated
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def post_init(self, __context):
-        # Handle standard types
-        if isinstance(self.type, type) and hasattr(self.type, "__name__"):
-            self.type_hint = self.type.__name__
-        # Handle `typing` types
-        if hasattr(self.type, "__origin__"):
-            origin = get_origin(self.type)
-            args = get_args(self.type)
-            args_str = ", ".join(
-                [
-                    arg.__name__ if isinstance(arg, type) else str(arg)
-                    for arg in args
-                ]
-            )
-            if origin is not None:
-                origin_name = (
-                    origin.__name__
-                    if hasattr(origin, "__name__")
-                    else origin._name
-                )
-            else:
-                origin_name = ""
-            self.type_hint = f"{origin_name}[{args_str}]"
-        raise ValueError("Invalid type provided")
+    @property
+    def type_hint(self):
+        return type_hint_to_str(self.type)
 
     @field_serializer("type")
     def serialize_type(self, type: Any, _info):
@@ -260,12 +228,22 @@ class Metric(ABC, metaclass=MetricDecoratorMeta):
 
     @property
     def args(self) -> Dict[str, Arg]:
-        # Implement this method in the subclass
-        raise NotImplementedError()
+        signature = inspect.signature(self.compute)
+        parameters = signature.parameters
+        arg_names = set(signature.parameters.keys()) - {"kwargs"}
+        args = {}
+        for name in arg_names:
+            has_default = parameters[name].default != inspect._empty
+            has_annotation = parameters[name].annotation != inspect._empty
+            args[name] = Arg(
+                type=parameters[name].annotation if has_annotation else Any,
+                default=parameters[name].default if has_default else None,
+                is_required=not has_default,
+            )
+        return args
 
     @property
     def help(self):
-        # Implement this method in the subclass
         return (
             self.__doc__.strip() if self.__doc__ else "No description available"
         )

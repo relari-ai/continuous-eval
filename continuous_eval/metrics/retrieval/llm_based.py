@@ -109,6 +109,8 @@ class ContextPrecision(ProbabilisticMetric):
 
 
 class ContextCoverage(LLMMetric):
+    """Evaluate the context coverage (i.e., the percentage of relevant statements) score."""
+
     def __init__(
         self,
         use_few_shot: bool = True,
@@ -138,9 +140,6 @@ class ContextCoverage(LLMMetric):
         ground_truth_answers: Union[List[str], str],
         **kwargs,
     ):
-        """
-        Calculate the context precision score for the given datum.
-        """
         if not isinstance(ground_truth_answers, list):
             ground_truth_answers = [ground_truth_answers]
         scores_by_gt_answer = list()
@@ -162,16 +161,6 @@ class ContextCoverage(LLMMetric):
             "statements": [
                 score["statement"] for score in scores_by_gt_answer[idx]
             ],
-        }
-
-    @property
-    def args(self):
-        return {
-            "question": Arg(type=str, is_ground_truth=False),
-            "retrieved_context": Arg(type=List[str], is_ground_truth=False),
-            "ground_truth_answers": Arg(
-                type=Union[List[str], str], is_ground_truth=True
-            ),
         }
 
     @property

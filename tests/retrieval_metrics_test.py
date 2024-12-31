@@ -11,12 +11,7 @@ from continuous_eval.metrics.retrieval import (
     TokenCount,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import (
-    all_close,
-    in_zero_one,
-    validate_args,
-    validate_schema,
-)
+from tests.helpers.utils import all_close, validate_metric_metadata
 
 
 def test_precision_recall_exact_chunk_match():
@@ -26,10 +21,8 @@ def test_precision_recall_exact_chunk_match():
         {"context_precision": 1.0, "context_recall": 1.0, "context_f1": 1.0},
     ]
     metric = PrecisionRecallF1(RougeChunkMatch(threshold=0.7))
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(metric(**datum), expected)
         for datum, expected in zip(data, expected_results)
@@ -42,10 +35,8 @@ def test_precision_recall_exact_sentence_match():
         {"context_precision": 1.0, "context_recall": 1.0, "context_f1": 1.0}
     ]
     metric = PrecisionRecallF1(RougeSentenceMatch(threshold=0.8))
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(metric(**datum), expected)
         for datum, expected in zip(data, expected_results)
@@ -66,10 +57,8 @@ def test_precision_recall_rouge_sentence_match():
         },
     ]
     metric = PrecisionRecallF1(RougeSentenceMatch())
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(metric(**datum), expected)
         for datum, expected in zip(data, expected_results)
@@ -83,10 +72,8 @@ def test_ranked_retrieval_exact_chunk_match():
         {"average_precision": 1.0, "reciprocal_rank": 1.0, "ndcg": 1.0},
     ]
     metric = RankedRetrievalMetrics(RougeChunkMatch())
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
     assert all(
         all_close(metric(**datum), expected)
         for datum, expected in zip(data, expected_results)
@@ -101,20 +88,15 @@ def test_ranked_retrieval_exact_sentence_match():
 def test_context_precision():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
     metric = ContextPrecision()
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
-    assert all(in_zero_one(metric(**datum)) for datum in data)
+    validate_metric_metadata(metric, results)
 
 
-def test_context_coverage_openai():
+def test_context_coverage():
     data = [example_datum.CAPITAL_OF_FRANCE, example_datum.ROMEO_AND_JULIET]
     metric = ContextCoverage(model="openai:gpt-4o")
-    assert metric.help is not None
-    assert validate_args(metric.args)
     results = [metric(**datum) for datum in data]
-    assert all(validate_schema(metric.schema, x) for x in results)
+    validate_metric_metadata(metric, results)
 
 
 def test_token_count():
@@ -124,6 +106,7 @@ def test_token_count():
     assert (
         result := [metric(**datum)["num_tokens"] for datum in data]
     ) == expected, result
+    validate_metric_metadata(metric)
     expected = [17, 18]
     metric = TokenCount("approx")
     assert (

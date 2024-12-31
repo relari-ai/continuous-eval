@@ -1,7 +1,7 @@
 from math import log
 from typing import List
 
-from continuous_eval.metrics.base import Arg, Field, Metric
+from continuous_eval.metrics.base import Field, Metric
 from continuous_eval.metrics.retrieval.matching_strategy import (
     MatchingStrategy,
     MatchingStrategyType,
@@ -24,7 +24,12 @@ class RankedRetrievalMetrics(Metric):
             self.matching_strategy.type == MatchingStrategyType.CHUNK_MATCH
         ), "Ranked metrics are calculated at chunk level."
 
-    def compute(self, retrieved_context, ground_truth_context, **kwargs):
+    def compute(
+        self,
+        retrieved_context: List[str],
+        ground_truth_context: List[str],
+        **kwargs,
+    ):
         # Calculate ranked metrics (MAP, MRR, NDCG) based on different matching strategies.
         map = self.calculate_average_precision(
             retrieved_context, ground_truth_context
@@ -101,13 +106,6 @@ class RankedRetrievalMetrics(Metric):
             idcg += 1 / log(i + 2, 2)
 
         return dcg / idcg
-
-    @property
-    def args(self):
-        return {
-            "retrieved_context": Arg(type=List[str], is_ground_truth=False),
-            "ground_truth_context": Arg(type=List[str], is_ground_truth=True),
-        }
 
     @property
     def schema(self):

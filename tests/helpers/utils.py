@@ -1,23 +1,17 @@
 import math
 from numbers import Number
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Mapping
 
 from continuous_eval.metrics.base import Arg, Field
 from continuous_eval.utils.types import check_type
 
 
-def is_close(
-    ret: Number, expected: Number, rel_tol: float = 1e-4, abs_tol: float = 0.0
-):
-    return math.isclose(ret, expected, rel_tol=rel_tol, abs_tol=abs_tol)
-
-
 def all_close(
-    datum_1: Dict[str, Union[Number, List[Number]]],
-    datum_2: Dict[str, Union[Number, List[Number]]],
+    datum_1: Mapping[str, Union[Number, List[Number]]],
+    datum_2: Mapping[str, Union[Number, List[Number]]],
     rel_tol: float = 1e-8,
     abs_tol: float = 1e-4,
-):
+) -> bool:
     if set(datum_1.keys()) != set(datum_2.keys()):
         return False
     for key, value1 in datum_1.items():
@@ -33,13 +27,6 @@ def all_close(
             ):
                 return False
     return True
-
-
-def in_zero_one(ret: Union[Number, Dict[str, Number]]):
-    if isinstance(ret, Number):
-        return ret >= 0 and ret <= 1
-    else:
-        return all(v >= 0 and v <= 1 for v in ret.values())
 
 
 def list_of_dicts_to_dict_of_lists(data: List[Dict[str, Any]]):
@@ -59,7 +46,7 @@ def validate_schema(schema: Dict[str, Field], data: Dict[str, Any]):
     for key, value in schema.items():
         if key not in data:
             raise ValueError(f"Key {key} not found in data")
-        if not check_type(data[key], value.type_hint):
+        if not check_type(data[key], value.type):
             raise ValueError(
                 f"Value {data[key]} for key {key} is not of type {value.type_hint}"
             )
@@ -80,3 +67,21 @@ def validate_args(args: Dict[str, Arg]):
             value, Arg
         ), f"All values in args must be of type Field, got {type(value)}"
     return True
+
+
+def validate_metric_metadata(metric, results=None):
+    assert isinstance(metric.name, str), "Metric name must be a string"
+    assert isinstance(metric.help, str), "Metric help must be a string"
+    assert isinstance(metric.schema, dict), "Metric schema must be a dictionary"
+    assert isinstance(metric.args, dict), "Metric args must be a dictionary"
+    assert metric.help != "No description available", "No help available"
+    if results is not None:
+        if isinstance(results, list):
+            assert all(
+                validate_schema(metric.schema, datum) for datum in results
+            ), "Metric schema and args do not match"
+        else:
+            assert validate_schema(
+                metric.schema, results
+            ), "Metric schema and args do not match"
+    assert validate_args(metric.args), "Metric args do not match"
