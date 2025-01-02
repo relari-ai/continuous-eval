@@ -4,11 +4,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Union
 
-from continuous_eval.eval.modules import AgentModule
+from continuous_eval.eval.modules import TOOL_PREFIX
 from continuous_eval.eval.pipeline import Pipeline
-from continuous_eval.eval.result_types import TOOL_PREFIX
-from continuous_eval.eval.utils import instantiate_type
-from continuous_eval.utils.telemetry import telemetry_event
+from continuous_eval.utils.types import instantiate_type
 
 logger = logging.getLogger("eval-manager")
 Serializable = Any
@@ -20,7 +18,6 @@ class LogMode(Enum):
 
 
 class PipelineLogger:
-    @telemetry_event("logger")
     def __init__(self, pipeline: Optional[Pipeline] = None):
         self._pipeline: Optional[Pipeline] = pipeline
         self.data = dict()
@@ -37,7 +34,7 @@ class PipelineLogger:
         empty_samples = dict()
         for module in self._pipeline.modules:
             empty_samples[module.name] = instantiate_type(module.output)
-            if isinstance(module, AgentModule):
+            if module.tools:
                 empty_samples[f"{TOOL_PREFIX}{module.name}"] = list()
         return empty_samples
 
@@ -57,7 +54,9 @@ class PipelineLogger:
             self.data[uid] = self._empty_sample()
         if kwargs and "tool_args" in kwargs:
             key = f"{TOOL_PREFIX}{module}"
-            self.data[uid][key].append({"name": value, "kwargs": kwargs["tool_args"]})
+            self.data[uid][key].append(
+                {"name": value, "kwargs": kwargs["tool_args"]}
+            )
         else:
             if mode == LogMode.REPLACE:
                 self.data[uid][module] = value

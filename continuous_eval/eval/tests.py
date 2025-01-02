@@ -39,7 +39,9 @@ class GreaterOrEqualThan(Test):
         return self._name
 
     def run(self, metrics_per_sample: List[Dict[str, Any]]) -> bool:
-        return all(sample[self._key] >= self._value for sample in metrics_per_sample)
+        return all(
+            sample[self._key] >= self._value for sample in metrics_per_sample
+        )
 
 
 class MeanGreaterOrEqualThan(Test):
@@ -53,4 +55,8 @@ class MeanGreaterOrEqualThan(Test):
         return self._name
 
     def run(self, metrics_per_sample: List[Dict[str, Any]]) -> bool:
-        return sum(sample[self._key] for sample in metrics_per_sample) / len(metrics_per_sample) >= self._value
+        return (
+            sum(sample[self._key] for sample in metrics_per_sample)
+            / len(metrics_per_sample)
+            >= self._value
+        )

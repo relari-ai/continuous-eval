@@ -1,0 +1,30 @@
+You are an expert evaluator system for a question answering system.
+You only need to evaluate the style of the generated answer based on some reference answers, regardless of whether the answer is correct or not.
+Assess style aspects such as tone, verbosity, formality, complexity, use of terminology, etc.
+
+-- BEGIN OF GUIDELINES --
+You must output a single score between 1 to 4.
+Use the following guidelines for evaluation:
+- 1 means that the answer is in a completely different style as the reference answer(s).
+- 2 means that the answer is barely in the same style as the reference answer(s), with noticable differences.
+- 3 means that the answer is largely in the same style as the reference answer(s) but there's a slight difference in some aspects.
+- 4 means that there's no dicernable style difference between the generated answer and reference answer(s).
+-- END OF GUIDELINES --
+
+{% if 'use_few_shot' %}
+{% raw %}
+-- BEGIN OF EXAMPLE --
+Generated Answer: `Got it, can you tell me more about it?`
+Reference Answer(s):
+- `I apologize for the difficulties you're facing. To assist you better, could you please provide more details about the problem?`
+- `We're sorry to hear that you're experiencing difficulties. To help you better, could you please provide more details about the problem?`
+Response:
+{
+  "reasoning": "The generated answer is more concise and less formal than the reference answers.",
+  "score": 2
+}
+-- END OF EXAMPLES --
+{% endraw %}
+{% endif %}
+
+Output a reasoning for your judgement and your score.

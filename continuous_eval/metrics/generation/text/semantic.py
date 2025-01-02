@@ -1,39 +1,73 @@
 import warnings
 from typing import Dict, List
 
-import pandas as pd
 
 try:
     import torch
-except ImportError:
-    raise ImportError("To use BertSimilarity, please install PyTorch.")
+    import pandas as pd
+except (ImportError, ModuleNotFoundError):
+    raise ImportError(
+        "To use BertSimilarity, please install PyTorch and Pandas."
+    )
 
-from continuous_eval.metrics.base import Metric
-from continuous_eval.metrics.generation.text.bert import BertSimilarity, DebertaScores
+from continuous_eval.metrics.base import Field, Metric
+from continuous_eval.metrics.generation.text.bert import (
+    BertSimilarity,
+    DebertaScores,
+)
 
 
 class BertAnswerRelevance(Metric):
-    def batch(self, answer: List[str], question: List[str]) -> List[Dict[str, float]]:
+    """Measures the semantic similarity between the Generated Answer and the Question"""
+
+    def __init__(self):
+        super().__init__(disable_multiprocessing=True)
+
+    def batch(
+        self, answer: List[str], question: List[str]
+    ) -> List[Dict[str, float]]:
         score = BertSimilarity().batch(prediction=answer, reference=question)
         return [{"bert_answer_relevance": x} for x in score["bert_similarity"]]
 
-    def __call__(self, answer: str, question: str) -> Dict[str, float]:
+    def compute(self, answer: str, question: str) -> Dict[str, float]:
         """Measures the semantic similarity between the Generated Answer and the Question"""
-        return {"bert_answer_relevance": BertSimilarity()(answer, question)["bert_similarity"]}
+        return {
+            "bert_answer_relevance": BertSimilarity()(answer, question)[
+                "bert_similarity"
+            ]
+        }
+
+    @property
+    def schema(self):
+        return {"bert_answer_relevance": Field(type=float)}
 
 
 class BertAnswerSimilarity(Metric):
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    """Measures the semantic similarity between the Generated Answer and the Ground Truth Answers"""
+
+    def __init__(self):
+        super().__init__(is_cpu_bound=True)
+
+    def compute(self, answer: str, ground_truth_answers: List[str], **kwargs):
         """Measures the semantic similarity between the Generated Answer and the Ground Truth Answers
 
         Args:
             answer (str): the generated answer
             ground_truth_answers (List[str]): the ground truth answers
         """
-        bert_similarity_scores = [BertSimilarity()(answer, gt_answer) for gt_answer in ground_truth_answers]
-        return {"bert_answer_similarity": max(score["bert_similarity"] for score in bert_similarity_scores)}
+        bert_similarity_scores = [
+            BertSimilarity()(answer, gt_answer)
+            for gt_answer in ground_truth_answers
+        ]
+        return {
+            "bert_answer_similarity": max(
+                score["bert_similarity"] for score in bert_similarity_scores
+            )
+        }
 
-    def _preprocess_dataset(self, answer: List[str], ground_truth_answers: List[List[str]]):
+    def _preprocess_dataset(
+        self, answer: List[str], ground_truth_answers: List[List[str]]
+    ):
         prediction = list()
         reference = list()
         ids = list()
@@ -45,16 +79,34 @@ class BertAnswerSimilarity(Metric):
         return prediction, reference, ids
 
     def batch(self, answer: List[str], ground_truth_answers: List[List[str]]):
-        prediction, reference, ids = self._preprocess_dataset(answer, ground_truth_answers)
-        score = BertSimilarity().batch(prediction=prediction, reference=reference)
-        df = pd.DataFrame({"bert_answer_similarity": score["bert_similarity"], "ids": ids})
+        prediction, reference, ids = self._preprocess_dataset(
+            answer, ground_truth_answers
+        )
+        score = BertSimilarity().batch(
+            prediction=prediction, reference=reference
+        )
+        df = pd.DataFrame(
+            {"bert_answer_similarity": score["bert_similarity"], "ids": ids}
+        )
         ret = df.groupby("ids").max()
-        return [{"bert_answer_similarity": x} for x in ret["bert_answer_similarity"]]
+        return [
+            {"bert_answer_similarity": x} for x in ret["bert_answer_similarity"]
+        ]
+
+    @property
+    def schema(self):
+        return {"bert_answer_similarity": Field(type=float)}
 
 
 class DebertaAnswerScores(Metric):
+    """Measures the semantic relationship between the Generated Answer and the Ground Truth Answers in three categories:
+    - Entailment: the Generated Answer IMPLIES a Ground Truth Answer.
+    - Contradiction: the Generated Answer CONTRADICTS a Ground Truth Answer.
+    - Neutral: the Generated Answer and the Ground Truth Answer have neutral logical relationship.
+    """
+
     def __init__(self, reverse: bool = False):
-        super().__init__()
+        super().__init__(disable_multiprocessing=True)
         self.reverse = reverse
         self.batch_size = 32
 
@@ -64,7 +116,9 @@ class DebertaAnswerScores(Metric):
         contradiction_key = f"deberta_{reverse}answer_contradiction"
         return entailment_key, contradiction_key
 
-    def batch(self, answer: List[str], ground_truth_answers: List[List[str]], **kwargs):
+    def batch(
+        self, answer: List[str], ground_truth_answers: List[List[str]], **kwargs
+    ):
         warnings.filterwarnings("ignore", category=UserWarning)
         entailment_key, contradiction_key = self._ret_keys()
         sentence_pairs = list()
@@ -83,17 +137,26 @@ class DebertaAnswerScores(Metric):
         probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
 
         # Group by 'ids' and get the score for the pair with the highest entailment
-        df = pd.DataFrame({entailment_key: probs[:, 1], contradiction_key: probs[:, 0], "ids": ids})
+        df = pd.DataFrame(
+            {
+                entailment_key: probs[:, 1],
+                contradiction_key: probs[:, 0],
+                "ids": ids,
+            }
+        )
         idx = df.groupby("ids")[entailment_key].idxmax()
         return [
-            {entailment_key: entailment_value, contradiction_key: contradiction_value}
+            {
+                entailment_key: entailment_value,
+                contradiction_key: contradiction_value,
+            }
             for (entailment_value, contradiction_value) in zip(
                 df.loc[idx, entailment_key],
                 df.loc[idx, contradiction_key],
             )
         ]
 
-    def __call__(self, answer: str, ground_truth_answers: List[str], **kwargs):
+    def compute(self, answer: str, ground_truth_answers: List[str], **kwargs):
         """Measure semantic relationship between the Generated Answer and the Ground Truth Answers in three categories:
         - Entailment: the Generated Answer IMPLIES a Ground Truth Answer.
         - Contradiction: the Generated Answer CONTRADICTS a Ground Truth Answer.
@@ -123,9 +186,18 @@ class DebertaAnswerScores(Metric):
         logits_with_max_entailment = max(logits, key=lambda sublist: sublist[1])  # type: ignore
 
         # convert logits into normalized probabilities
-        probs = torch.nn.functional.softmax(torch.tensor(logits_with_max_entailment), dim=0)
+        probs = torch.nn.functional.softmax(
+            torch.tensor(logits_with_max_entailment), dim=0
+        )
 
         return {
             entailment_key: probs[1].item(),
             contradiction_key: probs[0].item(),
+        }
+
+    @property
+    def schema(self):
+        return {
+            "deberta_answer_entailment": Field(type=float),
+            "deberta_answer_contradiction": Field(type=float),
         }

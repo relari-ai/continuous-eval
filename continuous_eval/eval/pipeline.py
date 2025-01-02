@@ -1,29 +1,31 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from continuous_eval.eval.dataset import Dataset, DatasetField
 from continuous_eval.eval.modules import Module, SingleModule
 from continuous_eval.eval.tests import Test
-from continuous_eval.eval.utils import type_hint_to_str
 from continuous_eval.metrics import Metric
+from continuous_eval.utils.types import type_hint_to_str
 
 
 @dataclass
 class ModuleOutput:
-    selector: Callable = field(default=lambda x: x)
+    selector: Optional[Callable] = None
     module: Optional[Union[Module, str]] = None
 
     def __call__(self, *args: Any) -> Any:
-        return self.selector(*args)
+        selector = self.selector or (lambda x: x)
+        return selector(*args)
 
 
 @dataclass
 class CalledTools:
-    selector: Callable = field(default=lambda x: x)
+    selector: Optional[Callable] = None
     module: Optional[Module] = None
 
     def __call__(self, *args: Any) -> Any:
-        return self.selector(*args)
+        selector = self.selector or (lambda x: x)
+        return selector(*args)
 
 
 @dataclass
@@ -34,7 +36,9 @@ class Graph:
 
 
 class Pipeline:
-    def __init__(self, modules: List[Module], dataset: Optional[Dataset] = None) -> None:
+    def __init__(
+        self, modules: List[Module], dataset: Optional[Dataset] = None
+    ) -> None:
         self._modules = modules
         self._dataset = dataset
         self._graph = self._build_graph()
@@ -64,7 +68,9 @@ class Pipeline:
         try:
             metric = [m for m in module.eval if m.name == metric_name][0]
         except IndexError:
-            raise ValueError(f"Metric {metric_name} not found in module {module_name}")
+            raise ValueError(
+                f"Metric {metric_name} not found in module {module_name}"
+            )
         return metric
 
     def _validate_modules(self):
@@ -84,10 +90,14 @@ class Pipeline:
             if module.input is None:
                 continue
             elif isinstance(module.input, Module):
-                assert module in self._modules, f"Module {module.input.name} not found"
+                assert (
+                    module in self._modules
+                ), f"Module {module.input.name} not found"
                 edges.add((module.input.name, module.name))
             elif isinstance(module.input, DatasetField):
-                assert module.input in self._dataset.fields, f"Field {module.input.name} not found"
+                assert (
+                    module.input in self._dataset.fields
+                ), f"Field {module.input.name} not found"
                 dataset_edges.add((module.input, module.name))
             elif isinstance(module.input, (list, tuple)):
                 for x in module.input:  # type: ignore
@@ -95,7 +105,9 @@ class Pipeline:
                         assert x in self._modules, f"Module {x.name} not found"
                         edges.add((x.name, module.name))
                     elif isinstance(x, DatasetField):
-                        assert x in self._dataset.fields, f"Field {x.name} not found"
+                        assert (
+                            x in self._dataset.fields
+                        ), f"Field {x.name} not found"
                         dataset_edges.add((x, module.name))
             else:
                 raise ValueError(f"Invalid input type {module.input}")
@@ -110,7 +122,9 @@ class Pipeline:
         for edge in self._graph.edges:
             start, end = edge
             if with_type_hints:
-                type_hint = type_hint_to_str(self.module_by_name(start).output.type)
+                type_hint = type_hint_to_str(
+                    self.module_by_name(start).output.type
+                )
                 repr_str += f'    {start}-->|"{type_hint}"|{end};\n'
             else:
                 repr_str += f"    {start} --> {end};\n"

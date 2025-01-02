@@ -1,0 +1,26 @@
+Carefully read the following question that describes what the SQL query should do:
+<question>
+{{question}}
+</question>
+
+Now, examine the generated SQL query:
+<generated_sql>
+{{answer}}
+</generated_sql>
+
+Compare it to the correct SQL query:
+{%- set ground_truth_answers = [ground_truth_answers] if ground_truth_answers is string else ground_truth_answers -%}
+{% for gt in ground_truth_answers %}
+<correct_sql>
+{{ gt }}
+</correct_sql>
+{%- endfor %}
+
+{% if schema %}
+The schema of the database is as follows:
+<schema>
+{{ schema }}
+</schema>
+{% endif %}
+
+Your evaluation:

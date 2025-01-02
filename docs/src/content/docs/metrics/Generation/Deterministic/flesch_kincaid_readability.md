@@ -39,7 +39,7 @@ print(metric(**datum))
 
 ```JSON
 {
-  "flesch_reading_ease": 116.14500000000001,
-  "flesch_kincaid_grade_level": -1.4499999999999993,
+    "flesch_reading_ease": 116.14500000000001,
+    "flesch_kincaid_grade_level": -1.4499999999999993,
 }
 ```

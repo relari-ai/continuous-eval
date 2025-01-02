@@ -1,0 +1,11 @@
+Generated answer: `{{ answer }}`
+{% if ground_truth_answers | length > 1 %}
+Reference Answer(s):
+{% for answer in ground_truth_answers %}
+- `{{ answer }}`
+{% endfor %}
+{% else %}
+Reference Answer: `{{ ground_truth_answers[0] }}`
+{% endif %}
+
+Response:

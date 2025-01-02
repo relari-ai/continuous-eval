@@ -2,7 +2,6 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
-import astroD2 from 'astro-d2'
 
 // https://astro.build/config
 export default defineConfig({
@@ -49,7 +48,7 @@ export default defineConfig({
 						{ label: 'Metrics and Tests', link: '/pipeline/metrics_and_tests'},
             { label: 'Pipeline Logger', link: '/pipeline/pipeline_logger' },
             { label: 'Evaluation Runner', link: '/pipeline/eval_runner' },
-						{ label: 'Evaluation Manager (Deprecated)', link: '/pipeline/eval_manager' },
+            { label: 'Supported LLMs', link: '/pipeline/llms' },
 					],
 
         },
@@ -57,6 +56,9 @@ export default defineConfig({
 					label: 'Metrics',
 					items: [
 						{ label: 'Overview', link: '/metrics/overview/' },
+						{label: 'Metric Class', link: '/metrics/base/'},
+						{label: 'LLM-as-a-Judge Metrics', link: '/metrics/llm_as_a_judge/'},
+						{label: 'Probabilistic LLM Metrics', link: '/metrics/probabilistic_metrics/'},			
 						{
 							label: 'Retrieval',
 							collapsed: true,
@@ -127,33 +129,17 @@ export default defineConfig({
 								},
 							]
 						},
-						{label: 'Custom Metrics', link: '/metrics/custom_metrics/'},
-						{label: 'Metric Ensembling', link: '/metrics/ensembling_classifier/'},
 						],
 				},
-				{
-					label: 'Datasets',
-					autogenerate: { directory: '/dataset/' }
-				},
-        		{
-					label: 'Examples',
-					items : [
-						{
-							label: 'Basic',
-							autogenerate: { directory: '/examples/Basics/' }
-						},
-						{
-							label: 'Advanced',
-							autogenerate: { directory: '/examples/Advanced/' }
-						},
-						{
-							label: 'End-to-End',
-							autogenerate: { directory: '/examples/End_to_End/' }
-						},
-					],
+        {
+					label: 'Examples 🔗',
+          attrs: {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+          link: 'https://github.com/relari-ai/examples'
 				},
 			],
 		}),
-    astroD2({output: 'd2', basePath: '/v0.3'}),
 	],
 });

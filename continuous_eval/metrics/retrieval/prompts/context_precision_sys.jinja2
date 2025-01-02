@@ -1,0 +1,18 @@
+Given the following question and context, verify if the information in the given context is useful in answering the question.
+Respond with either Yes or No, followed by reasoning.
+{% if use_few_shot %}
+
+--EXAMPLES--
+Example 1
+Question: What is the capital of France?
+Context: Paris is the largest city and the capital of France. It has many historical monuments.
+Response: Yes
+Reasoning: The context states that Paris is the capital of France.
+
+Example 2:
+Question: What is the capital of France?
+Context: Lyon is a major city in France. It is known for its culinary arts.
+Response: No
+Reasoning: The context does not mention any city that is the capital of France.
+{% endif %}
+Now evaluate the following:

@@ -13,184 +13,102 @@ The `continuous-eval` package offers three categories of metrics based on how th
 
 - **Deterministic metrics:** calculated based on statistical formulas
 - **Semantic:** calculated using smaller models
-- **LLM-based:** calculated by an Evaluation LLM with curated prompts
+- **Probabilistic:** calculated by an Evaluation LLM with curated prompts
 
 All the metrics comes with pros and cons and there's not a one-size-fits-all evaluation pipeline that's optimal for every use case. We aim to provide a wide range of metrics for you to choose from.
 
-The package also offers a way to [**Ensemble Metrics**](/v0.3/metrics/ensembling_classifier/) of different metrics to improve performance on quality and effeciency.
+## Using a metric
 
+There are two ways to use a metric: Directly or through a pipeline.
 
-<br>
+### 1. Directly
 
-### `Metric` Class 
+Each metric has a `__call__` method that takes a dictionary of data and returns a dictionary of results.
 
-Below is the list of metrics available:
+```python
+from continuous_eval.metrics.retrieval import PrecisionRecallF1
 
-<table>
-    <tr>
-        <th>Module</th>
-        <th>Category</th>
-        <th>Metrics</th>
-    </tr>
-    <tr>
-        <td rowspan="2">Retrieval</td>
-        <td>Deterministic</td>
-        <td>PrecisionRecallF1, RankedRetrievalMetrics, TokenCount</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
-    </tr>
-    <tr>
-        <td rowspan="3">Text Generation</td>
-        <td>Deterministic</td>
-        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
-    </tr>
-    <tr>
-        <td>Semantic</td>
-        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
-    </tr>
-    <tr>
-        <td rowspan="1">Classification</td>
-        <td>Deterministic</td>
-        <td>ClassificationAccuracy</td>
-    </tr>
-    <tr>
-        <td rowspan="2">Code Generation</td>
-        <td>Deterministic</td>
-        <td>CodeStringMatch, PythonASTSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedCodeGeneration</td>
-    </tr>
-    <tr>
-        <td>Agent Tools</td>
-        <td>Deterministic</td>
-        <td>ToolSelectionAccuracy</td>
-    </tr>
-    <tr>
-        <td>Custom</td>
-        <td></td>
-        <td>Define your own metrics</td>
-    </tr>
-</table>
+datum = {
+    "question": "What is the capital of France?",
+    "retrieved_context": [
+        "Paris is the capital of France and its largest city.",
+        "Lyon is a major city in France.",
+    ],
+    "ground_truth_context": ["Paris is the capital of France."],
+    "answer": "Paris",
+    "ground_truth_answers": ["Paris"],
+}
 
+metric = PrecisionRecallF1()
 
-#### Retrieval metrics
+print(metric(**datum))
+```
 
-##### Deterministic
+Additionally, each metric has a `args`, `schema` and `help` properties that describe the metric.
+The property `args` is a dictionary of arguments that can be passed to the metric
 
-**`PrecisionRecallF1`**
-- **Definition:** Rank-agnostic metrics including Precision, Recall, and F1 of Retrieved Contexts
-- **Inputs:** `retrieved_context`, `ground_truth_context`
+```text
+>> print(metric.args)
+{
+  'retrieved_context': Arg(type=typing.List[str], description='', is_required=True, default=None), 
+  'ground_truth_context': Arg(type=typing.List[str], description='', is_required=True, default=None)
+}
+```
 
-**`RankedRetrievalMetrics`**
-- **Definition:** Rank-aware metrics including Mean Average Precision (MAP), Mean Reciprical Rank (MRR), NDCG (Normalized Discounted Cumulative Gain) of retrieved contexts
-- **Inputs:** `retrieved_context`, `ground_truth_context`
+The property `schema` is a dictionary of arguments that can be passed to the metric
 
-**`TokenCount`**
-- **Definition:** Counts the amount of tokens in the retrieved context.
-- **Inputs:** `retrieved_context`
+```text
+>> print(metric.schema)
+{
+  {'context_precision': Field(type=<class 'float'>, limits=(0.0, 1.0), internal=False, description=None), 
+  'context_recall': Field(type=<class 'float'>, limits=(0.0, 1.0), internal=False, description=None), 
+  'context_f1': Field(type=<class 'float'>, limits=(0.0, 1.0), internal=False, description=None)
+}
+```
 
-##### LLM-based
+And finally, the property `help` is a string that describes the metric
 
-**`LLMBasedContextPrecision`**
-- **Definition:** Precision and Mean Average Precision (MAP) based on context relevancy classified by LLM
-- **Inputs:** `question`, `retrieved_context`
+```text
+>> print(metric.help)
+"Calculate the precision, recall, and f1 score for the retrieved context given the ground truth context."
+```
 
-**`LLMBasedContextCoverage`**
-- **Definition:** Proportion of statements in ground truth answer that can be attributed to Retrieved Contexts calculated by LLM
-- **Inputs:** `question`, `retrieved_context`, `ground_truth_answers`
+### 2. Through a pipeline
 
-#### Text Generation metrics
+This example shows how to use a metric through a pipeline, which is the recommended way when you want to evaluate over a dataset.
 
-##### Deterministic
+```python
+from continuous_eval.data_downloader import example_data_downloader
+from continuous_eval.eval import EvaluationRunner, SingleModulePipeline
+from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
 
-**`DeterministicAnswerRelevance`**
-- **Definition:** Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
-- **Inputs:** `question`, `generated_answer`
+if __name__ == "__main__":
+    # Let's download the retrieval dataset example
+    dataset = example_data_downloader("retrieval") 
 
-**`DeterministicFaithfulness`**
-- **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
-- **Inputs:** `retrieved_context`, `generated_answer`
+    # Define the pipeline (system under test)
+    pipeline = SingleModulePipeline(
+        dataset=dataset,
+        eval=[
+            PrecisionRecallF1().use(
+                retrieved_context=dataset.retrieved_contexts,
+                ground_truth_context=dataset.ground_truth_contexts,
+            ),
+            RankedRetrievalMetrics().use(
+                retrieved_context=dataset.retrieved_contexts,
+                ground_truth_context=dataset.ground_truth_contexts,
+            ),
+        ],
+    )
 
-**`FleschKincaidReadability`**
-- **Definition:** How easy or difficult it is to understand the LLM generated answer.
-- **Inputs:** `generated_answer`
+    # We start the evaluation runner and run the metrics over the downloaded dataset
+    evalrunner = EvaluationRunner(pipeline)
+    metrics = evalrunner.evaluate(dataset)
+    print(metrics.aggregate())
+```
 
-##### Semantic
+Note that it is important to place the code that uses the metric inside the `__main__` block, otherwise the multiprocessing evaluation will not work (and will fall back to the single-process evaluation).;
 
-**`DebertaAnswerScores`**
-- **Definition:** Entailment and contradiction scores between the Generated Answer and Ground Truth Answer
-- **Inputs:** `generated_answer`, `ground_truth_answers`
+## More examples
 
-**`BertAnswerRelevance`**
-- **Definition:** Similarity score based on the BERT model between the Generated Answer and Question
-- **Inputs:** `question`, `generated_answer`
-
-**`BertAnswerSimilarity`**
-- **Definition:** Similarity score based on the BERT model between the Generated Answer and Ground Truth Answer
-- **Inputs:** `generated_answer`, `ground_truth_answers`
-
-##### LLM-based
-
-**`LLMBasedFaithfulness`**
-- **Definition:** Binary classifications of whether the statements in the Generated Answer can be attributed to the Retrieved Contexts by LLM
-- **Inputs:** `question`, `retrieved_context`, `generated_answer`
-
-**`LLMBasedAnswerCorrectness`**
-- **Definition:** Overall correctness of the Generated Answer based on the Question and Ground Truth Answer calculated by LLM
-- **Inputs:** `question`, `generated_answer`, `ground_truth_answers`
-
-**`LLMBasedAnswerRelevance`**
-- **Definition:** Relevance of the Generated Answer with respect to the Question
-- **Inputs:** `question`, `generated_answer`
-
-**`LLMBasedStyleConsistency`**
-- **Definition:** Consistency of style between the Generated Answer and the Ground Truth Answer(s)
-- **Inputs:** `generated_answer`, `ground_truth_answers`
-
-#### Code Generation metrics
-
-##### Deterministic
-
-**`DeterministicAnswerRelevance`**
-- **Definition:** Includes Token Overlap (Precision, Recall, F1), ROUGE-L (Precision, Recall, F1), and BLEU score of Generated Answer vs. Ground Truth Answer
-- **Inputs:** `question`, `generated_answer`
-
-**`DeterministicFaithfulness`**
-- **Definition:** Proportion of sentences in Answer that can be matched to Retrieved Contexts using ROUGE-L precision, Token Overlap precision, and BLEU score
-- **Inputs:** `retrieved_context`, `generated_answer`
-
-#### Classification metrics
-
-##### Deterministic
-
-**`ClassificationAccuracy`**
-- **Definition:** Proportion of correctly identified items out of the total items
-- **Inputs:** `predictions`, `ground_truth_labels`
-
-#### Code Generation metrics
-
-##### Deterministic
-
-**`CodeStringMatch`**
-- **Definition:** Exact and fuzzy match scores between generated code strings and the ground truth code strings
-- **Inputs:** `answer`, `ground_truths`
-
-**`PythonASTSimilarity`**
-- **Definition:** Similarity of Abstract Syntax Trees (ASTs) for Python code, comparing the generated code to the ground truth code
-- **Inputs:** `answer`, `ground_truths`
-
-#### Agent Tools metrics
-
-##### Deterministic
-
-**`ToolSelectionAccuracy`**
-- **Definition:** Accuracy of selecting the correct tool(s) for a given task by the agent
-- **Inputs:** `tools`, `ground_truths`
+You can find more examples in the [examples folder](https://github.com/relari-ai/continuous-eval/tree/main/examples) or in the [example repository](https://github.com/relari-ai/examples).

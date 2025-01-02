@@ -69,13 +69,13 @@ print(metric(**datum))
 
 `default_threshold` for a sentence to be considered faithful is set to be `0.5`.
 
-```JSON
+```python
 {
-    'rouge_faithfulness': 0.5, 
-    'token_overlap_faithfulness': 0.5, 
-    'bleu_faithfulness': 0.37023896751607194, 
-    'rouge_p_by_sentence': [0.8333333333333334, 0.2], 
-    'token_overlap_p_by_sentence': [0.875, 0.2], 
-    'bleu_score_by_sentence': [0.6855956729300113, 0.05488226210213251]
+    "rouge_faithfulness": 0.5,
+    "token_overlap_faithfulness": 0.5,
+    "bleu_faithfulness": 0.37023896751607194,
+    "rouge_p_by_sentence": [0.8333333333333334, 0.2],
+    "token_overlap_p_by_sentence": [0.8, 0.0],
+    "bleu_score_by_sentence": [0.6855956729300113, 0.05488226210213251],
 }
 ```

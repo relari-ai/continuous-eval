@@ -27,18 +27,19 @@ The metric depends on syntactically correct SQL queries to produce the Abstract 
 Required data items: `answer`, `ground_truth_answers`
 
 ```python
-from continuous_eval.metrics.code import SQLASTSimilarity
+from continuous_eval.metrics.code.sql import SQLASTSimilarity
 
 datum = {
     "answer": "SELECT name, age FROM customers",
-    "ground_truth_answers": ["SELECT age, name FROM customers"],
-},
+    "ground_truth_answers": "SELECT age, name FROM customers",
+}
 
 metric = SQLASTSimilarity()
 print(metric(**datum))
 ```
 
 You can optionally initialize the metric to use optimized SQL queries using the [sqlglot optimizer](https://github.com/tobymao/sqlglot?tab=readme-ov-file#sql-optimizer) and optionally pass in the schema. For example:
+
 ```python
 schema={"x": {"A": "INT", "B": "INT", "C": "INT", "D": "INT", "Z": "STRING"}}
 sql_syntax_match_optimized = SQLASTSimilarity(optimized=True, schema=schema)
@@ -51,14 +52,14 @@ Higher weights indicate more significant changes, which are expected to have a g
 from continuous_eval.metrics.code.sql.deterministic import ASTDiffWeightConfig
 
 weights = ASTDiffWeightConfig(
-  keep_weight=0.0,
-  update_weight=2,
-  insert_weight=1.0,
-  remove_weight=1.5,
-  move_weight=0,
-  default_weight=0,
+    keep=0.0,
+    update=2,
+    insert=1.0,
+    remove=1.5,
+    move=0,
+    default=0,
 )
-ASTSimilarity = SQLASTSimilarity(diff_weights=weights)
+metric = SQLASTSimilarity(diff_weights=weights)
 ```
 
 ### Example Output

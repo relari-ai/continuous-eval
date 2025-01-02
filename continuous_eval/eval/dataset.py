@@ -8,9 +8,11 @@ from string import ascii_lowercase, digits
 import yaml
 
 from continuous_eval.eval.types import UID, ToolCall
-from continuous_eval.eval.utils import type_hint_to_str
+from continuous_eval.utils.types import type_hint_to_str
 
-_SAFE_DICT = {k: v for k, v in typing.__dict__.items() if not k.startswith("__")}
+_SAFE_DICT = {
+    k: v for k, v in typing.__dict__.items() if not k.startswith("__")
+}
 _SAFE_DICT["UID"] = UID
 _SAFE_DICT["ToolCall"] = ToolCall
 
@@ -53,7 +55,10 @@ class DatasetManifest:
             "description": self.description,
             "format": self.format,
             "license": self.license,
-            "fields": {field_name: field.to_dict() for field_name, field in self.fields.items()},
+            "fields": {
+                field_name: field.to_dict()
+                for field_name, field in self.fields.items()
+            },
         }
 
     @classmethod
@@ -93,12 +98,16 @@ class Dataset:
             manifest_path = None
 
         if dataset_path.suffix != ".jsonl":
-            raise ValueError(f"Dataset file must be a .jsonl file, found {dataset_path.suffix}")
+            raise ValueError(
+                f"Dataset file must be a .jsonl file, found {dataset_path.suffix}"
+            )
         # load jsonl dataset
         with open(dataset_path, "r") as json_file:
             self._data = [json.loads(x) for x in json_file.readlines()]
         for sample in self._data:
-            sample["uid"] = UID(sample["uid"]) if "uid" in sample else _generate_uid()
+            sample["uid"] = (
+                UID(sample["uid"]) if "uid" in sample else _generate_uid()
+            )
         self._manifest = self._load_or_infer_manifest(manifest_path)
         self._create_dynamic_properties()
 
@@ -111,12 +120,20 @@ class Dataset:
         dataset = cls.__new__(cls)
         dataset._data = data
         for sample in dataset._data:
-            sample["uid"] = UID(sample["uid"]) if "uid" in sample else _generate_uid()
-        dataset._manifest = DatasetManifest.from_json(manifest) if manifest is not None else dataset._infer_manifest()
+            sample["uid"] = (
+                UID(sample["uid"]) if "uid" in sample else _generate_uid()
+            )
+        dataset._manifest = (
+            DatasetManifest.from_json(manifest)
+            if manifest is not None
+            else dataset._infer_manifest()
+        )
         dataset._create_dynamic_properties()
         return dataset
 
-    def save(self, file_path: typing.Union[str, Path], save_manifest: bool = False):
+    def save(
+        self, file_path: typing.Union[str, Path], save_manifest: bool = False
+    ):
         if isinstance(file_path, str):
             file_path = Path(file_path)
         with open(file_path, "w") as json_file:
@@ -128,7 +145,9 @@ class Dataset:
             with open(manifest_path, "w") as manifest_file:
                 manifest_file.write(yaml.dump(self._manifest.to_dict()))
 
-    def _load_or_infer_manifest(self, manifest_path: typing.Optional[Path]) -> DatasetManifest:
+    def _load_or_infer_manifest(
+        self, manifest_path: typing.Optional[Path]
+    ) -> DatasetManifest:
         if manifest_path is None or not manifest_path.exists():
             return self._infer_manifest()
         else:
@@ -181,7 +200,7 @@ class Dataset:
         for field_name, field_info in self._manifest.fields.items():
             setattr(self, field_name, field_info)
 
-    def filed_types(self, name: str) -> type:
+    def field_type(self, name: str) -> type:
         return getattr(self, name).type
 
     @property
@@ -247,7 +266,9 @@ class Dataset:
         import random
 
         if size > 1 and isinstance(size, int):
-            assert size <= len(self._data), f"Sample size {size} is larger than the dataset size {len(self._data)}"
+            assert (
+                size <= len(self._data)
+            ), f"Sample size {size} is larger than the dataset size {len(self._data)}"
             k = size
         elif size > 0 and size < 1 and isinstance(size, float):
             k = int(len(self._data) * size)

@@ -64,14 +64,14 @@ print(metric(**datum))
 
 ### Example Output
 
-```JSON
+```python
 {
-    'rouge_l_recall': 1.0, 
-    'rouge_l_precision': 0.8, 
-    'rouge_l_f1': 0.7272727223140496, 
-    'token_overlap_recall': 1.0, 
-    'token_overlap_precision': 0.8333333333333334, 
-    'token_overlap_f1': 0.8333333333333334, 
-    'bleu_score': 0.799402901304756
+    "rouge_l_recall": 1.0,
+    "rouge_l_precision": 0.8,
+    "rouge_l_f1": 0.7272727223140496,
+    "token_overlap_recall": 1.0,
+    "token_overlap_precision": 1.0,
+    "token_overlap_f1": 0.888888888888889,
+    "bleu_score": 0.799402901304756,
 }
 ```

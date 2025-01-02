@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 try:
     import torch
@@ -8,13 +8,18 @@ try:
     from sentence_transformers import CrossEncoder
     from transformers import BertModel, BertTokenizer
 except ImportError:
-    raise ImportError("To use BertSimilarity, please install sentence-transformers and transformers.")
-from continuous_eval.metrics.base import Metric
+    raise ImportError(
+        "To use BertSimilarity, please install sentence-transformers and transformers."
+    )
+from continuous_eval.metrics.base import Arg, Field, Metric
 
 
 class DebertaScores:
     def __init__(self):
-        self._model = CrossEncoder("cross-encoder/nli-deberta-v3-large")
+        self._model = CrossEncoder(
+            "cross-encoder/nli-deberta-v3-large",
+            tokenizer_args={"use_fast": False},
+        )
         self._batch_size = 32
 
     @property
@@ -40,8 +45,12 @@ class DebertaScores:
 
 
 class BertSimilarity(Metric):
+    """
+    Evaluate the semantic similarity between the generated text and the reference text using BERT.
+    """
+
     def __init__(self, pooler_output: bool = False):
-        super().__init__()
+        super().__init__(disable_multiprocessing=True)
         # Load pre-trained BERT model and tokenizer
         self._tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self._model = BertModel.from_pretrained("bert-base-uncased")
@@ -86,10 +95,23 @@ class BertSimilarity(Metric):
                 ref_embedding = ref_embedding[0].mean(dim=1)
 
         cosine_similarity = torch.nn.CosineSimilarity(dim=0)
-        semantic_similarity = cosine_similarity(pred_embedding.T, ref_embedding.T)
+        semantic_similarity = cosine_similarity(
+            pred_embedding.T, ref_embedding.T
+        )
         semantic_similarity = torch.clip(semantic_similarity, min=0.0, max=1.0)
         return semantic_similarity.tolist()
 
-    def __call__(self, prediction: str, reference: str):
+    def compute(self, prediction: str, reference: str):
         res = self.batch(prediction=[prediction], reference=[reference])
         return {"bert_similarity": res["bert_similarity"][0]}
+
+    @property
+    def args(self):
+        return {
+            "prediction": Arg(type=str, description="The generated text"),
+            "reference": Arg(type=str, description="The reference text"),
+        }
+
+    @property
+    def schema(self):
+        return {"bert_similarity": Field(type=float)}

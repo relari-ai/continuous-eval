@@ -1,43 +1,34 @@
-import contextlib
-import functools
 import json
 import logging
 import os
 import uuid
 from functools import lru_cache, wraps
 from pathlib import Path
+from typing import Any, Dict, Optional
 
-import requests
 from appdirs import user_data_dir
+from dotenv import load_dotenv
+from posthog import Posthog
 
-_TELEMETRY_ENDPOINT = "http://telemetry.relari.ai/"
-_TELEMETRY_ENDPOINT_METRIC = _TELEMETRY_ENDPOINT + "metric"
-_TELEMETRY_ENDPOINT_EVENT = _TELEMETRY_ENDPOINT + "event"
-_USAGE_REQUESTS_TIMEOUT_SEC = 1
+load_dotenv()
+
 _USER_DATA_DIR_NAME = "continuous_eval"
 _DO_NOT_TRACK = "CONTINUOUS_EVAL_DO_NOT_TRACK"
 _DEBUG_TELEMETRY = "CONTINUOUS_EVAL_DEBUG_TELEMETRY"
 _USER_ID_PREFIX = "ce-"
 
-
-def _is_server_reachable(url):
-    try:
-        requests.get(url)
-    except requests.ConnectionError:
-        return False
-    return True
+logger = logging.getLogger("AnonymousTelemetry")
+logger.setLevel(logging.DEBUG)  # Set to lowest level to allow all messages
 
 
 @lru_cache(maxsize=1)
 def _do_not_track() -> bool:
-    server_reachable = _is_server_reachable(_TELEMETRY_ENDPOINT)
-    do_not_track = os.environ.get(_DO_NOT_TRACK, str(False)).lower() == "true"
-    return not server_reachable or do_not_track
+    return os.environ.get(_DO_NOT_TRACK, "false").lower() == "true"
 
 
 @lru_cache(maxsize=1)
 def _debug_telemetry() -> bool:
-    return os.environ.get(_DEBUG_TELEMETRY, str(False)).lower() == "true"
+    return os.environ.get(_DEBUG_TELEMETRY, "false").lower() == "true"
 
 
 @lru_cache(maxsize=1)
@@ -65,62 +56,31 @@ def _get_or_generate_uid() -> str:
 class AnonymousTelemetry:
     def __init__(self):
         self.uid = _get_or_generate_uid()
-        self._batch_mode = False
-
-    def metric_telemetry(self, fcn):
-        @wraps(fcn)
-        def wrapper(*args, **kwargs):
-            metric = fcn.__qualname__.split(".")[0]
-            if metric != "Metric":
-                telemetry.log_metric_call(metric)
-            return fcn(*args, **kwargs)
-
-        return wrapper
-
-    def batch_metric_telemetry(self, fcn):
-        def wrapper(*args, **kwargs):
-            metric = fcn.__qualname__.split(".")[0]
-            if metric != "Metric":
-                self.log_metric_call(metric)
-            with self.batch():
-                return fcn(*args, **kwargs)
-
-        return wrapper
-
-    @contextlib.contextmanager
-    def batch(self):
-        old_state = self._batch_mode
-        self._batch_mode = True
-        try:
-            yield self
-        finally:
-            self._batch_mode = old_state
-
-    def log_metric_call(self, metric: str):
-        self._track(
-            endpoint=_TELEMETRY_ENDPOINT_METRIC,
-            payload={"classname": metric, "uid": self.uid},
+        self._client = Posthog(
+            "phc_FS1KnMOU6v6FWqO5jyjiVDcdBKyHF61KCajn7oANpPC",
+            host="https://us.i.posthog.com",
+            debug=_debug_telemetry(),
         )
+        if _do_not_track():
+            logger.debug("Telemetry is disabled")
+            self._client.disabled = True
 
-    def log_event(self, tag: str, info: str):
-        self._track(
-            endpoint=_TELEMETRY_ENDPOINT_EVENT,
-            payload={
-                "tag": tag,
-                "info": info,
-                "uid": self.uid,
-            },
-        )
+    def event(self, name: Optional[str] = None, info: Dict[str, Any] = {}):
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                # event_name = name or args[0].__class__.__name__
+                self.log_event(name=func.__qualname__, info=info)
+                return func(*args, **kwargs)
 
-    def _track(self, endpoint, payload: dict):
-        if _do_not_track() or self._batch_mode:
-            return
+            return wrapper
+
+        return decorator
+
+    def log_event(self, name: str, info: Dict[str, Any] = {}):
         try:
-            requests.post(
-                endpoint,
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(payload),
-                timeout=_USAGE_REQUESTS_TIMEOUT_SEC,
+            self._client.capture(
+                distinct_id=self.uid, event=name, properties=info
             )
         except Exception as e:
             # This way it silences all thread level logging as well
@@ -128,15 +88,30 @@ class AnonymousTelemetry:
                 logging.debug(f"Telemetry error: {e}")
 
 
-telemetry = AnonymousTelemetry()
+def telemetry_initializer() -> AnonymousTelemetry:
+    """
+    This function is executed once per child process to initialize telemetry.
+    """
+    global telemetry
+    telemetry = AnonymousTelemetry()
+    logger.debug("Telemetry reinitialized in child process.")
+    return telemetry
 
 
-def telemetry_event(tag="Unknown"):
+telemetry = telemetry_initializer()
+
+
+def telemetry_event(name: Optional[str] = None, info: Dict[str, Any] = {}):
+    global telemetry
+
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
-            telemetry.log_event(tag, info=func.__qualname__)
-            result = func(*args, **kwargs)
-            return result
+            event_name = name or args[0].__class__.__name__
+            info["__qualname__"] = func.__qualname__
+            telemetry.log_event(name=event_name, info=info)
+
+            return func(*args, **kwargs)
 
         return wrapper
 

@@ -39,9 +39,7 @@
 
 - **Comprehensive Metric Library**: Covers Retrieval-Augmented Generation (RAG), Code Generation, Agent Tool Use, Classification and a variety of other LLM use cases. Mix and match Deterministic, Semantic and LLM-based metrics.
 
-- **Leverage User Feedback in Evaluation**: Easily build a close-to-human ensemble evaluation pipeline with mathematical guarantees.
-
-- **Synthetic Dataset Generation**: Generate large-scale synthetic dataset to test your pipeline.
+- **Probabilistic Evaluation**: Evaluate your pipeline with probabilistic metrics
 
 ## Getting Started
 
@@ -84,147 +82,188 @@ metric = PrecisionRecallF1()
 print(metric(**datum))
 ```
 
-### Available Metrics
+## Run an evaluation
 
-<table border="0">
-    <tr>
-        <th>Module</th>
-        <th>Category</th>
-        <th>Metrics</th>
-    </tr>
-    <tr>
-        <td rowspan="2">Retrieval</td>
-        <td>Deterministic</td>
-        <td>PrecisionRecallF1, RankedRetrievalMetrics, TokenCount</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedContextPrecision, LLMBasedContextCoverage</td>
-    </tr>
-    <tr>
-        <td rowspan="3">Text Generation</td>
-        <td>Deterministic</td>
-        <td>DeterministicAnswerCorrectness, DeterministicFaithfulness, FleschKincaidReadability</td>
-    </tr>
-    <tr>
-        <td>Semantic</td>
-        <td>DebertaAnswerScores, BertAnswerRelevance, BertAnswerSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedFaithfulness, LLMBasedAnswerCorrectness, LLMBasedAnswerRelevance, LLMBasedStyleConsistency</td>
-    </tr>
-    <tr>
-        <td rowspan="1">Classification</td>
-        <td>Deterministic</td>
-        <td>ClassificationAccuracy</td>
-    </tr>
-    <tr>
-        <td rowspan="2">Code Generation</td>
-        <td>Deterministic</td>
-        <td>CodeStringMatch, PythonASTSimilarity, SQLSyntaxMatch, SQLASTSimilarity</td>
-    </tr>
-    <tr>
-        <td>LLM-based</td>
-        <td>LLMBasedCodeGeneration</td>
-    </tr>
-    <tr>
-        <td>Agent Tools</td>
-        <td>Deterministic</td>
-        <td>ToolSelectionAccuracy</td>
-    </tr>
-    <tr>
-        <td>Custom</td>
-        <td></td>
-        <td>Define your own metrics</td>
-    </tr>
-</table>
-
-To define your own metrics, you only need to extend the [Metric](continuous_eval/metrics/base.py#L23C7-L23C13) class implementing the `__call__` method.
-Optional methods are `batch` (if it is possible to implement optimizations for batch processing) and `aggregate` (to aggregate metrics results over multiple samples_).
-
-## Run evaluation on a pipeline
-
-Define modules in your pipeline and select corresponding metrics.
+If you want to run an evaluation on a dataset, you can use the `EvaluationRunner` class.
 
 ```python
-from continuous_eval.eval import Module, ModuleOutput, Pipeline, Dataset, EvaluationRunner
-from continuous_eval.eval.logger import PipelineLogger
+from time import perf_counter
+
+from continuous_eval.data_downloader import example_data_downloader
+from continuous_eval.eval import EvaluationRunner, SingleModulePipeline
+from continuous_eval.eval.tests import GreaterOrEqualThan
+from continuous_eval.metrics.retrieval import (
+    PrecisionRecallF1,
+    RankedRetrievalMetrics,
+)
+
+
+def main():
+    # Let's download the retrieval dataset example
+    dataset = example_data_downloader("retrieval")
+
+    # Setup evaluation pipeline (i.e., dataset, metrics and tests)
+    pipeline = SingleModulePipeline(
+        dataset=dataset,
+        eval=[
+            PrecisionRecallF1().use(
+                retrieved_context=dataset.retrieved_contexts,
+                ground_truth_context=dataset.ground_truth_contexts,
+            ),
+            RankedRetrievalMetrics().use(
+                retrieved_context=dataset.retrieved_contexts,
+                ground_truth_context=dataset.ground_truth_contexts,
+            ),
+        ],
+        tests=[
+            GreaterOrEqualThan(
+                test_name="Recall", metric_name="context_recall", min_value=0.8
+            ),
+        ],
+    )
+
+    # Start the evaluation manager and run the metrics (and tests)
+    tic = perf_counter()
+    runner = EvaluationRunner(pipeline)
+    eval_results = runner.evaluate()
+    toc = perf_counter()
+    print("Evaluation results:")
+    print(eval_results.aggregate())
+    print(f"Elapsed time: {toc - tic:.2f} seconds\n")
+
+    print("Running tests...")
+    test_results = runner.test(eval_results)
+    print(test_results)
+
+
+if __name__ == "__main__":
+    # It is important to run this script in a new process to avoid
+    # multiprocessing issues
+    main()
+```
+
+## Run evaluation on a pipeline (modular evaluation)
+
+Sometimes the system is composed of multiple modules, each with its own metrics and tests.
+Continuous-eval supports this use case by allowing you to define modules in your pipeline and select corresponding metrics.
+
+```python
+from typing import Any, Dict, List
+
+from continuous_eval.data_downloader import example_data_downloader
+from continuous_eval.eval import (
+    Dataset,
+    EvaluationRunner,
+    Module,
+    ModuleOutput,
+    Pipeline,
+)
+from continuous_eval.eval.result_types import PipelineResults
+from continuous_eval.metrics.generation.text import AnswerCorrectness
 from continuous_eval.metrics.retrieval import PrecisionRecallF1, RankedRetrievalMetrics
-from continuous_eval.metrics.generation.text import DeterministicAnswerCorrectness
-from typing import List, Dict
 
-dataset = Dataset("dataset_folder")
 
-# Simple 3-step RAG pipeline with Retriever->Reranker->Generation
-retriever = Module(
-    name="Retriever",
-    input=dataset.question,
-    output=List[str],
-    eval=[
-        PrecisionRecallF1().use(
-            retrieved_context=ModuleOutput(),
-            ground_truth_context=dataset.ground_truth_context,
-        ),
-    ],
-)
+def page_content(docs: List[Dict[str, Any]]) -> List[str]:
+    # Extract the content of the retrieved documents from the pipeline results
+    return [doc["page_content"] for doc in docs]
 
-reranker = Module(
-    name="reranker",
-    input=retriever,
-    output=List[Dict[str, str]],
-    eval=[
-        RankedRetrievalMetrics().use(
-            retrieved_context=ModuleOutput(),
-            ground_truth_context=dataset.ground_truth_context,
-        ),
-    ],
-)
 
-llm = Module(
-    name="answer_generator",
-    input=reranker,
-    output=str,
-    eval=[
-        FleschKincaidReadability().use(answer=ModuleOutput()),
-        DeterministicAnswerCorrectness().use(
-            answer=ModuleOutput(), ground_truth_answers=dataset.ground_truths
-        ),
-    ],
-)
+def main():
+    dataset: Dataset = example_data_downloader("graham_essays/small/dataset")
+    results: Dict = example_data_downloader("graham_essays/small/results")
 
-pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
-print(pipeline.graph_repr()) # optional: visualize the pipeline
+    # Simple 3-step RAG pipeline with Retriever->Reranker->Generation
+    retriever = Module(
+        name="retriever",
+        input=dataset.question,
+        output=List[str],
+        eval=[
+            PrecisionRecallF1().use(
+                retrieved_context=ModuleOutput(page_content),  # specify how to extract what we need (i.e., page_content)
+                ground_truth_context=dataset.ground_truth_context,
+            ),
+        ],
+    )
+
+    reranker = Module(
+        name="reranker",
+        input=retriever,
+        output=List[Dict[str, str]],
+        eval=[
+            RankedRetrievalMetrics().use(
+                retrieved_context=ModuleOutput(page_content),
+                ground_truth_context=dataset.ground_truth_context,
+            ),
+        ],
+    )
+
+    llm = Module(
+        name="llm",
+        input=reranker,
+        output=str,
+        eval=[
+            AnswerCorrectness().use(
+                question=dataset.question,
+                answer=ModuleOutput(),
+                ground_truth_answers=dataset.ground_truth_answers,
+            ),
+        ],
+    )
+
+    pipeline = Pipeline([retriever, reranker, llm], dataset=dataset)
+    print(pipeline.graph_repr())  # visualize the pipeline in marmaid format
+
+    runner = EvaluationRunner(pipeline)
+    eval_results = runner.evaluate(PipelineResults.from_dict(results))
+    print(eval_results.aggregate())
+
+
+if __name__ == "__main__":
+    main()
 ```
 
-Now you can run the evaluation on your pipeline
+> Note: it is important to wrap your code in a main function (with the `if __name__ == "__main__":` guard) to make sure the parallelization works properly.
+
+## Custom Metrics
+
+There are several ways to create custom metrics, see the [Custom Metrics](https://continuous-eval.docs.relari.ai/v0.3/metrics/overview) section in the docs.
+
+The simplest way is to leverage the `CustomMetric` class to create a LLM-as-a-Judge.
 
 ```python
-pipelog = PipelineLogger(pipeline=pipeline)
+from continuous_eval.metrics.base.metric import Arg, Field
+from continuous_eval.metrics.custom import CustomMetric
+from typing import List
 
-# now run your LLM application pipeline, and for each module, log the results:
-pipelog.log(uid=sample_uid, module="module_name", value=data)
+criteria = "Check that the generated answer does not contain PII or other sensitive information."
+rubric = """Use the following rubric to assign a score to the answer based on its conciseness:
+- Yes: The answer contains PII or other sensitive information.
+- No: The answer does not contain PII or other sensitive information.
+"""
 
-# Once you finish logging the data, you can use the EvaluationRunner to evaluate the logs
-evalrunner = EvaluationRunner(pipeline)
-metrics = evalrunner.evaluate(pipelog)
-metrics.results() # returns a dictionary with the results
+metric = CustomMetric(
+    name="PIICheck",
+    criteria=criteria,
+    rubric=rubric,
+    arguments={"answer": Arg(type=str, description="The answer to evaluate.")},
+    response_format={
+        "reasoning": Field(
+            type=str,
+            description="The reasoning for the score given to the answer",
+        ),
+        "score": Field(
+            type=str, description="The score of the answer: Yes or No"
+        ),
+        "identifies": Field(
+            type=List[str],
+            description="The PII or other sensitive information identified in the answer",
+        ),
+    },
+)
+
+# Let's calculate the metric for the first datum
+print(metric(answer="John Doe resides at 123 Main Street, Springfield."))
 ```
-
-To run evaluation over an existing dataset (BYODataset), you can run the following:
-
-```python
-dataset = Dataset(...)
-evalrunner = EvaluationRunner(pipeline)
-metrics = evalrunner.evaluate(dataset)
-```
-
-## Synthetic Data Generation
-
-Ground truth data, or reference data, is important for evaluation as it can offer a comprehensive and consistent measurement of system performance. However, it is often costly and time-consuming to manually curate such a golden dataset.
-We have created a synthetic data pipeline that can custom generate user interaction data for a variety of use cases such as RAG, agents, copilots. They can serve a starting point for a golden dataset for evaluation or for other training purposes.
-
-To generate custom synthetic data, please visit [Relari](https://www.relari.ai/) to create a free account and you can then generate custom synthetic golden datasets through the Relari Cloud.
 
 ## 💡 Contributing
 

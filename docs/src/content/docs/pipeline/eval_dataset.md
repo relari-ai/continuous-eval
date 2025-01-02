@@ -123,3 +123,56 @@ fields:
     description: The tools used to extract the question and answer
     type: List[Dict[str, str]]
   ```
+
+### Example Datasets
+
+Below are the example datasets you can use to test your pipeline/code.
+
+<table>
+  <tr>
+    <th>Dataset</th>
+    <th>Description</th>
+    <th>Data format</th>
+  </tr>
+  <tr>
+    <td>correctness</td>
+    <td>1,200 examples, created from <a href="https://github.com/McGill-NLP/instruct-qa">InstructQA</a></td>
+    <td>`Dataset`</td>
+  </tr>
+  <tr>
+    <td>retrieval</td>
+    <td>300 examples, created from <a href="https://hotpotqa.github.io/">HotpotQA</a></td>
+    <td>`Dataset`</td>
+  </tr>
+  <tr>
+    <td>faithfulness</td>
+    <td>544 examples, created from <a href="https://github.com/McGill-NLP/instruct-qa">InstructQA</a></td>
+    <td>`Dataset`</td>
+  </tr>
+  <tr>
+    <td>graham_essays/small/txt</td>
+    <td>10 Paul Graham essays, created from <a href="https://github.com/ofou/graham-essays">graham-essays</a></td>
+    <td>Zip of txt</td>
+  </tr>
+  <tr>
+    <td>graham_essays/small/dataset</td>
+    <td>55 questions about Paul Graham essays</td>
+    <td>`Dataset`</td>
+  </tr>
+  <tr>
+    <td>graham_essays/small/results</td>
+    <td>The results (i.e., answer and retrieved documents) from a simple RAG pipeline</td>
+    <td>JSON</td>
+  </tr>
+</table>
+
+#### Download Datasets
+
+The example datasets can be `example_data_downloader` helper function.
+
+```python
+from continuous_eval.data_downloader import example_data_downloader
+
+# Download a dataset for evaluation
+dataset = example_data_downloader("retrieval")
+```

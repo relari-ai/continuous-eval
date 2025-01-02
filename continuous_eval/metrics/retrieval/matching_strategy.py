@@ -31,6 +31,12 @@ class ExactChunkMatch(MatchingStrategy):
     def is_relevant(self, retrieved_component, ground_truth_component):
         return retrieved_component == ground_truth_component
 
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        pass
+
 
 class ExactSentenceMatch(MatchingStrategy):
     @property
@@ -40,8 +46,16 @@ class ExactSentenceMatch(MatchingStrategy):
     def is_relevant(self, retrieved_component, ground_truth_component):
         return retrieved_component == ground_truth_component
 
+    def __getstate__(self):
+        return {}
+
+    def __setstate__(self, state):
+        pass
+
 
 class RougeChunkMatch(MatchingStrategy):
+    _rouge = Rouge()
+
     def __init__(self, threshold=_DEFAULT_ROUGE_CHUNK_MATCH_THRESHOLD) -> None:
         super().__init__()
         self.threshold = threshold
@@ -51,11 +65,35 @@ class RougeChunkMatch(MatchingStrategy):
         return MatchingStrategyType.CHUNK_MATCH
 
     def is_relevant(self, retrieved_component, ground_truth_component):
-        return Rouge().get_scores(retrieved_component, ground_truth_component)[0]["rouge-l"]["r"] > self.threshold
+        try:
+            score = RougeChunkMatch._rouge.get_scores(
+                retrieved_component, ground_truth_component, ignore_empty=True
+            )
+        except Exception:
+            return False
+        try:
+            return score[0]["rouge-l"]["r"] >= self.threshold
+        except Exception:
+            return False
+
+    def __getstate__(self):
+        return {"threshold": self.threshold}
+
+    def __setstate__(self, state):
+        self.threshold = state["threshold"]
 
 
 class RougeSentenceMatch(MatchingStrategy):
-    def __init__(self, threshold=_DEFAULT_ROUGE_SENTENCE_MATCH_THRESHOLD) -> None:
+    _rouge = Rouge()
+    # def __new__(cls, *args, **kwargs):
+    #     # Always initialize _rouge during object creation
+    #     instance = super().__new__(cls)
+    #     instance._rouge = Rouge()  # type: ignore
+    #     return instance
+
+    def __init__(
+        self, threshold=_DEFAULT_ROUGE_SENTENCE_MATCH_THRESHOLD
+    ) -> None:
         super().__init__()
         self.threshold = threshold
 
@@ -64,4 +102,19 @@ class RougeSentenceMatch(MatchingStrategy):
         return MatchingStrategyType.SENTENCE_MATCH
 
     def is_relevant(self, retrieved_component, ground_truth_component):
-        return Rouge().get_scores(retrieved_component, ground_truth_component)[0]["rouge-l"]["r"] >= self.threshold
+        try:
+            score = RougeSentenceMatch._rouge.get_scores(
+                retrieved_component, ground_truth_component, ignore_empty=True
+            )
+        except Exception:
+            return False
+        try:
+            return score[0]["rouge-l"]["r"] >= self.threshold
+        except Exception:
+            return False
+
+    def __getstate__(self):
+        return {"threshold": self.threshold}
+
+    def __setstate__(self, state):
+        self.threshold = state["threshold"]

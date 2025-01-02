@@ -1,20 +1,21 @@
-import pytest
-
 from continuous_eval.metrics.generation.text import (
+    AnswerCorrectness,
+    AnswerRelevance,
     DeterministicAnswerCorrectness,
     DeterministicFaithfulness,
+    Faithfulness,
     FleschKincaidReadability,
-    LLMBasedAnswerCorrectness,
-    LLMBasedAnswerRelevance,
-    LLMBasedFaithfulness,
-    LLMBasedStyleConsistency,
+    StyleConsistency,
 )
 from tests.helpers import example_datum
-from tests.helpers.utils import all_close
+from tests.helpers.utils import all_close, validate_metric_metadata
 
 
 def test_deterministic_answer_relevance():
-    data = [example_datum.ROMEO_AND_JULIET, example_datum.IMPLICATIONS_GLOBAL_WARMING]
+    data = [
+        example_datum.ROMEO_AND_JULIET,
+        example_datum.IMPLICATIONS_GLOBAL_WARMING,
+    ]
     expected_results = [
         {
             "rouge_l_recall": 1.0,
@@ -36,7 +37,12 @@ def test_deterministic_answer_relevance():
         },
     ]
     metric = DeterministicAnswerCorrectness()
-    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))
+    results = [metric(**datum) for datum in data]
+    validate_metric_metadata(metric, results)
+    assert all(
+        all_close(res, expected)
+        for res, expected in zip(results, expected_results)
+    )
 
 
 def test_rouge_sentence_faithfulness():
@@ -51,45 +57,53 @@ def test_rouge_sentence_faithfulness():
             "bleu_score_by_sentence": [3.3720152341391845e-06],
         },
     ]
-
     metric = DeterministicFaithfulness()
-    assert all(all_close(metric(**datum), expected) for datum, expected in zip(data, expected_results))
+    results = [metric(**datum) for datum in data]
+    validate_metric_metadata(metric, results)
+    assert all(
+        all_close(res, expected)
+        for res, expected in zip(results, expected_results)
+    )
 
 
 def test_llm_based_faithfulness():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
-
-    metric = LLMBasedFaithfulness()
+    data = [
+        example_datum.CAPITAL_OF_FRANCE,
+        example_datum.IMPLICATIONS_GLOBAL_WARMING,
+    ]
+    metric = Faithfulness()
     results = [metric(**datum) for datum in data]
-    for result in results:
-        assert isinstance(result["LLM_based_faithfulness"], float)
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_answer_correctness():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
-
-    metric = LLMBasedAnswerCorrectness()
+    data = [
+        example_datum.CAPITAL_OF_FRANCE,
+        example_datum.IMPLICATIONS_GLOBAL_WARMING,
+    ]
+    metric = AnswerCorrectness()
     results = [metric(**datum) for datum in data]
-    for result in results:
-        assert 0.0 <= result["LLM_based_answer_correctness"] <= 1.0
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_answer_relevance():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
-
-    metric = LLMBasedAnswerRelevance()
+    data = [
+        example_datum.CAPITAL_OF_FRANCE,
+        example_datum.IMPLICATIONS_GLOBAL_WARMING,
+    ]
+    metric = AnswerRelevance()
     results = [metric(**datum) for datum in data]
-    for result in results:
-        assert 0.0 <= result["LLM_based_answer_relevance"] <= 1.0
+    validate_metric_metadata(metric, results)
 
 
 def test_llm_based_style_consistency():
-    data = [example_datum.CAPITAL_OF_FRANCE, example_datum.IMPLICATIONS_GLOBAL_WARMING]
-
-    metric = LLMBasedStyleConsistency()
+    data = [
+        example_datum.CAPITAL_OF_FRANCE,
+        example_datum.IMPLICATIONS_GLOBAL_WARMING,
+    ]
+    metric = StyleConsistency()
     results = [metric(**datum) for datum in data]
-    for result in results:
-        assert 0.0 <= result["LLM_based_style_consistency"] <= 1.0
+    validate_metric_metadata(metric, results)
 
 
 def test_flesch_kincaid():
@@ -97,5 +111,7 @@ def test_flesch_kincaid():
         "flesch_reading_ease": 116.14500000000001,
         "flesch_kincaid_grade_level": -1.4499999999999993,
     }
-    result = FleschKincaidReadability()(answer="The cat sat on the mat.")
+    metric = FleschKincaidReadability()
+    result = metric(answer="The cat sat on the mat.")
+    validate_metric_metadata(metric, result)
     assert all_close(result, expected)
