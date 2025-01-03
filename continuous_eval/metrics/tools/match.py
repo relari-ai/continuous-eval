@@ -4,61 +4,69 @@ from continuous_eval.eval.types import ToolCall
 from continuous_eval.metrics.base import Field, Metric
 
 
+def _count_matches(ground_truth, tools, order_sensitive=False):
+    if order_sensitive:
+        # For order-sensitive matching
+        matches = 0
+        gt_index = 0
+
+        for tool in tools:
+            if gt_index < len(ground_truth) and ground_truth[gt_index] == tool:
+                matches += 1
+                gt_index += 1
+        return matches
+    else:
+        # For order-insensitive matching, convert dictionaries to hashable tuples
+        def make_hashable(obj):
+            if isinstance(obj, dict):
+                return tuple(
+                    sorted((k, make_hashable(v)) for k, v in obj.items())
+                )
+            elif isinstance(obj, list):
+                return tuple(make_hashable(v) for v in obj)
+            else:
+                return obj
+
+        ground_truth_set = set(make_hashable(d) for d in ground_truth)
+        tools_set = set(make_hashable(d) for d in tools)
+        intersection = ground_truth_set & tools_set
+        return len(intersection)
+
+
 class ToolSelectionAccuracy(Metric):
     """
     Computes the accuracy of tool selection.
     """
 
-    def __init__(self, order_sensitive: bool = False) -> None:
+    def __init__(
+        self,
+        order_sensitive: bool = False,
+        ignore_kwargs: bool = False,
+    ) -> None:
         super().__init__(is_cpu_bound=True)
         self._order_sensitive = order_sensitive
+        self._ignore_kwargs = ignore_kwargs
 
     def compute(
         self, tools: List[ToolCall], ground_truths: List[ToolCall], **kwargs
     ):
-        if self._order_sensitive:
-            # When order matters, compare tool executions directly in sequence.
-            num_correct = sum(
-                1
-                for i, tool in enumerate(tools)
-                if i < len(ground_truths)
-                and tool["name"] == ground_truths[i]["name"]
-                and tool["kwargs"] == ground_truths[i]["kwargs"]
-            )
+        if self._ignore_kwargs:
+            _ground_truths = [{"name": t["name"]} for t in ground_truths]
+            _tools = [{"name": t["name"]} for t in tools]
         else:
-            # Convert ground_truth to a format that's easy to check for "contains"
-            use_kwargs = all("kwargs" in tool for tool in ground_truths)
-            if use_kwargs:
-                ground_truth_set = {
-                    frozenset(tool.items())
-                    for tool in [
-                        {"name": tool["name"], **tool["kwargs"]}
-                        for tool in ground_truths
-                    ]
-                }
-            else:
-                ground_truth_set = {
-                    frozenset(tool.items()) for tool in ground_truths
-                }
-            # Score
-            num_correct, matched_executions = 0, set()
-            for tool in tools:
-                if use_kwargs:
-                    tool_set = frozenset(
-                        {"name": tool["name"], **tool["kwargs"]}.items()
-                    )
-                else:
-                    tool_set = frozenset({"name": tool["name"]}.items())
-                if (
-                    tool_set in ground_truth_set
-                    and tool_set not in matched_executions
-                ):
-                    num_correct += 1
-                matched_executions.add(tool_set)
+            _ground_truths, _tools = ground_truths, tools
+        num_correct = _count_matches(
+            _ground_truths, _tools, order_sensitive=self._order_sensitive
+        )
+        score = 1.0
+        if len(ground_truths) > 0:
+            score = num_correct / len(ground_truths)
+        elif len(tools) > 0:
+            score = 0.0
 
         return {
             "num_correct": num_correct,
-            "score": num_correct / len(ground_truths),
+            "score": score,
         }
 
     @property
