@@ -19,3 +19,23 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
+
+
+## How to enable versioning
+
+- Add the following to the `astro.config.mjs` file:
+
+```js
+base: '/v0.3',
+outDir: './dist/v0.3',
+```
+
+
+- Add the following to the `astro.config.mjs` file:
+
+```js
+components: {
+        // Override the default `SocialIcons` component.
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
+```

@@ -6,8 +6,10 @@ import rehypeMathjax from 'rehype-mathjax';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://docs.relari.ai',
-  base: '/v0.3',
-  outDir: './dist/v0.3',
+  // base: '/v0.3',
+  // outDir: './dist/v0.3',
+  base: '.',
+  outDir: './dist',
   trailingSlash: "never",
   markdown: {
     remarkPlugins: [remarkMath],
@@ -16,10 +18,10 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Continuous Eval',
-      components: {
-        // Override the default `SocialIcons` component.
-        ThemeSelect: './src/components/ThemeSelect.astro',
-      },
+      // components: {
+      //   // Override the default `SocialIcons` component.
+      //   ThemeSelect: './src/components/ThemeSelect.astro',
+      // },
 			tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 4, },
 			customCss: [
 				// Relative path to your custom CSS file

@@ -3,11 +3,11 @@ title: Quick Start
 description: Quick Start
 ---
 
-If you haven't installed continuous-eval, go [here](../../v0.3/getting-started/installation/).
+If you haven't installed continuous-eval, go [here](../../getting-started/installation/).
 
 ## Run a single metric
 
-Import the metric of your choice ([see all metrics](../../v0.3/metrics/overview/)) and get the results.
+Import the metric of your choice ([see all metrics](../../metrics/overview/)) and get the results.
 
 ```python
 from continuous_eval.metrics.retrieval import PrecisionRecallF1
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 Continuous-eval is designed to support multi-module evaluation. In this case we instead suppose the system is composed by one single module (the retriever) so we can use the `SingleModulePipeline` class to setup the pipeline.
 
-In the pipeline we added both metrics (i.e., `PrecisionRecallF1` and `RankedRetrievalMetrics`) and tests (i.e., `GreaterOrEqualThan` on the recall metric). Read more about this in the [Metrics and Tests](../../v0.3/pipeline/metrics_and_tests) page.
+In the pipeline we added both metrics (i.e., `PrecisionRecallF1` and `RankedRetrievalMetrics`) and tests (i.e., `GreaterOrEqualThan` on the recall metric). Read more about this in the [Metrics and Tests](../../pipeline/metrics_and_tests) page.
 
 ## Curate a golden dataset
 
