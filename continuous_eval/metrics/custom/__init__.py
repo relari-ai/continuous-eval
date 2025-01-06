@@ -1,1 +1,1 @@
-from .custom_metric import CustomMetric, Example
+from .custom_metric import ProbabilisticCustomMetric,CustomMetric, Example
