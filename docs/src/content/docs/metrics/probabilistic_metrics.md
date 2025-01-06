@@ -6,7 +6,50 @@ sidebar:
  
 Probabilistic LLM metrics are LLM-as-a-Judge metrics that provide score distributions with their associated confidence levels, enabling assessment of model certainty in its evaluations. These distributions are derived from the model's token-level log probabilities.
 
-## Define a Probabilistic Metric
+## Custom Probabilistic Metric
+
+Similar to the custom LLM-as-a-Judge metric, you can define your own probabilistic metric by extending the `ProbabilisticCustomMetric` class.
+
+```python
+from continuous_eval.metrics.base.metric import Arg
+from continuous_eval.metrics.base.response_type import Integer
+from continuous_eval.metrics.custom import ProbabilisticCustomMetric
+
+rubric = """1: The joke is not funny or inappropriate.
+2: The joke is somewhat funny and appropriate.
+3: The joke is very funny and appropriate."""
+
+metric = ProbabilisticCustomMetric(
+    name="FunnyJoke",
+    criteria="Joke is funny and appropriate",
+    rubric=rubric,
+    arguments={"joke": Arg(type=str, description="The joke to evaluate.")},
+    response_format=Integer(ge=1, le=3),
+)
+
+print(metric(
+    joke="""Scientists released a new way to measure AI performance. 
+It's so accurate, even the AI said, ‘Finally, someone understands me!’"""
+))
+```
+
+Optionally, you can also add examples to the metric.
+
+> Note: See the [limitations section](#current-limitations) for more information about the response format.
+
+#### Example Output
+
+```py
+{
+  'FunnyJoke_score': 3,
+  'FunnyJoke_reasoning': 'The joke is clever as it plays on the idea of AI having feelings.',
+  'FunnyJoke_probabilities': {1: 0.0, 2: 4.22e-06, 3: 0.99}
+}
+```
+
+## Define a new Probabilistic Metric
+
+Sometimes the criteria, rubric and examples are not enough to define the metric. In this case, you can define your own probabilistic metric by extending the `ProbabilisticMetric` class.
 
 ### Classification
 
@@ -119,5 +162,6 @@ print({"weighted_score": metric.prompt.response_format.weighted_score(result['Se
 
 ## Current limitations
 
-1. The `response_format` must be a _single token value_, we predefined a few: `GoodOrBad`, `YesOrNo`, `Boolean` and `Integer`, but it is possible to define your own. In case of integer scoring, negative values are not supported (they are two tokens) as well as values greater than 9.
-2. Only OpenAI models are supported for probabilistic metrics.
+1. The `response_format` must be a **single token value**, we predefined a few: `GoodOrBad`, `YesOrNo`, `Boolean` and `Integer`, but it is possible to define your own. In case of integer scoring, negative values are not supported (they are two tokens) as well as values greater than 9.
+2. Arbitrary JSON format is not supported yet for probabilistic metrics.
+3. At the moment, **only OpenAI models are supported for probabilistic metrics**.
