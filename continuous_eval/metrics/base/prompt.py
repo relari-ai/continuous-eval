@@ -102,8 +102,6 @@ class PromptTemplate:
         return self._args
 
     def get_identifiers(self):
-        # Directly return the keys as a set, since `self._args.keys()` is a highly
-        # optimized operation and converting it to a set is efficient.
         return set(self._args)
 
     @classmethod
