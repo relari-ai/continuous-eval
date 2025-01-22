@@ -53,9 +53,17 @@ google = ["google-generativeai"]
 pytest = "^7.4.3"
 pre-commit = "^4.0.1"
 ruff = "^0.7.4"
+codeflash = ">=0.9.0"
 
 [tool.ruff]
 line-length = 80
+
+[tool.codeflash]
+module-root = "continuous_eval"
+tests-root = "tests"
+test-framework = "pytest"
+ignore-paths = []
+formatter-cmds = ["ruff check --exit-zero --fix $file", "ruff format $file"]
 
 [build-system]
 requires = ["poetry-core"]
