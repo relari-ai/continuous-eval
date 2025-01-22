@@ -102,7 +102,7 @@ class PromptTemplate:
         return self._args
 
     def get_identifiers(self):
-        return set(self._args.keys())
+        return set(self._args)
 
     @classmethod
     def from_file(
