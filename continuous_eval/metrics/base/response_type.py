@@ -135,7 +135,7 @@ class Integer(ScoringFunction, ResponseFormatBaseType):
         return max(self._ge, min(self._le, num))
 
     def _numeric_matcher(self, input_val) -> Optional[float]:
-        match = re.search(r"\d+(?:\.\d+)?", input_val)
+        match = re.search(r"-?\d+(?:\.\d+)?", input_val)
         if not match:
             return None
         return max(self._ge, min(self._le, float(match.group())))
